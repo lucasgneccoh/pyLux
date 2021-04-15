@@ -1,2 +1,2 @@
 # pyLux
-Python implementation of Risk based on Lux Deluxe (Sillisoft software) for academic purposes
+Python implementation of Risk based on Lux Deluxe (Sillysoft software) for academic purposes
