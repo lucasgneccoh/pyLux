@@ -9,5 +9,20 @@ First things to do:
     - *Agent*: Try to implement this in a general way and replicating the *LuxAgent*, so that hopefully I can use my python players in the real Lux
     - *Map*: Maps should be hackable. Better to create a file to load/create them. Lux uses an xml file to represent a map. To make it simple, I can avoid all the GUI related things and just represent a map as a network. Maybe even use `networkx` for that
     - *Project tree*: I think I will also mimic the Lux structure somehow. Folder *Support* contains maps and agents, folder *pyLux* will contain the game engine.
+    
+  - How to use Java from Python and viceversa?
+    - Jpype (From python)
+    - Py4J (The two must be open and running)
+    - User Java Process. See C:\Users\lucas\OneDrive - Université Paris-Dauphine\S4\Stage M2\SillysoftSDK\src\com\sillysoft\lux\Gemisys.java, they call a perl script. This could be the easiest way in terms of not depending on external stuff
+    - Then the output could be written somewhere and used as training data in Python.
    
 
+# Created map (16-04-2021)
+I finished the first map. To model it I used networkx, so the world is made of three basic things: a nx.DiGraph for the world, a dictionary of countries and a dictionary of continents. Classes Country and Continent extend dict, they use both the integer codes as keys. This integer country code is used to acces the world graph.
+All the attributes of countries and continents are stored in the dictionaries, graph is only to get edges.
+Next step:
+
+  - Finish the Country and Continent classes.
+  - Implement the Board class.
+  - Tests the game
+  - Implement cards
