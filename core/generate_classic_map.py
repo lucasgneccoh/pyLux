@@ -2,59 +2,59 @@
 
 countries = [
   # South America
-  {'id': 'ARG', 'name':'Argentina'},
-  {'id': 'VEN', 'name':'Venezuela'},
-  {'id': 'BRA', 'name':'Brazil'},
-  {'id': 'PER', 'name':'Peru'},
+  {'id': 'ARG', 'name':'Argentina', 'xy':'250,600', 'card_kind':1},
+  {'id': 'VEN', 'name':'Venezuela', 'xy':'232,405', 'card_kind':2},
+  {'id': 'BRA', 'name':'Brazil', 'xy':'330,470', 'card_kind':1},
+  {'id': 'PER', 'name':'Peru', 'xy':'201,490', 'card_kind':2},
 
   #North America
-  {'id': 'MEX', 'name':'Mexico'},
-  {'id': 'EUS', 'name':'Eastern United Stated'},
-  {'id': 'WUS', 'name':'Western United Stated'},
-  {'id': 'QBC', 'name':'Quebec'},
-  {'id': 'ONT', 'name':'Ontario'},
-  {'id': 'WC', 'name':'Western Canada'},
-  {'id': 'ALA', 'name':'Alaska'},
-  {'id': 'NWT', 'name':'North West Territory'},
-  {'id': 'GRE', 'name':'Greenland - Nunavut'},
+  {'id': 'MEX', 'name':'Mexico', 'xy':'172,335', 'card_kind':1},
+  {'id': 'EUS', 'name':'Eastern United Stated', 'xy':'130,260', 'card_kind':3},
+  {'id': 'WUS', 'name':'Western United Stated', 'xy':'228,250', 'card_kind':3},
+  {'id': 'QBC', 'name':'Quebec', 'xy':'272,172', 'card_kind':3},
+  {'id': 'ONT', 'name':'Ontario', 'xy':'185,169', 'card_kind':3},
+  {'id': 'WC', 'name':'Western Canada', 'xy':'86,168', 'card_kind':3},
+  {'id': 'ALA', 'name':'Alaska', 'xy':'17,93', 'card_kind':3},
+  {'id': 'NWT', 'name':'North West Territory', 'xy':'148,78', 'card_kind':2},
+  {'id': 'GRE', 'name':'Greenland - Nunavut', 'xy':'330,60', 'card_kind':2},
 
   # Europe
-  {'id': 'ICE', 'name':'Iceland'},
-  {'id': 'GB', 'name':'Great Britain'},
-  {'id': 'SCA', 'name':'Scandinavia'},
-  {'id': 'UKR', 'name':'Ukraine'},
-  {'id': 'NEU', 'name':'Northern Europe'},
-  {'id': 'WEU', 'name':'Western Europe'},
-  {'id': 'SEU', 'name':'Southern Europe'},
+  {'id': 'ICE', 'name':'Iceland', 'xy':'460,76', 'card_kind':2},
+  {'id': 'GB', 'name':'Great Britain', 'xy':'441,171', 'card_kind':1},
+  {'id': 'SCA', 'name':'Scandinavia', 'xy':'570,105', 'card_kind':1},
+  {'id': 'UKR', 'name':'Ukraine', 'xy':'662,155', 'card_kind':1},
+  {'id': 'NEU', 'name':'Northern Europe', 'xy':'551,190', 'card_kind':2},
+  {'id': 'WEU', 'name':'Western Europe', 'xy':'479,275', 'card_kind':1},
+  {'id': 'SEU', 'name':'Southern Europe', 'xy':'574,270', 'card_kind':1},
 
   # Africa
-  {'id': 'NAF', 'name':'North Africa'},
-  {'id': 'EGY', 'name':'Egypt'},
-  {'id': 'CON', 'name':'Congo'},
-  {'id': 'EAF', 'name':'East Africa'},
-  {'id': 'SAF', 'name':'South Africa'},
-  {'id': 'MAD', 'name':'Madagascar'},
+  {'id': 'NAF', 'name':'North Africa', 'xy':'461,407', 'card_kind':1},
+  {'id': 'EGY', 'name':'Egypt', 'xy':'570,380', 'card_kind':2},
+  {'id': 'CON', 'name':'Congo', 'xy':'532,502', 'card_kind':3},
+  {'id': 'EAF', 'name':'East Africa', 'xy':'621,466', 'card_kind':1},
+  {'id': 'SAF', 'name':'South Africa', 'xy':'573,603', 'card_kind':3},
+  {'id': 'MAD', 'name':'Madagascar', 'xy':'703,553', 'card_kind':2},
   
 
   # Asia
-  {'id': 'MDE', 'name':'Middle East'},
-  {'id': 'AFG', 'name':'Afghanistan'},
-  {'id': 'URA', 'name':'Ural'},
-  {'id': 'SIB', 'name':'Siberia'},
-  {'id': 'YAK', 'name':'Yakutsk'},
-  {'id': 'IRK', 'name':'Irkutsk'},
-  {'id': 'MON', 'name':'Mongolia'},
-  {'id': 'CHI', 'name':'China'},
-  {'id': 'IND', 'name':'India'},
-  {'id': 'SIA', 'name':'Siam'},
-  {'id': 'JAP', 'name':'Japan'},
-  {'id': 'KAM', 'name':'Kamchatka'},
+  {'id': 'MDE', 'name':'Middle East', 'xy':'666,306', 'card_kind':3},
+  {'id': 'AFG', 'name':'Afghanistan', 'xy':'763,242', 'card_kind':1},
+  {'id': 'URA', 'name':'Ural', 'xy':'768,133', 'card_kind':1},
+  {'id': 'SIB', 'name':'Siberia', 'xy':'859,101', 'card_kind':1},
+  {'id': 'YAK', 'name':'Yakutsk', 'xy':'958,45', 'card_kind':3},
+  {'id': 'IRK', 'name':'Irkutsk', 'xy':'956,122', 'card_kind':3},
+  {'id': 'MON', 'name':'Mongolia', 'xy':'957,204', 'card_kind':2},
+  {'id': 'CHI', 'name':'China', 'xy':'881,272', 'card_kind':3},
+  {'id': 'IND', 'name':'India', 'xy':'772,356', 'card_kind':2},
+  {'id': 'SIA', 'name':'Siam', 'xy':'883,361', 'card_kind':2},
+  {'id': 'JAP', 'name':'Japan', 'xy':'1050,220', 'card_kind':2},
+  {'id': 'KAM', 'name':'Kamchatka', 'xy':'1040,111', 'card_kind':3},
 
   # Oceania
-  {'id': 'WAU', 'name':'Western Australia'},
-  {'id': 'EAU', 'name':'Eastern Australia'},
-  {'id': 'INDO', 'name':'Indonesia'},
-  {'id': 'NGU', 'name':'New Guinea'}
+  {'id': 'WAU', 'name':'Western Australia', 'xy':'938,545', 'card_kind':3},
+  {'id': 'EAU', 'name':'Eastern Australia', 'xy':'1017,558', 'card_kind':2},
+  {'id': 'INDO', 'name':'Indonesia', 'xy':'931,450', 'card_kind':1},
+  {'id': 'NGU', 'name':'New Guinea', 'xy':'1042,460', 'card_kind':2}
   ]
 
 continents = [
@@ -69,6 +69,7 @@ continents = [
 links = [('ARG','PER'),
          ('ARG','BRA'),
          ('PER','VEN'),
+         ('PER','BRA'),
          ('BRA','VEN'),
          ('VEN','MEX'),
          ('MEX','WUS'),
@@ -150,6 +151,7 @@ links = [('ARG','PER'),
          ('KAM','ALA'),                      
          ]
 
+#%% Imports
 
 import pandas as pd
 import numpy as np
@@ -160,6 +162,9 @@ import os
 import matplotlib.pyplot as plt
 from game import MapLoader
 
+#%% Create & save
+
+path = '../support/maps/classic_world_map.json'
 
 # Create the classic world map from Risk
 G = nx.Graph()
@@ -168,12 +173,12 @@ graph_data = json_graph.node_link_data(G.to_directed())
 
 whole_file = {"map_graph": graph_data, "countries": countries, "continents":continents}
 
-if os.path.exists('classic_world_map.json'):
-  os.remove('classic_world_map.json')
+if os.path.exists(path):
+  os.remove(path)
   
 # Save the file in the json format designed for the MapLoader
 
-with open('classic_world_map.json','w') as f:
+with open(path,'w') as f:
   json.dump(whole_file, f)
 
 
@@ -181,7 +186,7 @@ with open('classic_world_map.json','w') as f:
 #%% Test the MapLoader class to load the map
 
 # MapLoader
-mapLoader = MapLoader('classic_world_map.json')
+mapLoader = MapLoader(path)
 mapLoader.load_from_json()
 
 
@@ -214,7 +219,7 @@ labels = {n:mapLoader.countries[n]['id'] for n in mapLoader.map_graph.nodes}
 
 
 # Draw the map
-if True:
+if False:
   fig, ax = plt.subplots(1,1, figsize=(20,20))
   nx.draw_networkx(mapLoader.map_graph, with_labels=True, pos = pos,
                    labels=labels,
