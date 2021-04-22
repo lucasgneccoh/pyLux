@@ -23,6 +23,8 @@ cd core
 python GUI.py
 ```
 
+You can pass some arguments to `GUI.py`. Use the command `python GUI.py --help` to get more information.
+
 ## Some instructions
 Here are the commands you can use to play the game with the default configuration:
 
