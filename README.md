@@ -7,13 +7,13 @@ Python implementation of Risk based on Lux Deluxe (Sillysoft software) for acade
 
 To play with the GUI, you need two things:
 
-  - **map file**: This is a JSON file that describes the world. It contains the continents with their bonuses, names, colors and the countries they include. The countries have their names, id, associated card type, and xy coordinates to draw them in the GUI. There is also a list of links telling which countries are neighbors.
+  - **map file**: This is a JSON file that describes the world. It contains the continents with their bonuses, names, colors and the countries they include. The countries have their names, id, associated card type, and xy coordinates to draw them in the GUI. There is also a list of links telling which countries are neighbors. See [this file](https://github.com/lucasgneccoh/pyLux/blob/main/support/maps/classic_world_map.json) for an example of the final JSON file. [This](https://github.com/lucasgneccoh/pyLux/blob/main/core/generate_classic_map.py) other script can help you create such a file.
  
-  - **GUI config file**: This file is also a JSON file telling different GUI visual preferences as well as game preferences. You can change the players, the map to be loaded (related to the **map file**), the colors to use, and even screen sizes and positions of things. Be careful those last parameters!
+  - **GUI config file**: This file is also a JSON file telling different GUI visual preferences as well as game preferences. You can change the players, the map to be loaded (related to the **map file**), the colors to use, and even screen sizes and positions of things. Be careful those last parameters! Here is an [example](https://github.com/lucasgneccoh/pyLux/blob/main/support/GUI_config/classic_map_default_config.json) file, and again a script to [generate](https://github.com/lucasgneccoh/pyLux/blob/main/core/generate_GUI_config_file.py) it.
  
-If you don't want to create or change this files yourself, the defaults will be just fine. They include the usual world map for risk. I would just recommend changing the players (default has 1 human versus 6 random bots).
+If you don't want to create or change this files yourself, the defaults will be just fine. They include the usual world map for risk. I would just recommend changing the players (default has 1 human versus 6 random bots). To do so, change the *players* and *players_names* lists in the config file.
 
-More agents will be available soon, for now you can play human, or play against random and not so aggresive bots.
+More agents will be available soon, for now you can play human, or play against random, weak bots.
 
 ## Launch the GUI
 Once you are ready to play, just use the following commands to go to the *core* folder and execute the GUI. (I assume you are on the root directory)
