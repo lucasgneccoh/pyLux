@@ -7,8 +7,8 @@ import pygame
 preferences = {
   # Game
   'map_path'  : '../support/maps/classic_world_map.json',
-  'players'   : ['human', 'random', 'random', 'random', 'random', 'random'],
-  'players_names'   : ['PocketNavy', 'P2', 'P3', 'P4', 'P5', 'P6'],
+  'players'   : ['human', 'random'],
+  'players_names'   : ['PocketNavy', 'P2'],
   'pickInitialCountries': False,
   'initialPhase': False,
   'useCards':True,
