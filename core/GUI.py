@@ -221,16 +221,10 @@ def print_countries(board):
   for c in board.countries:
     print(f'{c.id}\t{c.armies}')
   
-def shown_big_message(screen, color_text, color_text_back, WIDTH, HEIGHT):
-  msgs = []
-  
-  msgs.append("*")
-  msgs.append("       GAME OVER     ")
-  msgs.append("   Close the window   ")
-  msgs.append("*")
+def shown_big_message(msgs, screen, color_text, color_text_back, WIDTH, HEIGHT):
   num_lines = len(msgs)
   for i, msg in enumerate(msgs):
-    label = myfont.render('{:*^50}'.format(msg), 1, color_text, color_text_back)
+    label = myfont.render(msg, 1, color_text, color_text_back)
     text_w = label.get_width()
     
     text_h = label.get_height()
@@ -464,12 +458,14 @@ key_cards = prefs['key_cards']
 TIME_SLEEP_AI = prefs['time_sleep_ai']
 
 last_AI_player = None
+final_message = []
+winner = None
 while running:
   
   msgs = []    
   
-  if game_over:      
-    shown_big_message(screen, color_text, color_text_back, WIDTH, HEIGHT)
+  if game_over:
+    shown_big_message(final_message, screen, color_text, color_text_back, WIDTH, HEIGHT)
     wait_for_quit()
   
   else:
@@ -842,6 +838,16 @@ while running:
     
     if board.getNumberOfPlayersLeft() == 1:
       game_over = True
+      for i, p in board.players:
+        if p.is_alive: 
+          winner = p
+          break
+      final_message.append('{:*^50}'.format(''))
+      final_message.append('{:*^50}'.format('   GAME OVER   '))
+      final_message.append('{: ^50}'.format(f'Winner was {winner.code}, {winner.name()}'))
+      final_message.append('{: ^50}'.format(winner.youWon()))
+      final_message.append('{:*^50}'.format(''))
+      
     
     pygame.display.update()
     

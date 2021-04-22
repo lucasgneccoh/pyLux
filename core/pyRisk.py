@@ -913,27 +913,47 @@ class Board(object):
             self.gamePhase = 'startTurn'
             self.endTurn()
       else:
-        print("No initial phase, setting everything random")
+        if self.console_debug: print("No initial phase, setting everything random")
         # No initial phase, everything at random
-        print("random pick")
+        if self.console_debug: print("random pick")
         self.randomInitialPick()
         self.prepareStart() # So that next player has income updated
-        print("random fortify")
+        if self.console_debug: print("random fortify")
         self.randomInitialFotify()
         self.prepareStart() # So that next player has income updated
       
 
-    # Start turn: Give armies and place them
-    
-    if self.gamePhase == 'startTurn':
-      
-      
+    # Start turn: Give armies and place them    
+    if self.gamePhase == 'startTurn':      
       if not p.human:
         armies = p.income
-        res = p.cardPhase(p.cards) if self.useCards else 0
-        armies += res
+        cashed = 0
+        if self.useCards:
+          # Card cash          
+          card_set = p.cardPhase(p.cards)
+          if not card_set is None:
+            cashed += self.cashCards(*card_set)
+
+          # If player has more than 5 cards, keep asking
+          # If player does not cash, must force the cash
+          while len(p.cards)>=5:
+            card_set = p.cardPhase(p.cards)
+            if not card_set is None:
+              cashed += self.cashCards(*card_set)
+            else:
+              # Force the cash
+              card_set = Deck.yieldCashableSet(p.cards)
+              if not card_set is None:
+                cashed += self.cashCards(*card_set)
+              else:
+                # Error
+                print("More than 5 cards but not able to find a cashable set. Maybe the deck has too many wildcards?")
+                break
+          armies += cashed
+        
+
         p.placeArmies(armies)
-        p.income -= armies
+        p.income = 0
         self.gamePhase = 'attack'
       else:
         pass
@@ -960,9 +980,8 @@ class Board(object):
 
 
 
-  ''' Cashes in the given card set. Each parameter must be a reference  to a different Card instance sent via cardsPhase(). 
+  ''' Cashes in the given card set. Each parameter must be a reference to a different Card instance sent via cardsPhase(). 
   It returns true if the set was cashed, false otherwise. '''
-  
   def cashCards(self, card, card2, card3):
     # Check that cards are a set, take them out from player
     # Deal also with bonuses from country cards
@@ -990,8 +1009,14 @@ class Board(object):
     self.world.countries[code].addArmies(numberOfArmies)
     return 0
    
-  
-  def roll(self, attack:int = 3, defense:int = 2):
+  '''
+  Simulate the dice rolling. Inputs determine the number of dice to use for each side.
+  They must be at most 3 for the attacker and 2 for the defender.
+  Returns the number of lost armies for each side
+  '''
+  def roll(self, attack:int, defense:int):
+    if attack > 3 or attack <= 0: return None
+    if defense > 3 or defense <= 0: return None
     aDice = sorted(np.random.randint(0,7,size=attack), reverse=True)
     dDice = sorted(np.random.randint(0,7,size=defense), reverse=True)
     aLoss, dLoss = 0, 0
@@ -1002,6 +1027,7 @@ class Board(object):
         dLoss += 1
     
     return aLoss, dLoss
+    
   ''' 
   If *attackTillDead* is true then perform attacks until one side or the other has been defeated.
   Otherwise perform a single attack.
@@ -1022,12 +1048,14 @@ class Board(object):
     if defender.code == self.activePlayer.code: return -1
     stop = False
     while not stop:
-      aLoss, dLoss = self.roll(min(3, cA.armies-1), min(2,cD.armies))
+      aDice, dDice = min(3, cA.armies-1), min(2,cD.armies)
+      aLoss, dLoss = self.roll(aDice, dDice)
       cA.armies -= aLoss
       cD.armies -= dLoss
       if cD.armies < 1: 
         # Attacker won
         armies = attacker.moveArmiesIn(countryCodeAttacker, countryCodeDefender)
+        if armies >= cA.armies or armies < aDice: return -1
         cA.armies -= armies
         attacker.num_countries += 1
         defender.num_countries -= 1
@@ -1070,29 +1098,29 @@ class Board(object):
   def fortifyArmies(self, numberOfArmies:int, origin, destination) ->int:
     cO = origin if isinstance(origin, Country) else self.world.countries[origin]
     cD = destination if isinstance(destination, Country) else self.world.countries[destination]
-    
+ 
     if cO.owner != self.activePlayer.code: return -1
     if cD.owner != self.activePlayer.code: return -1
     if cO.movable_armies < numberOfArmies: return -1
+ 
     # Even if movable_armies == armies, we have to always leave one army at least    
     aux = numberOfArmies-1 if numberOfArmies == cO.armies else numberOfArmies
     
     cO.armies -= aux
     cO.movable_armies -= aux
     cD.armies += aux
-    return 0
+    return 1
     
 
 
-  ### Info methods ------------------------------------------
   
   # These methods are provided for the agents to get information about the game.
 
-  ''' Will return an array of all the countries in the game. The array is ordered by country code, so c[i].getCode() equals i.  '''
+  ''' Will return a list of all the countries in the game. No order or guaranteed for now'''
   def getCountries(self):
     return self.countries
   
-  ''' Return a country by id'''
+  ''' Return a country by id or None if no match was found'''
   def getCountryById(self, ID):
     for c in self.countries:
       if c.id == ID: return c
@@ -1103,12 +1131,10 @@ class Board(object):
   def getNumberOfCountries(self)->int:
     return len(self.world.countries)
     
-  ''' Returns the number of countries owned by player.  '''
+  ''' Returns the number of countries owned by a player.'''
   def getNumberOfCountriesPlayer(self, player:int)->int:
-    s = 0
-    for c in self.countries:
-      if c.owner==player: s += 1
-    return s
+    r = self.players.get(player)
+    return r.num_countries if not r is None else None
   
   
   ''' Returns the number of continents in the game.  '''  
@@ -1123,12 +1149,9 @@ class Board(object):
 
   ''' Returns the name of the specified continent (or null if the map did not give one).  '''  
   def getContinentName(self, cont:int) -> str:
-    c = self.world.continents.get(cont)
-    if not c is None:
-      return c.name  
-    else:
-      return None
-  
+    c = self.world.continents.get(cont)    
+    return c.name if not c is None else None
+    
   
   ''' Returns the number of players that started in the game.  '''  
   def getNumberOfPlayers(self) -> int:
@@ -1191,7 +1214,7 @@ class Board(object):
     res = []
     for _ in range(10):
       res.append(aux.nextCashArmies())
-    return ' '.join(res)
+    return '-'.join(res)
   
   
   ''' Return the percent increase of the continents. '''
@@ -1210,6 +1233,7 @@ class Board(object):
   
   
   #### From BoardHelper - Seems logic to have them here with access to the board
+  # NOTE: As I will not be using these, they are not thoroughly tested for the moment
 
   def getPlayersBiggestArmy(self, player:int)-> Country:
     m, biggest = -1, None    
@@ -1372,30 +1396,35 @@ class Board(object):
   def easyCostCountryWithOwner(self, country:int, owner:int):
     '''
     Have to build an auxiliary graph weighted with the armies in target, to find shortest paths
+    Could use networkx for that
     '''
     pass
     
   def easyCostFromCountryToContinent(self, country:int, cont:int):
     '''
     Have to build an auxiliary graph weighted with the armies in target, to find shortest paths
+    Could use networkx for that
     '''
     pass
    
   def easyCostBetweenCountries(self, source:int, target:int):
     '''
     Have to build an auxiliary graph weighted with the armies in target, to find shortest paths
+    Could use networkx for that
     '''
     pass
     
   def friendlyPathBetweenCountries(self, source:int, target:int):
     '''
     Have to build an auxiliary graph weighted with the armies in target, to find shortest paths
+    Could use networkx for that
     '''
     pass
     
   def cheapestRouteFromOwnerToCont(self, owner:int, cont:int):
     '''
     Have to build an auxiliary graph weighted with the armies in target, to find shortest paths
+    Could use networkx for that
     '''
     pass
   
