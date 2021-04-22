@@ -1,1 +1,1165 @@
-{"map_graph": {"directed": true, "multigraph": false, "graph": {}, "nodes": [{"id": "ARG"}, {"id": "PER"}, {"id": "BRA"}, {"id": "VEN"}, {"id": "MEX"}, {"id": "WUS"}, {"id": "EUS"}, {"id": "WC"}, {"id": "ONT"}, {"id": "QBC"}, {"id": "ALA"}, {"id": "NWT"}, {"id": "GRE"}, {"id": "ICE"}, {"id": "SCA"}, {"id": "GB"}, {"id": "WEU"}, {"id": "NEU"}, {"id": "UKR"}, {"id": "URA"}, {"id": "AFG"}, {"id": "MDE"}, {"id": "SEU"}, {"id": "NAF"}, {"id": "EGY"}, {"id": "EAF"}, {"id": "CON"}, {"id": "SAF"}, {"id": "MAD"}, {"id": "IND"}, {"id": "CHI"}, {"id": "SIB"}, {"id": "YAK"}, {"id": "IRK"}, {"id": "MON"}, {"id": "KAM"}, {"id": "JAP"}, {"id": "SIA"}, {"id": "INDO"}, {"id": "NGU"}, {"id": "WAU"}, {"id": "EAU"}], "links": [{"source": "ARG", "target": "PER"}, {"source": "ARG", "target": "BRA"}, {"source": "PER", "target": "ARG"}, {"source": "PER", "target": "VEN"}, {"source": "PER", "target": "BRA"}, {"source": "BRA", "target": "ARG"}, {"source": "BRA", "target": "PER"}, {"source": "BRA", "target": "VEN"}, {"source": "BRA", "target": "NAF"}, {"source": "VEN", "target": "PER"}, {"source": "VEN", "target": "BRA"}, {"source": "VEN", "target": "MEX"}, {"source": "MEX", "target": "VEN"}, {"source": "MEX", "target": "WUS"}, {"source": "MEX", "target": "EUS"}, {"source": "WUS", "target": "MEX"}, {"source": "WUS", "target": "EUS"}, {"source": "WUS", "target": "ONT"}, {"source": "WUS", "target": "QBC"}, {"source": "EUS", "target": "MEX"}, {"source": "EUS", "target": "WUS"}, {"source": "EUS", "target": "WC"}, {"source": "EUS", "target": "ONT"}, {"source": "WC", "target": "EUS"}, {"source": "WC", "target": "ALA"}, {"source": "WC", "target": "NWT"}, {"source": "WC", "target": "ONT"}, {"source": "ONT", "target": "EUS"}, {"source": "ONT", "target": "WUS"}, {"source": "ONT", "target": "WC"}, {"source": "ONT", "target": "QBC"}, {"source": "ONT", "target": "NWT"}, {"source": "ONT", "target": "GRE"}, {"source": "QBC", "target": "WUS"}, {"source": "QBC", "target": "ONT"}, {"source": "QBC", "target": "GRE"}, {"source": "ALA", "target": "WC"}, {"source": "ALA", "target": "NWT"}, {"source": "ALA", "target": "KAM"}, {"source": "NWT", "target": "WC"}, {"source": "NWT", "target": "ONT"}, {"source": "NWT", "target": "ALA"}, {"source": "NWT", "target": "GRE"}, {"source": "GRE", "target": "ONT"}, {"source": "GRE", "target": "NWT"}, {"source": "GRE", "target": "QBC"}, {"source": "GRE", "target": "ICE"}, {"source": "ICE", "target": "GRE"}, {"source": "ICE", "target": "SCA"}, {"source": "ICE", "target": "GB"}, {"source": "SCA", "target": "ICE"}, {"source": "SCA", "target": "GB"}, {"source": "SCA", "target": "NEU"}, {"source": "SCA", "target": "UKR"}, {"source": "GB", "target": "ICE"}, {"source": "GB", "target": "SCA"}, {"source": "GB", "target": "WEU"}, {"source": "GB", "target": "NEU"}, {"source": "WEU", "target": "GB"}, {"source": "WEU", "target": "NEU"}, {"source": "WEU", "target": "SEU"}, {"source": "WEU", "target": "NAF"}, {"source": "NEU", "target": "GB"}, {"source": "NEU", "target": "SCA"}, {"source": "NEU", "target": "UKR"}, {"source": "NEU", "target": "SEU"}, {"source": "NEU", "target": "WEU"}, {"source": "UKR", "target": "SCA"}, {"source": "UKR", "target": "URA"}, {"source": "UKR", "target": "AFG"}, {"source": "UKR", "target": "MDE"}, {"source": "UKR", "target": "SEU"}, {"source": "UKR", "target": "NEU"}, {"source": "URA", "target": "UKR"}, {"source": "URA", "target": "AFG"}, {"source": "URA", "target": "SIB"}, {"source": "URA", "target": "CHI"}, {"source": "AFG", "target": "UKR"}, {"source": "AFG", "target": "MDE"}, {"source": "AFG", "target": "IND"}, {"source": "AFG", "target": "CHI"}, {"source": "AFG", "target": "URA"}, {"source": "MDE", "target": "UKR"}, {"source": "MDE", "target": "SEU"}, {"source": "MDE", "target": "EAF"}, {"source": "MDE", "target": "EGY"}, {"source": "MDE", "target": "IND"}, {"source": "MDE", "target": "AFG"}, {"source": "SEU", "target": "UKR"}, {"source": "SEU", "target": "NEU"}, {"source": "SEU", "target": "WEU"}, {"source": "SEU", "target": "NAF"}, {"source": "SEU", "target": "EGY"}, {"source": "SEU", "target": "MDE"}, {"source": "NAF", "target": "WEU"}, {"source": "NAF", "target": "SEU"}, {"source": "NAF", "target": "BRA"}, {"source": "NAF", "target": "EGY"}, {"source": "NAF", "target": "EAF"}, {"source": "NAF", "target": "CON"}, {"source": "EGY", "target": "SEU"}, {"source": "EGY", "target": "NAF"}, {"source": "EGY", "target": "EAF"}, {"source": "EGY", "target": "MDE"}, {"source": "EAF", "target": "NAF"}, {"source": "EAF", "target": "CON"}, {"source": "EAF", "target": "SAF"}, {"source": "EAF", "target": "MAD"}, {"source": "EAF", "target": "EGY"}, {"source": "EAF", "target": "MDE"}, {"source": "CON", "target": "NAF"}, {"source": "CON", "target": "EAF"}, {"source": "CON", "target": "SAF"}, {"source": "SAF", "target": "CON"}, {"source": "SAF", "target": "EAF"}, {"source": "SAF", "target": "MAD"}, {"source": "MAD", "target": "SAF"}, {"source": "MAD", "target": "EAF"}, {"source": "IND", "target": "MDE"}, {"source": "IND", "target": "AFG"}, {"source": "IND", "target": "CHI"}, {"source": "IND", "target": "SIA"}, {"source": "CHI", "target": "AFG"}, {"source": "CHI", "target": "URA"}, {"source": "CHI", "target": "SIB"}, {"source": "CHI", "target": "MON"}, {"source": "CHI", "target": "IND"}, {"source": "CHI", "target": "SIA"}, {"source": "SIB", "target": "URA"}, {"source": "SIB", "target": "YAK"}, {"source": "SIB", "target": "IRK"}, {"source": "SIB", "target": "MON"}, {"source": "SIB", "target": "CHI"}, {"source": "YAK", "target": "SIB"}, {"source": "YAK", "target": "KAM"}, {"source": "YAK", "target": "IRK"}, {"source": "IRK", "target": "SIB"}, {"source": "IRK", "target": "YAK"}, {"source": "IRK", "target": "KAM"}, {"source": "IRK", "target": "MON"}, {"source": "MON", "target": "SIB"}, {"source": "MON", "target": "IRK"}, {"source": "MON", "target": "KAM"}, {"source": "MON", "target": "CHI"}, {"source": "MON", "target": "JAP"}, {"source": "KAM", "target": "YAK"}, {"source": "KAM", "target": "IRK"}, {"source": "KAM", "target": "MON"}, {"source": "KAM", "target": "JAP"}, {"source": "KAM", "target": "ALA"}, {"source": "JAP", "target": "MON"}, {"source": "JAP", "target": "KAM"}, {"source": "SIA", "target": "CHI"}, {"source": "SIA", "target": "IND"}, {"source": "SIA", "target": "INDO"}, {"source": "INDO", "target": "SIA"}, {"source": "INDO", "target": "NGU"}, {"source": "INDO", "target": "WAU"}, {"source": "NGU", "target": "INDO"}, {"source": "NGU", "target": "WAU"}, {"source": "NGU", "target": "EAU"}, {"source": "WAU", "target": "INDO"}, {"source": "WAU", "target": "EAU"}, {"source": "WAU", "target": "NGU"}, {"source": "EAU", "target": "WAU"}, {"source": "EAU", "target": "NGU"}]}, "countries": [{"id": "ARG", "name": "Argentina", "xy": "250,600", "card_kind": 1}, {"id": "VEN", "name": "Venezuela", "xy": "232,405", "card_kind": 2}, {"id": "BRA", "name": "Brazil", "xy": "330,470", "card_kind": 1}, {"id": "PER", "name": "Peru", "xy": "201,490", "card_kind": 2}, {"id": "MEX", "name": "Mexico", "xy": "172,335", "card_kind": 1}, {"id": "EUS", "name": "Eastern United Stated", "xy": "130,260", "card_kind": 3}, {"id": "WUS", "name": "Western United Stated", "xy": "228,250", "card_kind": 3}, {"id": "QBC", "name": "Quebec", "xy": "272,172", "card_kind": 3}, {"id": "ONT", "name": "Ontario", "xy": "185,169", "card_kind": 3}, {"id": "WC", "name": "Western Canada", "xy": "86,168", "card_kind": 3}, {"id": "ALA", "name": "Alaska", "xy": "17,93", "card_kind": 3}, {"id": "NWT", "name": "North West Territory", "xy": "148,78", "card_kind": 2}, {"id": "GRE", "name": "Greenland - Nunavut", "xy": "330,60", "card_kind": 2}, {"id": "ICE", "name": "Iceland", "xy": "460,76", "card_kind": 2}, {"id": "GB", "name": "Great Britain", "xy": "441,171", "card_kind": 1}, {"id": "SCA", "name": "Scandinavia", "xy": "570,105", "card_kind": 1}, {"id": "UKR", "name": "Ukraine", "xy": "662,155", "card_kind": 1}, {"id": "NEU", "name": "Northern Europe", "xy": "551,190", "card_kind": 2}, {"id": "WEU", "name": "Western Europe", "xy": "479,275", "card_kind": 1}, {"id": "SEU", "name": "Southern Europe", "xy": "574,270", "card_kind": 1}, {"id": "NAF", "name": "North Africa", "xy": "461,407", "card_kind": 1}, {"id": "EGY", "name": "Egypt", "xy": "570,380", "card_kind": 2}, {"id": "CON", "name": "Congo", "xy": "532,502", "card_kind": 3}, {"id": "EAF", "name": "East Africa", "xy": "621,466", "card_kind": 1}, {"id": "SAF", "name": "South Africa", "xy": "573,603", "card_kind": 3}, {"id": "MAD", "name": "Madagascar", "xy": "703,553", "card_kind": 2}, {"id": "MDE", "name": "Middle East", "xy": "666,306", "card_kind": 3}, {"id": "AFG", "name": "Afghanistan", "xy": "763,242", "card_kind": 1}, {"id": "URA", "name": "Ural", "xy": "768,133", "card_kind": 1}, {"id": "SIB", "name": "Siberia", "xy": "859,101", "card_kind": 1}, {"id": "YAK", "name": "Yakutsk", "xy": "958,45", "card_kind": 3}, {"id": "IRK", "name": "Irkutsk", "xy": "956,122", "card_kind": 3}, {"id": "MON", "name": "Mongolia", "xy": "957,204", "card_kind": 2}, {"id": "CHI", "name": "China", "xy": "881,272", "card_kind": 3}, {"id": "IND", "name": "India", "xy": "772,356", "card_kind": 2}, {"id": "SIA", "name": "Siam", "xy": "883,361", "card_kind": 2}, {"id": "JAP", "name": "Japan", "xy": "1050,220", "card_kind": 2}, {"id": "KAM", "name": "Kamchatka", "xy": "1040,111", "card_kind": 3}, {"id": "WAU", "name": "Western Australia", "xy": "938,545", "card_kind": 3}, {"id": "EAU", "name": "Eastern Australia", "xy": "1017,558", "card_kind": 2}, {"id": "INDO", "name": "Indonesia", "xy": "931,450", "card_kind": 1}, {"id": "NGU", "name": "New Guinea", "xy": "1042,460", "card_kind": 2}], "continents": [{"name": "South America", "bonus": 2, "countries": ["ARG", "VEN", "BRA", "PER"], "color": [252, 59, 45]}, {"name": "North America", "bonus": 5, "countries": ["MEX", "EUS", "WUS", "ONT", "QBC", "WC", "ALA", "NWT", "GRE"], "color": [255, 176, 31]}, {"name": "Europe", "bonus": 5, "countries": ["ICE", "GB", "SCA", "UKR", "NEU", "WEU", "SEU"], "color": [23, 236, 255]}, {"name": "Africa", "bonus": 3, "countries": ["NAF", "EGY", "CON", "EAF", "SAF", "MAD"], "color": [138, 70, 18]}, {"name": "Asia", "bonus": 7, "countries": ["MDE", "AFG", "URA", "SIB", "YAK", "IRK", "MON", "CHI", "IND", "SIA", "JAP", "KAM"], "color": [0, 255, 42]}, {"name": "Oceania", "bonus": 3, "countries": ["WAU", "EAU", "INDO", "NGU"], "color": [255, 59, 219]}]}
+{
+  "map_graph": {
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+      {
+        "id": "ARG"
+      },
+      {
+        "id": "PER"
+      },
+      {
+        "id": "BRA"
+      },
+      {
+        "id": "VEN"
+      },
+      {
+        "id": "MEX"
+      },
+      {
+        "id": "WUS"
+      },
+      {
+        "id": "EUS"
+      },
+      {
+        "id": "WC"
+      },
+      {
+        "id": "ONT"
+      },
+      {
+        "id": "QBC"
+      },
+      {
+        "id": "ALA"
+      },
+      {
+        "id": "NWT"
+      },
+      {
+        "id": "GRE"
+      },
+      {
+        "id": "ICE"
+      },
+      {
+        "id": "SCA"
+      },
+      {
+        "id": "GB"
+      },
+      {
+        "id": "WEU"
+      },
+      {
+        "id": "NEU"
+      },
+      {
+        "id": "UKR"
+      },
+      {
+        "id": "URA"
+      },
+      {
+        "id": "AFG"
+      },
+      {
+        "id": "MDE"
+      },
+      {
+        "id": "SEU"
+      },
+      {
+        "id": "NAF"
+      },
+      {
+        "id": "EGY"
+      },
+      {
+        "id": "EAF"
+      },
+      {
+        "id": "CON"
+      },
+      {
+        "id": "SAF"
+      },
+      {
+        "id": "MAD"
+      },
+      {
+        "id": "IND"
+      },
+      {
+        "id": "CHI"
+      },
+      {
+        "id": "SIB"
+      },
+      {
+        "id": "YAK"
+      },
+      {
+        "id": "IRK"
+      },
+      {
+        "id": "MON"
+      },
+      {
+        "id": "KAM"
+      },
+      {
+        "id": "JAP"
+      },
+      {
+        "id": "SIA"
+      },
+      {
+        "id": "INDO"
+      },
+      {
+        "id": "NGU"
+      },
+      {
+        "id": "WAU"
+      },
+      {
+        "id": "EAU"
+      }
+    ],
+    "links": [
+      {
+        "source": "ARG",
+        "target": "PER"
+      },
+      {
+        "source": "ARG",
+        "target": "BRA"
+      },
+      {
+        "source": "PER",
+        "target": "ARG"
+      },
+      {
+        "source": "PER",
+        "target": "VEN"
+      },
+      {
+        "source": "PER",
+        "target": "BRA"
+      },
+      {
+        "source": "BRA",
+        "target": "ARG"
+      },
+      {
+        "source": "BRA",
+        "target": "PER"
+      },
+      {
+        "source": "BRA",
+        "target": "VEN"
+      },
+      {
+        "source": "BRA",
+        "target": "NAF"
+      },
+      {
+        "source": "VEN",
+        "target": "PER"
+      },
+      {
+        "source": "VEN",
+        "target": "BRA"
+      },
+      {
+        "source": "VEN",
+        "target": "MEX"
+      },
+      {
+        "source": "MEX",
+        "target": "VEN"
+      },
+      {
+        "source": "MEX",
+        "target": "WUS"
+      },
+      {
+        "source": "MEX",
+        "target": "EUS"
+      },
+      {
+        "source": "WUS",
+        "target": "MEX"
+      },
+      {
+        "source": "WUS",
+        "target": "EUS"
+      },
+      {
+        "source": "WUS",
+        "target": "ONT"
+      },
+      {
+        "source": "WUS",
+        "target": "QBC"
+      },
+      {
+        "source": "EUS",
+        "target": "MEX"
+      },
+      {
+        "source": "EUS",
+        "target": "WUS"
+      },
+      {
+        "source": "EUS",
+        "target": "WC"
+      },
+      {
+        "source": "EUS",
+        "target": "ONT"
+      },
+      {
+        "source": "WC",
+        "target": "EUS"
+      },
+      {
+        "source": "WC",
+        "target": "ALA"
+      },
+      {
+        "source": "WC",
+        "target": "NWT"
+      },
+      {
+        "source": "WC",
+        "target": "ONT"
+      },
+      {
+        "source": "ONT",
+        "target": "EUS"
+      },
+      {
+        "source": "ONT",
+        "target": "WUS"
+      },
+      {
+        "source": "ONT",
+        "target": "WC"
+      },
+      {
+        "source": "ONT",
+        "target": "QBC"
+      },
+      {
+        "source": "ONT",
+        "target": "NWT"
+      },
+      {
+        "source": "ONT",
+        "target": "GRE"
+      },
+      {
+        "source": "QBC",
+        "target": "WUS"
+      },
+      {
+        "source": "QBC",
+        "target": "ONT"
+      },
+      {
+        "source": "QBC",
+        "target": "GRE"
+      },
+      {
+        "source": "ALA",
+        "target": "WC"
+      },
+      {
+        "source": "ALA",
+        "target": "NWT"
+      },
+      {
+        "source": "ALA",
+        "target": "KAM"
+      },
+      {
+        "source": "NWT",
+        "target": "WC"
+      },
+      {
+        "source": "NWT",
+        "target": "ONT"
+      },
+      {
+        "source": "NWT",
+        "target": "ALA"
+      },
+      {
+        "source": "NWT",
+        "target": "GRE"
+      },
+      {
+        "source": "GRE",
+        "target": "ONT"
+      },
+      {
+        "source": "GRE",
+        "target": "NWT"
+      },
+      {
+        "source": "GRE",
+        "target": "QBC"
+      },
+      {
+        "source": "GRE",
+        "target": "ICE"
+      },
+      {
+        "source": "ICE",
+        "target": "GRE"
+      },
+      {
+        "source": "ICE",
+        "target": "SCA"
+      },
+      {
+        "source": "ICE",
+        "target": "GB"
+      },
+      {
+        "source": "SCA",
+        "target": "ICE"
+      },
+      {
+        "source": "SCA",
+        "target": "GB"
+      },
+      {
+        "source": "SCA",
+        "target": "NEU"
+      },
+      {
+        "source": "SCA",
+        "target": "UKR"
+      },
+      {
+        "source": "GB",
+        "target": "ICE"
+      },
+      {
+        "source": "GB",
+        "target": "SCA"
+      },
+      {
+        "source": "GB",
+        "target": "WEU"
+      },
+      {
+        "source": "GB",
+        "target": "NEU"
+      },
+      {
+        "source": "WEU",
+        "target": "GB"
+      },
+      {
+        "source": "WEU",
+        "target": "NEU"
+      },
+      {
+        "source": "WEU",
+        "target": "SEU"
+      },
+      {
+        "source": "WEU",
+        "target": "NAF"
+      },
+      {
+        "source": "NEU",
+        "target": "GB"
+      },
+      {
+        "source": "NEU",
+        "target": "SCA"
+      },
+      {
+        "source": "NEU",
+        "target": "UKR"
+      },
+      {
+        "source": "NEU",
+        "target": "SEU"
+      },
+      {
+        "source": "NEU",
+        "target": "WEU"
+      },
+      {
+        "source": "UKR",
+        "target": "SCA"
+      },
+      {
+        "source": "UKR",
+        "target": "URA"
+      },
+      {
+        "source": "UKR",
+        "target": "AFG"
+      },
+      {
+        "source": "UKR",
+        "target": "MDE"
+      },
+      {
+        "source": "UKR",
+        "target": "SEU"
+      },
+      {
+        "source": "UKR",
+        "target": "NEU"
+      },
+      {
+        "source": "URA",
+        "target": "UKR"
+      },
+      {
+        "source": "URA",
+        "target": "AFG"
+      },
+      {
+        "source": "URA",
+        "target": "SIB"
+      },
+      {
+        "source": "URA",
+        "target": "CHI"
+      },
+      {
+        "source": "AFG",
+        "target": "UKR"
+      },
+      {
+        "source": "AFG",
+        "target": "MDE"
+      },
+      {
+        "source": "AFG",
+        "target": "IND"
+      },
+      {
+        "source": "AFG",
+        "target": "CHI"
+      },
+      {
+        "source": "AFG",
+        "target": "URA"
+      },
+      {
+        "source": "MDE",
+        "target": "UKR"
+      },
+      {
+        "source": "MDE",
+        "target": "SEU"
+      },
+      {
+        "source": "MDE",
+        "target": "EAF"
+      },
+      {
+        "source": "MDE",
+        "target": "EGY"
+      },
+      {
+        "source": "MDE",
+        "target": "IND"
+      },
+      {
+        "source": "MDE",
+        "target": "AFG"
+      },
+      {
+        "source": "SEU",
+        "target": "UKR"
+      },
+      {
+        "source": "SEU",
+        "target": "NEU"
+      },
+      {
+        "source": "SEU",
+        "target": "WEU"
+      },
+      {
+        "source": "SEU",
+        "target": "NAF"
+      },
+      {
+        "source": "SEU",
+        "target": "EGY"
+      },
+      {
+        "source": "SEU",
+        "target": "MDE"
+      },
+      {
+        "source": "NAF",
+        "target": "WEU"
+      },
+      {
+        "source": "NAF",
+        "target": "SEU"
+      },
+      {
+        "source": "NAF",
+        "target": "BRA"
+      },
+      {
+        "source": "NAF",
+        "target": "EGY"
+      },
+      {
+        "source": "NAF",
+        "target": "EAF"
+      },
+      {
+        "source": "NAF",
+        "target": "CON"
+      },
+      {
+        "source": "EGY",
+        "target": "SEU"
+      },
+      {
+        "source": "EGY",
+        "target": "NAF"
+      },
+      {
+        "source": "EGY",
+        "target": "EAF"
+      },
+      {
+        "source": "EGY",
+        "target": "MDE"
+      },
+      {
+        "source": "EAF",
+        "target": "NAF"
+      },
+      {
+        "source": "EAF",
+        "target": "CON"
+      },
+      {
+        "source": "EAF",
+        "target": "SAF"
+      },
+      {
+        "source": "EAF",
+        "target": "MAD"
+      },
+      {
+        "source": "EAF",
+        "target": "EGY"
+      },
+      {
+        "source": "EAF",
+        "target": "MDE"
+      },
+      {
+        "source": "CON",
+        "target": "NAF"
+      },
+      {
+        "source": "CON",
+        "target": "EAF"
+      },
+      {
+        "source": "CON",
+        "target": "SAF"
+      },
+      {
+        "source": "SAF",
+        "target": "CON"
+      },
+      {
+        "source": "SAF",
+        "target": "EAF"
+      },
+      {
+        "source": "SAF",
+        "target": "MAD"
+      },
+      {
+        "source": "MAD",
+        "target": "SAF"
+      },
+      {
+        "source": "MAD",
+        "target": "EAF"
+      },
+      {
+        "source": "IND",
+        "target": "MDE"
+      },
+      {
+        "source": "IND",
+        "target": "AFG"
+      },
+      {
+        "source": "IND",
+        "target": "CHI"
+      },
+      {
+        "source": "IND",
+        "target": "SIA"
+      },
+      {
+        "source": "CHI",
+        "target": "AFG"
+      },
+      {
+        "source": "CHI",
+        "target": "URA"
+      },
+      {
+        "source": "CHI",
+        "target": "SIB"
+      },
+      {
+        "source": "CHI",
+        "target": "MON"
+      },
+      {
+        "source": "CHI",
+        "target": "IND"
+      },
+      {
+        "source": "CHI",
+        "target": "SIA"
+      },
+      {
+        "source": "SIB",
+        "target": "URA"
+      },
+      {
+        "source": "SIB",
+        "target": "YAK"
+      },
+      {
+        "source": "SIB",
+        "target": "IRK"
+      },
+      {
+        "source": "SIB",
+        "target": "MON"
+      },
+      {
+        "source": "SIB",
+        "target": "CHI"
+      },
+      {
+        "source": "YAK",
+        "target": "SIB"
+      },
+      {
+        "source": "YAK",
+        "target": "KAM"
+      },
+      {
+        "source": "YAK",
+        "target": "IRK"
+      },
+      {
+        "source": "IRK",
+        "target": "SIB"
+      },
+      {
+        "source": "IRK",
+        "target": "YAK"
+      },
+      {
+        "source": "IRK",
+        "target": "KAM"
+      },
+      {
+        "source": "IRK",
+        "target": "MON"
+      },
+      {
+        "source": "MON",
+        "target": "SIB"
+      },
+      {
+        "source": "MON",
+        "target": "IRK"
+      },
+      {
+        "source": "MON",
+        "target": "KAM"
+      },
+      {
+        "source": "MON",
+        "target": "CHI"
+      },
+      {
+        "source": "MON",
+        "target": "JAP"
+      },
+      {
+        "source": "KAM",
+        "target": "YAK"
+      },
+      {
+        "source": "KAM",
+        "target": "IRK"
+      },
+      {
+        "source": "KAM",
+        "target": "MON"
+      },
+      {
+        "source": "KAM",
+        "target": "JAP"
+      },
+      {
+        "source": "KAM",
+        "target": "ALA"
+      },
+      {
+        "source": "JAP",
+        "target": "MON"
+      },
+      {
+        "source": "JAP",
+        "target": "KAM"
+      },
+      {
+        "source": "SIA",
+        "target": "CHI"
+      },
+      {
+        "source": "SIA",
+        "target": "IND"
+      },
+      {
+        "source": "SIA",
+        "target": "INDO"
+      },
+      {
+        "source": "INDO",
+        "target": "SIA"
+      },
+      {
+        "source": "INDO",
+        "target": "NGU"
+      },
+      {
+        "source": "INDO",
+        "target": "WAU"
+      },
+      {
+        "source": "NGU",
+        "target": "INDO"
+      },
+      {
+        "source": "NGU",
+        "target": "WAU"
+      },
+      {
+        "source": "NGU",
+        "target": "EAU"
+      },
+      {
+        "source": "WAU",
+        "target": "INDO"
+      },
+      {
+        "source": "WAU",
+        "target": "EAU"
+      },
+      {
+        "source": "WAU",
+        "target": "NGU"
+      },
+      {
+        "source": "EAU",
+        "target": "WAU"
+      },
+      {
+        "source": "EAU",
+        "target": "NGU"
+      }
+    ]
+  },
+  "countries": [
+    {
+      "id": "ARG",
+      "name": "Argentina",
+      "xy": "250,600",
+      "card_kind": 1
+    },
+    {
+      "id": "VEN",
+      "name": "Venezuela",
+      "xy": "232,405",
+      "card_kind": 2
+    },
+    {
+      "id": "BRA",
+      "name": "Brazil",
+      "xy": "330,470",
+      "card_kind": 1
+    },
+    {
+      "id": "PER",
+      "name": "Peru",
+      "xy": "201,490",
+      "card_kind": 2
+    },
+    {
+      "id": "MEX",
+      "name": "Mexico",
+      "xy": "172,335",
+      "card_kind": 1
+    },
+    {
+      "id": "EUS",
+      "name": "Eastern United Stated",
+      "xy": "130,260",
+      "card_kind": 3
+    },
+    {
+      "id": "WUS",
+      "name": "Western United Stated",
+      "xy": "228,250",
+      "card_kind": 3
+    },
+    {
+      "id": "QBC",
+      "name": "Quebec",
+      "xy": "272,172",
+      "card_kind": 3
+    },
+    {
+      "id": "ONT",
+      "name": "Ontario",
+      "xy": "185,169",
+      "card_kind": 3
+    },
+    {
+      "id": "WC",
+      "name": "Western Canada",
+      "xy": "86,168",
+      "card_kind": 3
+    },
+    {
+      "id": "ALA",
+      "name": "Alaska",
+      "xy": "17,93",
+      "card_kind": 3
+    },
+    {
+      "id": "NWT",
+      "name": "North West Territory",
+      "xy": "148,78",
+      "card_kind": 2
+    },
+    {
+      "id": "GRE",
+      "name": "Greenland - Nunavut",
+      "xy": "330,60",
+      "card_kind": 2
+    },
+    {
+      "id": "ICE",
+      "name": "Iceland",
+      "xy": "460,76",
+      "card_kind": 2
+    },
+    {
+      "id": "GB",
+      "name": "Great Britain",
+      "xy": "441,171",
+      "card_kind": 1
+    },
+    {
+      "id": "SCA",
+      "name": "Scandinavia",
+      "xy": "570,105",
+      "card_kind": 1
+    },
+    {
+      "id": "UKR",
+      "name": "Ukraine",
+      "xy": "662,155",
+      "card_kind": 1
+    },
+    {
+      "id": "NEU",
+      "name": "Northern Europe",
+      "xy": "551,190",
+      "card_kind": 2
+    },
+    {
+      "id": "WEU",
+      "name": "Western Europe",
+      "xy": "479,275",
+      "card_kind": 1
+    },
+    {
+      "id": "SEU",
+      "name": "Southern Europe",
+      "xy": "574,270",
+      "card_kind": 1
+    },
+    {
+      "id": "NAF",
+      "name": "North Africa",
+      "xy": "461,407",
+      "card_kind": 1
+    },
+    {
+      "id": "EGY",
+      "name": "Egypt",
+      "xy": "570,380",
+      "card_kind": 2
+    },
+    {
+      "id": "CON",
+      "name": "Congo",
+      "xy": "532,502",
+      "card_kind": 3
+    },
+    {
+      "id": "EAF",
+      "name": "East Africa",
+      "xy": "621,466",
+      "card_kind": 1
+    },
+    {
+      "id": "SAF",
+      "name": "South Africa",
+      "xy": "573,603",
+      "card_kind": 3
+    },
+    {
+      "id": "MAD",
+      "name": "Madagascar",
+      "xy": "703,553",
+      "card_kind": 2
+    },
+    {
+      "id": "MDE",
+      "name": "Middle East",
+      "xy": "666,306",
+      "card_kind": 3
+    },
+    {
+      "id": "AFG",
+      "name": "Afghanistan",
+      "xy": "763,242",
+      "card_kind": 1
+    },
+    {
+      "id": "URA",
+      "name": "Ural",
+      "xy": "768,133",
+      "card_kind": 1
+    },
+    {
+      "id": "SIB",
+      "name": "Siberia",
+      "xy": "859,101",
+      "card_kind": 1
+    },
+    {
+      "id": "YAK",
+      "name": "Yakutsk",
+      "xy": "958,45",
+      "card_kind": 3
+    },
+    {
+      "id": "IRK",
+      "name": "Irkutsk",
+      "xy": "956,122",
+      "card_kind": 3
+    },
+    {
+      "id": "MON",
+      "name": "Mongolia",
+      "xy": "957,204",
+      "card_kind": 2
+    },
+    {
+      "id": "CHI",
+      "name": "China",
+      "xy": "881,272",
+      "card_kind": 3
+    },
+    {
+      "id": "IND",
+      "name": "India",
+      "xy": "772,356",
+      "card_kind": 2
+    },
+    {
+      "id": "SIA",
+      "name": "Siam",
+      "xy": "883,361",
+      "card_kind": 2
+    },
+    {
+      "id": "JAP",
+      "name": "Japan",
+      "xy": "1050,220",
+      "card_kind": 2
+    },
+    {
+      "id": "KAM",
+      "name": "Kamchatka",
+      "xy": "1040,111",
+      "card_kind": 3
+    },
+    {
+      "id": "WAU",
+      "name": "Western Australia",
+      "xy": "938,545",
+      "card_kind": 3
+    },
+    {
+      "id": "EAU",
+      "name": "Eastern Australia",
+      "xy": "1017,558",
+      "card_kind": 2
+    },
+    {
+      "id": "INDO",
+      "name": "Indonesia",
+      "xy": "931,450",
+      "card_kind": 1
+    },
+    {
+      "id": "NGU",
+      "name": "New Guinea",
+      "xy": "1042,460",
+      "card_kind": 2
+    }
+  ],
+  "continents": [
+    {
+      "name": "South America",
+      "bonus": 2,
+      "countries": [
+        "ARG",
+        "VEN",
+        "BRA",
+        "PER"
+      ],
+      "color": [
+        252,
+        59,
+        45
+      ]
+    },
+    {
+      "name": "North America",
+      "bonus": 5,
+      "countries": [
+        "MEX",
+        "EUS",
+        "WUS",
+        "ONT",
+        "QBC",
+        "WC",
+        "ALA",
+        "NWT",
+        "GRE"
+      ],
+      "color": [
+        255,
+        176,
+        31
+      ]
+    },
+    {
+      "name": "Europe",
+      "bonus": 5,
+      "countries": [
+        "ICE",
+        "GB",
+        "SCA",
+        "UKR",
+        "NEU",
+        "WEU",
+        "SEU"
+      ],
+      "color": [
+        23,
+        236,
+        255
+      ]
+    },
+    {
+      "name": "Africa",
+      "bonus": 3,
+      "countries": [
+        "NAF",
+        "EGY",
+        "CON",
+        "EAF",
+        "SAF",
+        "MAD"
+      ],
+      "color": [
+        138,
+        70,
+        18
+      ]
+    },
+    {
+      "name": "Asia",
+      "bonus": 7,
+      "countries": [
+        "MDE",
+        "AFG",
+        "URA",
+        "SIB",
+        "YAK",
+        "IRK",
+        "MON",
+        "CHI",
+        "IND",
+        "SIA",
+        "JAP",
+        "KAM"
+      ],
+      "color": [
+        0,
+        255,
+        42
+      ]
+    },
+    {
+      "name": "Oceania",
+      "bonus": 3,
+      "countries": [
+        "WAU",
+        "EAU",
+        "INDO",
+        "NGU"
+      ],
+      "color": [
+        255,
+        59,
+        219
+      ]
+    }
+  ]
+}
