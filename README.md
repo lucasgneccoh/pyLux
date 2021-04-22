@@ -3,6 +3,8 @@ Python implementation of Risk based on Lux Deluxe (Sillysoft software) for acade
 
 # Play with the GUI
 
+![PyRisk GUI](https://github.com/lucasgneccoh/pyLux/blob/main/images/GUI_init.PNG)
+
 ## Setup
 
 To play with the GUI, you need two things:
