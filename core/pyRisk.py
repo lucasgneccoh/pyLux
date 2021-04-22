@@ -24,8 +24,6 @@ import time
 
 
 import agent
-
-
 # For the GUI
 import pygame
 
@@ -638,27 +636,20 @@ class Board(object):
     self.countriesLeft = [c for c in self.countries]
     
     
-    
-    self.cardSequence = ListThenArithmeticCardSequence(sequence=[4,6,8,10,12,15], incr=5)
-    self.nextCashArmies = self.cardSequence.nextCashArmies()
-    
-    
     self.playerCycle = itertools.cycle(list(self.players.values()))
     self.activePlayer = next(self.playerCycle)
     self.firstPlayerCode = self.activePlayer.code
     self.lastPlayerCode = list(self.players.values())[-1].code
     self.cacheArmies = 0
-    self.initialPhase = True
     self.gamePhase = 'initialPick'
     
-    self.deck = Deck()
-    self.deck.create_deck(self.countries, num_wildcards=2)
     
       
     
    
     
     # Preferences (Default here)
+    self.initialPhase = True
     self.useCards = True
     self.transferCards = True
     self.immediateCash = False
@@ -666,6 +657,12 @@ class Board(object):
     self.continentIncrease = 0.05
     self.pickInitialCountries = False
     self.armiesPerTurnInitial = 4
+    self.console_debug = False
+    
+    self.cardSequence = ListThenArithmeticCardSequence(sequence=[4,6,8,10,12,15], incr=5)
+    self.deck = Deck()
+    self.deck.create_deck(self.countries, num_wildcards=2)
+    self.nextCashArmies = self.cardSequence.nextCashArmies()
     self.aux_cont = 0
     
     # Start players
@@ -677,6 +674,15 @@ class Board(object):
       p.num_countries = 0
     
   
+  def setPreferences(self, prefs):
+    available_prefs = ['initialPhase', 'useCards', 'transferCards', 'immediateCash', 'continentIncrease', 'pickInitialCountries', 'armiesPerTurnInitial', 'console_debug']
+    # In the future, card sequences, num_wildcards
+    for a in available_prefs:
+      r = prefs.get(a)
+      if r is None:
+        print(f"Board preferences: value for '{a}' not given. Leaving default value {getattr(self, a)}")
+      else:
+        setattr(self, a, r)
   
   def randomInitialPick(self):
     
@@ -688,12 +694,46 @@ class Board(object):
       c.owner = p
       c.addArmies(1)
       self.players[p].initialArmies -= 1
-      self.players[p].num_countries += 1
-          
+      self.players[p].num_countries += 1  
+      if self.console_debug: print(f"Board:randomInitialPick: Picked {c.id} for {p.code} ({p.name()})")
     self.gamePhase = 'initialFortify'
-  
-  def initialPickOneHuman(self, country):
     
+  def randomInitialFotify(self):        
+    over = False
+    N = self.getNumberOfPlayers()
+    
+    # Get countries first to avoid getting them every time
+    countries_players = {p.code: [c for k, c in self.world.countries.items() if c.owner == p.code] for i,p in self.players.items()}
+    
+    while not over:            
+      # Check if there are armies left to put
+      cont = 0
+      while self.activePlayer.income==0 and self.activePlayer.initialArmies==0 and cont <= N:
+        cont += 1
+        self.endTurn()
+        if cont >= N:
+          # Prepare everything for the next round
+          self.activePlayer = self.players[self.firstPlayerCode]
+          over = True
+      
+      if over: break
+      
+      # Not over
+      # Get income, put it in random countries
+      p = self.activePlayer      
+      armies = p.income
+      if self.console_debug: print(f"Board:randomInitialFotify: For {p.code} ({p.name()})")
+      for _ in range(armies):
+        c = np.random.choice(countries_players[p.code])
+        c.addArmies(1)
+        if self.console_debug: print(f"{c.id} - {c.name}")
+      
+      p.income -= armies
+      self.endTurn()
+      
+    self.gamePhase = 'startTurn'
+  
+  def initialPickOneHuman(self, country): 
     if isinstance(country, int):
       country = self.world.countries[country]
     p = self.activePlayer
@@ -707,9 +747,7 @@ class Board(object):
     if len(self.countriesLeft) == 0:
       self.gamePhase = 'initialFortify'
     self.endTurn()
-      
-    
-  
+         
   def initialPickOneComputer(self):    
     
     p = self.activePlayer
@@ -769,10 +807,8 @@ class Board(object):
       p.income -= armies
       
     if p.income == 0: self.gamePhase = 'attack'
-    
-    
+       
   # Methods to use in basic game turn ----------------------
-  
   
   def updateIncome(self, p):    
     p.income = 0
@@ -802,7 +838,7 @@ class Board(object):
   
   def endTurn(self):
   
-    if self.tookOverCountry:
+    if self.tookOverCountry and self.useCards:
       self.activePlayer.cards.append(self.deck.draw())
     
     # Next player
@@ -831,55 +867,62 @@ class Board(object):
       self.endTurn()
       return 
       
-      
-    # Initial Pick
-    if self.gamePhase == 'initialPick':
-      if self.pickInitialCountries:
-        # The picking will end with a endTurn(), so everything is fine
-        if not p.human:
-          self.initialPickOneComputer()
-          if len(self.countriesLeft)==0:
-            self.gamePhase = 'initialFortify'
-        else: #Must wait for manual call to pickInitialOneHuman
-          pass
+    # Initial phase
+    if 'initial' in self.gamePhase:
+      if self.initialPhase:
+        # Initial Pick
+        if self.gamePhase == 'initialPick':
+          if self.pickInitialCountries:
+            # The picking will end with a endTurn(), so everything is fine
+            if not p.human:
+              self.initialPickOneComputer()
+              if len(self.countriesLeft)==0:
+                self.gamePhase = 'initialFortify'
+            else: #Must wait for manual call to pickInitialOneHuman
+              pass
+          else:
+            # No endTurn(), so we must do it manually here
+            self.randomInitialPick()
+            self.prepareStart()
+        
+        # Initial Fortify
+        if self.gamePhase == 'initialFortify':
+          over = False
+          if p.initialArmies==0 and p.income==0:
+            # Check if the phase is finished
+            N = self.getNumberOfPlayers()
+            cont = 1
+            q = next(self.playerCycle)
+            while (q.initialArmies==0 and q.income==0) and cont < N:
+              cont += 1
+              q = next(self.playerCycle)
+            if cont >= N: 
+              over=True
+            else:
+              self.activePlayer = q
+            
+          if not over:
+            if not self.activePlayer.human:        
+              self.initialFortifyComputer()          
+            else:
+              pass
+          else:
+            # Go to last player before endTurn()
+            while self.activePlayer.code != self.lastPlayerCode:
+              self.activePlayer = next(self.playerCycle)
+            self.gamePhase = 'startTurn'
+            self.endTurn()
       else:
-        # No endTurn(), so we must do it manually here
+        print("No initial phase, setting everything random")
+        # No initial phase, everything at random
+        print("random pick")
         self.randomInitialPick()
-        self.prepareStart()
-    
-    # Initial Fortify
-    if self.gamePhase == 'initialFortify':
-      over = False
-      if p.initialArmies==0 and p.income==0:
-        # Check if the phase is finished
-        N = self.getNumberOfPlayers()
-        cont = 1
-        q = next(self.playerCycle)
-        while (q.initialArmies==0 and q.income==0) and cont < N:
-          cont += 1
-          q = next(self.playerCycle)
-        if cont >= N: 
-          over=True
-        else:
-          self.activePlayer = q
-        
-      if not over:
-        if not self.activePlayer.human:        
-          self.initialFortifyComputer()          
-        else:
-          pass
-      else:
-        # Go to last player before endTurn()
-        while self.activePlayer.code != self.lastPlayerCode:
-          self.activePlayer = next(self.playerCycle)
-        self.gamePhase = 'startTurn'
-        self.endTurn()
-        
-        
-    
-        
+        self.prepareStart() # So that next player has income updated
+        print("random fortify")
+        self.randomInitialFotify()
+        self.prepareStart() # So that next player has income updated
       
-    
+
     # Start turn: Give armies and place them
     
     if self.gamePhase == 'startTurn':
@@ -887,7 +930,7 @@ class Board(object):
       
       if not p.human:
         armies = p.income
-        res = p.cardPhase(p.cards)
+        res = p.cardPhase(p.cards) if self.useCards else 0
         armies += res
         p.placeArmies(armies)
         p.income -= armies
@@ -926,7 +969,6 @@ class Board(object):
     #   If card is from owned country, receive extra 2 armies there
     if Deck.isSet(card, card2, card3):
       res = self.nextCashArmies
-      if console_debug: print(f"Card cash for {res} armies")
       self.nextCashArmies = self.cardSequence.nextCashArmies()
       for c in [card, card2, card3]:
         if c.code < 0: continue
@@ -996,19 +1038,21 @@ class Board(object):
           defender.is_alive = False
           # Player has been eliminated. 
           # Must do cardPhase if more than 5 cards or self.immediateCash==True
-          attacker.cards.extend(defender.cards)
-          if len(attacker.cards)>=5 or self.immediateCash:
-            # Bot players - Run cardPhase
-            if not attacker.human:
-              armies = attacker.cardPhase(attacker.cards)
-              if armies > 0:
-                attacker.placeArmies(armies)            
-            else: # Human player
-              # leave them to be properly cashed at startTurn
-              pass
-              #if len(attacker.cards)>=5:
-              #  card_set = Deck.yieldCashableSet(attacker.cards)
-              #  self.cashCards(*card_set)
+          if self.useCards:
+            if self.transferCards:
+              attacker.cards.extend(defender.cards)
+              if len(attacker.cards)>=5 or self.immediateCash:
+                # Bot players - Run cardPhase
+                if not attacker.human:
+                  armies = attacker.cardPhase(attacker.cards)
+                  if armies > 0:
+                    attacker.placeArmies(armies)            
+                else: # Human player
+                  # leave them to be properly cashed at startTurn
+                  pass
+                  #if len(attacker.cards)>=5:
+                  #  card_set = Deck.yieldCashableSet(attacker.cards)
+                  #  self.cashCards(*card_set)
         self.tookOverCountry = True        
         return 7
       

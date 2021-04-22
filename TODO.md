@@ -26,3 +26,6 @@ Next step:
   - Implement the Board class.
   - Tests the game
   - Implement cards
+
+# GUI ready (22-04-2021)
+GUI is ready and most of the game logic is done. Now I have to finish the GUI (add a parser for arguments, etc) and then start coding the fast mode to leave algorithms play. I also have to generalize a bit the different phases and the concept of "move" to first test the search methods. The Board class in Lux has a lot of methods, but they are very game dependent. I need some more general ones.

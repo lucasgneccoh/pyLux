@@ -58,12 +58,12 @@ countries = [
   ]
 
 continents = [
-  {'name':'South America', 'bonus':2, 'countries':['ARG','VEN','BRA','PER']},
-  {'name':'North America', 'bonus':5, 'countries':['MEX','EUS','WUS', 'ONT','QBC', 'WC', 'ALA', 'NWT', 'GRE']},
-  {'name':'Europe', 'bonus':5, 'countries':['ICE','GB','SCA','UKR', 'NEU', 'WEU', 'SEU']},
-  {'name':'Africa', 'bonus':3, 'countries':['NAF','EGY','CON','EAF', 'SAF', 'MAD']},
-  {'name':'Asia', 'bonus':7, 'countries':['MDE','AFG', 'URA','SIB', 'YAK', 'IRK', 'MON', 'CHI', 'IND', 'SIA', 'JAP', 'KAM']},
-  {'name':'Oceania', 'bonus':3, 'countries':['WAU','EAU','INDO','NGU']}
+  {'name':'South America', 'bonus':2, 'countries':['ARG','VEN','BRA','PER'], 'color':[252, 59, 45]},
+  {'name':'North America', 'bonus':5, 'countries':['MEX','EUS','WUS', 'ONT','QBC', 'WC', 'ALA', 'NWT', 'GRE'], 'color':[255, 176, 31]},
+  {'name':'Europe', 'bonus':5, 'countries':['ICE','GB','SCA','UKR', 'NEU', 'WEU', 'SEU'], 'color':[23, 236, 255]},
+  {'name':'Africa', 'bonus':3, 'countries':['NAF','EGY','CON','EAF', 'SAF', 'MAD'], 'color':[138, 70, 18]},
+  {'name':'Asia', 'bonus':7, 'countries':['MDE','AFG', 'URA','SIB', 'YAK', 'IRK', 'MON', 'CHI', 'IND', 'SIA', 'JAP', 'KAM'], 'color':[0, 255, 42]},
+  {'name':'Oceania', 'bonus':3, 'countries':['WAU','EAU','INDO','NGU'], 'color':[255, 59, 219]}
   ]
 
 links = [('ARG','PER'),
@@ -160,7 +160,7 @@ from networkx.readwrite import json_graph
 import json
 import os
 import matplotlib.pyplot as plt
-from game import MapLoader
+from pyRisk import MapLoader
 
 #%% Create & save
 

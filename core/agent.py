@@ -133,5 +133,5 @@ class Human(Agent):
     return 'Homo sapiens sapiens'
   
   
-  
+all_agents = {'random': RandomAgent, 'human': Human}
     
