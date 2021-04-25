@@ -22,7 +22,7 @@ preferences = {
   'key_fortify_phase': 'f',
   'key_end_turn': 'q',
   'key_cards': 'c',
-  'time_sleep_ai':1,
+  'time_sleep_ai':2,
   # Visual: Be very carefull, everything must fit well in the screen
   'screen_W':1280,
   'screen_H':720,
