@@ -1655,11 +1655,12 @@ if __name__ == '__main__':
   
 
   # Set players
-  aggressiveness = 1
+  aggressiveness = 0.7
   pH, pR1, pR2 = agent.Human('PocketNavy'), agent.RandomAgent('Red',aggressiveness), agent.RandomAgent('Green',aggressiveness)
   pMC = agent.FlatMC('MC', agent.RandomAgent, budget=40)
+  pP = agent.PeacefulAgent()
   #p1.console_debug = console_debug  
-  players = [pR1, pMC]
+  players = [pMC, pP]
   # Set board
   prefs = {'initialPhase': False, 'useCards':True,
            'transferCards':True, 'immediateCash': True,
@@ -1706,9 +1707,9 @@ if __name__ == '__main__':
     countries = []
     board.console_debug = False
     
-    pMC.budget = 30
+    pMC.budget = 50
     pMC.inner_placeArmies_budget = 30
-    
+
     for i in tqdm.tqdm(range(N)):
       in_start = time.process_time()
       board.play()

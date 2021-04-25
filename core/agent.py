@@ -148,6 +148,8 @@ class Agent(object):
     '''
     return 'Hello human, this is {}'.format(self.name_string)  
 
+
+#%% Basic methods and baselines
 class RandomAgent(Agent):
 
   def __init__(self, name='random', aggressiveness = 0.5):
@@ -221,7 +223,7 @@ class RandomAgent(Agent):
       if not options or source.armies <= 1: continue      
       target = np.random.choice(options)      
       tillDead = True if np.random.uniform()<self.aggressiveness else False
-      res = self.board.attack(source.code, target.code, tillDead)
+      _ = self.board.attack(source.code, target.code, tillDead)
       # if self.console_debug: print(f"{self.name()}: Attacking {source.id} -> {target_c.id}: tillDead {tillDead}: Result {res}")
     
     return 
@@ -246,6 +248,64 @@ class Human(Agent):
   
   def version(self):
     return 'Homo sapiens sapiens'
+
+
+class PeacefulAgent(Agent):
+
+  def __init__(self, name='peace'):
+    '''! Constructor of peaceful agent. It does not attack, so it serves as a very easy baseline
+    
+    :param name: Name of the agent.
+    :type name: str
+    '''
+    super().__init__(name)
+    
+    
+  
+  def pickCountry(self):
+    '''! Pick at random one of the empty countries
+    '''    
+    options = self.board.countriesLeft()
+    if options:
+      return np.random.choice(options)
+    else:
+      return None
+  
+  def placeInitialArmies(self, numberOfArmies:int):
+    '''! Pick at random one of the empty countries
+    '''  
+    
+    countries = self.board.getCountriesPlayer(self.code)
+    c = countries[0]
+    self.board.placeArmies(numberOfArmies, c)
+  
+  def cardPhase(self, cards):
+    '''! Only cash when forced, then cash best possible set
+    '''
+    if len(cards)<5 or not pyRisk.Deck.containsSet(cards): 
+      return None
+    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, self.board.world.countries)
+    if not c is None:      
+      return c
+  
+  def placeArmies(self, numberOfArmies:int):
+    '''! Place armies at random one by one, but on the countries with enemy borders
+    '''
+    countries = self.board.getCountriesPlayer(self.code)
+    c = countries[0]
+    self.board.placeArmies(numberOfArmies, c)
+  
+  def attackPhase(self):
+    '''! Always peace, never war
+    '''  
+
+    return 
+  
+  def fortifyPhase(self):
+    '''! No fortification needed in the path of peace
+    '''
+    if self.console_debug: print(f"{self.name()}: Fortify: Nothing")
+    return 
 
 
 class Move(object):
@@ -331,6 +391,7 @@ class Move(object):
       board.fortifyArmies(move.details, move.source.code, move.target.code)
     
                      
+#%% Tree search methods
 
 class TreeSearch(Agent):
   '''! Contains methods to generalize the game and be able to perform tree search.
@@ -359,17 +420,16 @@ class TreeSearch(Agent):
     # Very simple win/lose reward, but giving some reward if at least player was still alive
     if sim_board.players[self.code].is_alive:
       if sim_board.getNumberOfPlayersLeft()==1:
-        return 100000
+        return 100000000
       else:
         s = len(sim_board.getCountriesPlayer(self.code))
         income = sim_board.getPlayerIncome(self.code)
         max_income = 0
         for i, p in sim_board.players.items():
           inc = sim_board.getPlayerIncome(i)
-          if inc > max_income and i != self.code:
+          if inc > max_income and p.code != self.code:
             max_income = inc
-        s += max(income - max_income, 0)
-        s += income
+        s += max(income - max_income, 0)        
         return s 
     else:
       return 0
@@ -533,6 +593,8 @@ class FlatMC(TreeSearch):
   def name(self):    
     return self.name_string
   
+
   
-all_agents = {'random': RandomAgent, 'human': Human, 'flatMC':FlatMC}
+all_agents = {'random': RandomAgent, 'human': Human,
+              'flatMC':FlatMC, 'peace':PeacefulAgent}
     
