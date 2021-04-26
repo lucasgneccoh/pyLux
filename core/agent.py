@@ -150,7 +150,84 @@ class Agent(object):
 
 
 #%% Basic methods and baselines
+
 class RandomAgent(Agent):
+
+  def __init__(self, name='random', aggressiveness = 0.1, max_attacks = 10):
+    '''! Constructor of random agent.
+    
+    :param name: Name of the agent.
+    :type name: str
+    :param aggressiveness: Level of aggressiveness. Determines the probability of attacking until dead. 1 means always attacking until dead when attacking.
+    :type aggressiveness: float
+    '''
+    super().__init__(name)
+    self.aggressiveness = aggressiveness
+    self.max_attacks = max_attacks
+    
+  
+  def pickCountry(self):
+    '''! Pick at random one of the empty countries
+    '''    
+    options = self.board.countriesLeft()
+    if options:
+      return np.random.choice(options)
+    else:
+      return None
+  
+  def placeInitialArmies(self, numberOfArmies:int):
+    '''! Pick at random one of the empty countries
+    '''  
+    
+    countries = self.board.getCountriesPlayer(self.code)
+    for _ in range(numberOfArmies):
+      c = np.random.choice(countries)      
+      self.board.placeArmies(1, c)
+  
+  def cardPhase(self, cards):
+    '''! Only cash when forced, then cash best possible set
+    '''
+    if len(cards)<5 or not pyRisk.Deck.containsSet(cards): 
+      return None
+    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, self.board.world.countries)
+    if not c is None:      
+      return c
+  
+  def placeArmies(self, numberOfArmies:int):
+    '''! Place armies at random one by one, but on the countries with enemy borders
+    '''
+    
+    countries = self.board.getCountriesPlayer(self.code)
+    for _ in range(numberOfArmies):
+      c = np.random.choice(countries)
+      self.board.placeArmies(1, c)
+  
+  def attackPhase(self):
+    '''! Attack a random number of times, from random countries, to random targets.
+    The till_dead parameter is also set at random using an aggressiveness parameter
+    '''  
+    
+    nbAttacks = np.random.randint(self.max_attacks)
+    for _ in range(nbAttacks):
+      canAttack = self.board.getCountriesPlayerThatCanAttack(self.code)
+      if len(canAttack)==0: return
+      source = np.random.choice(canAttack)
+      options = self.board.world.getCountriesToAttack(source.code)
+      if not options or source.armies <= 1: continue      
+      target = np.random.choice(options)      
+      tillDead = True if np.random.uniform()<self.aggressiveness else False
+      _ = self.board.attack(source.code, target.code, tillDead)
+      # if self.console_debug: print(f"{self.name()}: Attacking {source.id} -> {target_c.id}: tillDead {tillDead}: Result {res}")
+    
+    return 
+  
+  def fortifyPhase(self):
+    '''! For now, no fortification is made
+    '''
+    if self.console_debug: print(f"{self.name()}: Fortify: Nothing")
+    return 
+
+class RandomAgressiveAgent(Agent):
 
   def __init__(self, name='random', aggressiveness = 0.5):
     '''! Constructor of random agent.
@@ -349,27 +426,27 @@ class Move(object):
       return [Move(c,c,a, board.gamePhase) for c,a in itertools.product(board.getCountriesPlayer(p.code), range(armies,armies-1,-1))]
     elif board.gamePhase == 'attack':
       moves = []
-      moves.append(Move(None, None, None, 'attack'))
       for source in board.getCountriesPlayerThatCanAttack(p.code):
         for target in board.world.getCountriesToAttack(source.code):
           # Attack once
           moves.append(Move(source, target, 0, 'attack'))
           # Attack till dead
           moves.append(Move(source, target, 1, 'attack'))
+      moves.append(Move(None, None, None, 'attack'))
       return moves
     elif board.gamePhase == 'fortify':    
       # For the moment, only considering to fortify 5 or all
       moves = []
-      moves.append(Move(None, None, None, 'fortify'))
       for source in board.getCountriesPlayer(p.code):
         for target in board.world.getCountriesToFortify(source.code):          
           if source.movable_armies > 0:
             # Fortify all or 1
             moves.append(Move(source, target, 0,'fortify'))            
-            moves.append(Move(source, target, 1,'fortify'))
+            # moves.append(Move(source, target, 1,'fortify'))
           
           if source.movable_armies > 5:
             moves.append(Move(source, target, 5,'fortify'))
+      moves.append(Move(None, None, None, 'fortify'))
       return moves
       
   @staticmethod
@@ -384,7 +461,10 @@ class Move(object):
     
     elif board.gamePhase == 'attack':
       if move.source is None: return
-      board.attack(move.source.code, move.target.code, bool(move.details))
+      try:
+        board.attack(move.source.code, move.target.code, bool(move.details))
+      except Exception as e:
+        raise e
     
     elif board.gamePhase == 'fortify':   
       if move.source is None: return
@@ -406,7 +486,7 @@ class TreeSearch(Agent):
   def playout(self, sim_board):
     '''! Simulates a complete game using a policy
     '''    
-    sim_board.simulate(self.code, self.playout_policy(), maxRounds=40)
+    sim_board.simulate(self.playout_policy())
     return sim_board
     
   def score(self, sim_board):
@@ -419,25 +499,28 @@ class TreeSearch(Agent):
     
     # Very simple win/lose reward, but giving some reward if at least player was still alive
     if sim_board.players[self.code].is_alive:
-      if sim_board.getNumberOfPlayersLeft()==1:
-        return 100000000
-      else:
-        s = len(sim_board.getCountriesPlayer(self.code))
-        income = sim_board.getPlayerIncome(self.code)
-        max_income = 0
-        for i, p in sim_board.players.items():
-          inc = sim_board.getPlayerIncome(i)
-          if inc > max_income and p.code != self.code:
-            max_income = inc
-        s += max(income - max_income, 0)        
-        return s 
+      s = 0
+      countries = sim_board.getNumberOfCountriesPlayer(self.code)
+      income = sim_board.getPlayerIncome(self.code)
+      max_income, max_countries = 0, 0
+      for i, p in sim_board.players.items():
+        if p.code == self.code: continue
+        inc, con = sim_board.getPlayerIncome(i), sim_board.getNumberOfCountriesPlayer(i)
+        if inc > max_income: max_income = inc          
+        if con > max_countries: max_countries = con
+          
+      s += income - max_income
+      s += countries - max_countries
+      s += 50*(sim_board.getNumberOfPlayersLeft()==1) # Is the winner
+      return s/max(sim_board.roundCount,1)
+    
     else:
-      return 0
+      return -10e6
  
 
 class FlatMC(TreeSearch):
 
-  def __init__(self, name='flat_mc', playout_policy = RandomAgent, budget = 10):        
+  def __init__(self, name='flat_mc', playout_policy = RandomAgent, budget = 300):        
     super().__init__(name, playout_policy)
     self.budget = budget
     self.inner_placeArmies_budget = budget//3
@@ -452,22 +535,28 @@ class FlatMC(TreeSearch):
     for m in moves: 
       #print('Looking to pick...')
       #print(m.source.id)
-      for i in range(max(budget//len(moves), 1)):  
+      total_reward = 0
+      N = max(budget//len(moves), 1)
+      for i in range(N):  
         #print(i,'... ')
         sim_board = copy.deepcopy(board)
+        sim_board.replacePlayer(self.code, self.playout_policy())
+        
+        sim_board.console_debug = False
         #print('agent:FlatMC: armies before Move.play', sim_board.world.countries[m.source.code].armies)
         # board.report()
         Move.play(sim_board, m)
         #print('agent:FlatMC: armies after Move.play', sim_board.world.countries[m.source.code].armies)        
         # print("Simulation")
         self.playout(sim_board)  
-        score = self.score(sim_board)
+        total_reward += self.score(sim_board)
         # print(f"done: {score}")
-        if score > bestScore:
-          if self.console_debug: 
-            print(f"------ Found best move:\n\t\tscore: {score}\n\t\tmove {m}")
-          bestMove = m
-          bestScore = score      
+      score = total_reward/N
+      if score > bestScore:
+        if self.console_debug: 
+          print(f"------ Found best move:\n\t\tscore: {score}\n\t\tmove {m}")
+        bestMove = m
+        bestScore = score      
       # print(bestScore)
     return bestMove
       
@@ -544,10 +633,23 @@ class FlatMC(TreeSearch):
     :type numberOfArmies: int
     '''
     armies_put = 0
-    while armies_put < numberOfArmies:
+    changed_phase, orig_phase = False, self.board.gamePhase
+    if self.board.gamePhase == 'attack':      
+      # A card cash occured. Can place the armies at any territory
+      # To call run_flat_mc, we need to change the gamePhase
+      self.board.gamePhase = 'startTurn'
+      changed_phase = True
+      
+    while armies_put < numberOfArmies:      
       bestMove = self.run_flat_mc(budget = self.inner_placeArmies_budget, armies=numberOfArmies-armies_put)
+      if bestMove is None or bestMove.source is None:
+        raise Exception("FlatMC: Nowhere to place armies?. Possibly a call to placeArmies outside of the startTurn phase")        
       self.board.placeArmies(int(bestMove.details), bestMove.source)
       armies_put += int(bestMove.details)
+  
+    if changed_phase:
+      self.board.gamePhase = orig_phase
+      
     return 
   
   
@@ -583,8 +685,8 @@ class FlatMC(TreeSearch):
     return self.board.world.countries[countryCodeAttacker].armies-1
 
   def fortifyPhase(self):
-    # For now, fortify at most 2 times
-    for i in range(2):
+    # For now, fortify at most 1 time
+    for i in range(1):
       bestMove = self.run_flat_mc()
       if bestMove is None or bestMove.source is None: return 
       self.board.fortifyArmies(int(bestMove.details), bestMove.source.code, bestMove.target.code)
@@ -595,6 +697,7 @@ class FlatMC(TreeSearch):
   
 
   
-all_agents = {'random': RandomAgent, 'human': Human,
+all_agents = {'random': RandomAgent, 'random_agressive':RandomAgressiveAgent,
+              'human': Human,
               'flatMC':FlatMC, 'peace':PeacefulAgent}
     

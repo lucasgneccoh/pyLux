@@ -119,7 +119,10 @@ def show_some_message(message_box, board, color_text, color_background, msgs):
     message_box.blit(label, (pos_x, pos_y))
 
 def draw_lines(coords, board):
-  ala, kam = board.getCountryById('ALA').code, board.getCountryById('KAM').code
+  try:
+    ala, kam = board.getCountryById('ALA').code, board.getCountryById('KAM').code
+  except AttributeError:
+    ala, kam = -99, -99
   for e in board.world.map_graph.edges():
     # For now the Alaska-Kamchatka line is monkey patched.
     # Must fix that, insert it in the map definition
@@ -134,9 +137,12 @@ def draw_lines(coords, board):
       pygame.draw.line(screen, pygame.Color('black'), [x+SQ_RADIUS for x in coords[e[0]]], [x+SQ_RADIUS for x in coords[e[1]]], 6)
         
 def draw_lines_attack(coords, board, country):
-  ala, kam = board.getCountryById('ALA').code, board.getCountryById('KAM').code
+  try:
+    ala, kam = board.getCountryById('ALA').code, board.getCountryById('KAM').code
+  except AttributeError:
+    ala, kam = -99, -99
   x, y = coords[country.code]
-  for c in country.successors():
+  for c in board.world.successors(country.code):
     if country.owner == c.owner:
       continue
     ex, ey = coords[c.code]
@@ -157,9 +163,12 @@ def draw_lines_attack(coords, board, country):
       [x+SQ_RADIUS, y+SQ_RADIUS], [ex+SQ_RADIUS, ey+SQ_RADIUS], 6)
     
 def draw_lines_fortify(coords, board, country):
-  ala, kam = board.getCountryById('ALA').code, board.getCountryById('KAM').code
+  try:
+    ala, kam = board.getCountryById('ALA').code, board.getCountryById('KAM').code
+  except AttributeError:
+    ala, kam = -99, -99
   x, y = coords[country.code]
-  for c in country.successors():
+  for c in board.world.successors(country.code):
     if country.owner != c.owner:
       continue
     ex, ey = coords[c.code]
@@ -204,14 +213,14 @@ def print_players(board):
   print('------ PLAYERS ----------')
   armies = {i: 0 for i in board.players}
   armies[-1] = 0
-  for c in board.countries:
+  for c in board.countries():
     armies[c.owner] += c.armies
   for i, pla in board.players.items():
     print(f'Player: {pla.name_string}, inc {pla.income}, initialArmies {pla.initialArmies}, total: {armies[pla.code]}')
     
 def print_countries(board):
   print('------ COUNTRIES ----------')
-  for c in board.countries:
+  for c in board.countries():
     print(f'{c.id}\t{c.armies}')
   
 def shown_big_message(msgs, screen, color_text, color_text_back, WIDTH, HEIGHT):
@@ -247,7 +256,8 @@ def fill_and_label(button, color, text, color_text):
   label = myfont.render(text, 1, color_text)
   button.fill(color)
   button.blit(label, (0,0))
-  
+ 
+#%% start
 if __name__ == "__main__":
 
   args = parseInputs()
@@ -267,7 +277,7 @@ if __name__ == "__main__":
   available_players = agent.all_agents
   for p, n in zip(prefs['players'], prefs['players_names']):
     ag = available_players[p](n)
-    ag.console_debug = console_debug
+    ag.console_debug = console_debug and False
     players.append(ag)
   
   # Set board
@@ -422,7 +432,8 @@ if __name__ == "__main__":
     fill_and_label(b, color_msgbox, n, color_text)
   color_all(wildcard_containers, color_background)
   
-  board.play()
+  # board.play()
+  
   color_continents(boxes_back, board)
   color_countries(boxes, board, player_colors)
   show_text(boxes, board, player_colors, 2*SQ_RADIUS, 2*SQ_RADIUS)
@@ -452,7 +463,6 @@ if __name__ == "__main__":
   final_message = []
   winner = None
   
-  print("CONSOLE_DEBUG:", board.console_debug)
   
 #%% Main loop
   while running:
@@ -474,7 +484,7 @@ if __name__ == "__main__":
           
         # Check if more than 5 cards at the start of the turn
         if board.gamePhase == 'startTurn' and len(board.activePlayer.cards)>=5:
-          card_set = pyRisk.Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries)
+          card_set = pyRisk.Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
           if not card_set is None:
             armies = board.cashCards(*card_set)
             if console_debug: print(f"GUI:Force cashed {armies} armies")
@@ -637,7 +647,7 @@ if __name__ == "__main__":
                   action_msg = 'No cash after turn start phase!'
                   continue
                 showing_cards = False
-                card_set = pyRisk.Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries)
+                card_set = pyRisk.Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
                 if not card_set is None:
                   armies = board.cashCards(*card_set)
                   if console_debug: print(f"GUI:Cashed {armies} armies")
@@ -851,4 +861,7 @@ if __name__ == "__main__":
         time.sleep(TIME_SLEEP_AI)
         action_msg = None
         AI_played = False
+        board.report()
+        
+      
   

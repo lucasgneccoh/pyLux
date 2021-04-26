@@ -306,6 +306,7 @@ class Country(Attr_dict):
     self.armies = self.armies + armies
     
 #%% Card sequence
+
 class AbstractCardSequence(object):
   '''! Represents a sequence of numbers corresponding to the armies cashed in the game
   '''
@@ -446,6 +447,12 @@ class Deck(object):
       self.shuffle()
     return card
   
+  def __deepcopy__(self, memo):
+    new_Deck = Deck()
+    new_Deck.deck = copy.deepcopy(self.deck)
+    new_Deck.orig_deck =  copy.deepcopy(self.orig_deck)
+    return new_Deck
+  
   @staticmethod
   def isSet(c1,c2,c3):
     '''! Tells if the three cards are all the same or all different. This includes the case where there is one wildcard
@@ -498,7 +505,6 @@ class Board(object):
   '''
   board_count = 0
   
-
   def __init__(self, world, players):
     '''! Setup the board with the given world representing the map, and the list of players. We take different game settings either from the world or from a dictionary of preferences to allow players to easily customize their games
     '''
@@ -553,10 +559,11 @@ class Board(object):
     self.armiesPerTurnInitial = 4
     self.console_debug = False
     
-    # Fixed for the moment
+    # Fixed for the moment (must be copied manually)
     self.cardSequence = ListThenArithmeticCardSequence(sequence=[4,6,8,10,12,15], incr=5)
     self.deck = Deck()
-    self.deck.create_deck(self.countries(), num_wildcards=2)
+    num_wildcards = len(self.world.countries)//20
+    self.deck.create_deck(self.countries(), num_wildcards=num_wildcards)
     self.nextCashArmies = self.cardSequence.nextCashArmies()
     self.aux_cont = 0
     
@@ -982,16 +989,19 @@ class Board(object):
       res = self.nextCashArmies
       self.nextCashArmies = self.cardSequence.nextCashArmies()
       if self.console_debug:
-        print(f'cashCards:Obtained {res} armies')
+        print(f'Board:cashCards:Obtained {res} armies')
       for c in [card, card2, card3]:
         if c.code < 0: continue
         country = self.world.countries[c.code]
         if country.owner == self.activePlayer.code:
           country.addArmies(2)
           if self.console_debug:
-            print(f'cashCards:Bonus cards in {country.id}')
-        self.activePlayer.cards.remove(c)
-      self.activePlayer.income += res
+            print(f'Board:cashCards:Bonus cards in {country.id}')
+        try:
+          self.activePlayer.cards.remove(c)
+        except Exception as e:
+          print(f'Board:cashCards: Card {c} does not belong to activePlayer {self.activePlayer.code}, {self.activePlayer.name()}: {self.activePlayer.cards}')
+          raise e      
       return res
     else:
       return 0
@@ -1076,13 +1086,23 @@ class Board(object):
           if self.useCards:
             if self.transferCards:
               attacker.cards.extend(defender.cards)
-              if len(attacker.cards)>=5 or self.immediateCash:
-                # Bot players - Run cardPhase
-                armies = 0
+              armies = 0
+              while len(attacker.cards)>=5 and self.immediateCash:
+                # Bot players - Run cardPhase                
                 if not attacker.human:
                   card_set = attacker.cardPhase(attacker.cards)
                   if not card_set is None:
-                    armies = self.cashCards(*card_set)
+                    if self.console_debug:
+                      print("****************************")
+                      print("card set", card_set)
+                      print(f"Trading cards for {self.activePlayer.code}, {self.activePlayer.name()}")
+                      print(f"ActivePlayer: {self.activePlayer}")
+                      print(f"ActivePlayer cards: {self.activePlayer.cards}")
+                      print(f"Attacker: {attacker.code}, {attacker.name()}")
+                      print(f"Attacker: {attacker}")
+                      print(f"Attacker cards: {attacker.cards}")
+                      print("****************************")
+                    armies += self.cashCards(*card_set)
                   else:
                     if len(attacker.cards)>=5:
                       # Must force the cash
@@ -1090,15 +1110,15 @@ class Board(object):
                       if card_set is None:
                         # This should not arrive
                         if self.console_debug:
-                          print('attack:Error on forced cash')
+                          print('Board:attack: Error on forced cash')
                         pass
                       else:
-                        armies = self.cashCards(*card_set)
-                  if armies > 0:
-                    attacker.placeArmies(armies)            
+                        armies += self.cashCards(*card_set)                  
                 else: # Human player
                   # leave them to be properly cashed at startTurn
-                  pass
+                  break
+              if armies > 0:
+                attacker.placeArmies(armies)
                  
         self.tookOverCountry = True    
         if self.console_debug:
@@ -1131,7 +1151,7 @@ class Board(object):
     aux = numberOfArmies-1 if numberOfArmies == cO.armies else numberOfArmies
     
     if self.console_debug:
-      print(f'Fortify: From {cO.id} to {cD.id}, armies = {aux}')
+      print(f'Board:Fortify: From {cO.id} to {cD.id}, armies = {aux}')
     cO.armies -= aux
     cO.movable_armies -= aux
     cD.armies += aux
@@ -1224,7 +1244,8 @@ class Board(object):
     if not p is None:
       s = 0
       for i, c in self.world.continents.items():
-        if c.owner == p.code:
+        self.updateContinentOwner(i)
+        if self.world.continents[i].owner == p.code:
           s += int(c.bonus)    
       base = self.getNumberOfCountriesPlayer(p.code)
       s += max(int(base/3),3)
@@ -1524,39 +1545,43 @@ class Board(object):
   def __deepcopy__(self, memo):
     act_code = self.activePlayer.code
     new_world = copy.deepcopy(self.world, memo)
-    new_players = [p.__class__() for i, p in self.players.items()]
-    new_prefs = copy.deepcopy(self.prefs, memo)
+    new_players = [p.__class__() for i, p in self.players.items()]   
     new_board = Board(new_world, new_players)
+    
+    # Copy everything for the players
     for i, p in new_board.players.items():
       for n in self.players[i].__dict__:
         if n != 'board':
-          setattr(p, n, getattr(self.players[i], n))
-    new_board.setPreferences(new_prefs)
+          setattr(p, n, copy.deepcopy(getattr(self.players[i], n), memo))
+    
+    new_board.setPreferences(self.prefs)
+    # Extra copying
+    other_attrs = ['deck', 'cardSequence', 'nextCashArmies']
+    for a in other_attrs:
+      setattr(new_board, a, copy.deepcopy(getattr(self, a)))
+  
+    
+    # Active player must be the same, and playerCycle at the same player
     while new_board.activePlayer.code != act_code:
       new_board.activePlayer = next(new_board.playerCycle)   
     new_board.gamePhase = self.gamePhase
     return new_board
     
     
-  def simulate(self, playerToChange:int, newAgent, maxRounds = 40,
+  def simulate(self, newAgent, maxRounds = 60,
                safety=10e5, sim_console_debug = False):
     '''! Use to facilitate the playouts for search algorithms. Should be called from a copy of the actual board, because it would change the game.
     The player that called the simulation should give a new agent representing a policy it would follow, so that in the new copy the player will be changed with this new agent, and the game will be played until the end or for a maximum number of rounds.
     '''
     oldActivePlayerCode = self.activePlayer.code
     
-    # Copy all the attributes of the player  
-    newPlayer = self.copyPlayer(playerToChange, newAgent)    
-    newPlayer.setPrefs(playerToChange, self)
-    self.players[playerToChange] = newPlayer
     
-    # Also change every human player
+    # Also change every player
     for i, p in self.players.items():
       p.console_debug = sim_console_debug
-      if p.human:        
-        newPlayer = self.copyPlayer(i, newAgent) 
-        self.players[i] = newPlayer
-        
+      newPlayer = self.copyPlayer(i, newAgent) 
+      self.players[i] = newPlayer
+      
       self.players[i].setPrefs(i, self)
       self.players[i].human = False
     
@@ -1621,7 +1646,21 @@ class Board(object):
         res.append(c)
     return res
   
-  
+  def replacePlayer(self, player:int, newAgent):
+    oldActivePlayerCode = self.activePlayer.code
+    # Also change every player
+
+    newPlayer = self.copyPlayer(player, newAgent) 
+    self.players[player] = newPlayer      
+    self.players[player].setPrefs(player, self)
+        
+    self.playerCycle = itertools.cycle(list(self.players.values()))
+    self.activePlayer = next(self.playerCycle)
+    while self.activePlayer.code != oldActivePlayerCode:
+      self.activePlayer = next(self.playerCycle)
+    self.prepareStart()
+    
+    
   def copyPlayer(self, player:int, newAgent=None):
     oldPlayer = self.players[player]
     if newAgent is None or newAgent.human:
@@ -1650,6 +1689,7 @@ if __name__ == '__main__':
   
   # Load map
   path = '../support/maps/classic_world_map.json'
+  path = '../support/maps/test_map.json'
     
   world = World(path)
   
@@ -1659,8 +1699,8 @@ if __name__ == '__main__':
   pH, pR1, pR2 = agent.Human('PocketNavy'), agent.RandomAgent('Red',aggressiveness), agent.RandomAgent('Green',aggressiveness)
   pMC = agent.FlatMC('MC', agent.RandomAgent, budget=40)
   pP = agent.PeacefulAgent()
-  #p1.console_debug = console_debug  
-  players = [pMC, pP]
+ 
+  players = [pR2, pMC]
   # Set board
   prefs = {'initialPhase': False, 'useCards':True,
            'transferCards':True, 'immediateCash': True,
@@ -1673,17 +1713,46 @@ if __name__ == '__main__':
   #%% Test deepcopy 
   if False:
     board_copy = copy.deepcopy(board)
-    for i in range(100):
+    for i in range(10):
       board.play()
       board_copy.play()
     board.report()
     board_copy.report()
-    for i in range(100):
+    for i in range(5):
       board_copy.play()
-    print("See one country")
+    print("\n\nSee one country")
     print(board.getCountryById('BRA'))
     print(board_copy.getCountryById('BRA'))
     
+    print("\n\nWorld reference")
+    print(board.world)
+    print(board_copy.world)
+    
+    print("\n\nPlayers")
+    for i, p in board.players.items():
+      print(i, p)
+      print('Cards:', p.cards)
+    for i, p in board_copy.players.items():
+      print(i, p)
+      print('Cards:', p.cards)
+      
+      
+    print("\n\nDecks")
+    print("\nboard")
+    for c in board.deck.deck:
+      print(c)
+    print("\nboard_copy")
+    for c in board_copy.deck.deck:
+      print(c)
+      
+    print("Draw one card", board.deck.draw())
+    print("\n\nDecks")
+    print("\nboard")
+    for c in board.deck.deck:
+      print(c)
+    print("\nboard_copy")
+    for c in board_copy.deck.deck:
+      print(c)
   
   #%% Test simulate
   if False:
@@ -1693,7 +1762,7 @@ if __name__ == '__main__':
     board.report()
     sim_board = copy.deepcopy(board)
     sim_board.report()
-    sim_board.simulate(pMC.code, agent.RandomAgent(), 20, safety = 10e5)
+    sim_board.simulate(agent.RandomAgent(), 20, safety = 10e5)
     sim_board.report()
     
     
@@ -1707,9 +1776,10 @@ if __name__ == '__main__':
     countries = []
     board.console_debug = False
     
-    pMC.budget = 50
-    pMC.inner_placeArmies_budget = 30
-
+    pMC.budget = 500
+    pMC.inner_placeArmies_budget = 100
+    pMC.console_debug = True
+    
     for i in tqdm.tqdm(range(N)):
       in_start = time.process_time()
       board.play()
