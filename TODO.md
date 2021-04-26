@@ -31,3 +31,19 @@ Next step:
 GUI is ready and most of the game logic is done. Now I have to finish the GUI (add a parser for arguments, etc) and then start coding the fast mode to leave algorithms play. I also have to generalize a bit the different phases and the concept of "move" to first test the search methods. The Board class in Lux has a lot of methods, but they are very game dependent. I need some more general ones.
 Almost finished. Now everything needs to be documented. Agents is already done, now pyRisk is missing.
 Next step is to generalize and try first search algorithms.
+
+
+# First MC method (26-04-2021)
+Yesterday I restructured a bit the class organization for the project to make board copying and simulations simpler. The flat MC agent is working, but it is not quite good. At least he is now winning against the peaceful agent. It is very sensitive to some things
+  - The scoring function for the resulting boards after simulation: What has worked the best are "continuous" scores. I tried simple 1/0 scores, but in the end it was acting somehow random and dumb
+  - The order in which the moves are visited
+  
+# Java and Python (26-04-2021)
+Now that the first MC was more tested, I will focus on using the Java AIs on Python or viceversa. The main idea I have right now is to comunicate the board in some way.
+
+In Python, my board has a World with the map, countries, continents, etc.
+In Java, a World object is also behind, but I have not access to it. I can not see the source code
+
+Using Python inside Java
+In python I can use everything as long as I am able to build the whole board from a board in Java.
+I could run the game in Java, send an initial board to build the world and set all the players to random or dummy, and update the board everytime the player has to play just to get an answer to every call
