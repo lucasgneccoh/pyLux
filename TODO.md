@@ -47,3 +47,22 @@ In Java, a World object is also behind, but I have not access to it. I can not s
 Using Python inside Java
 In python I can use everything as long as I am able to build the whole board from a board in Java.
 I could run the game in Java, send an initial board to build the world and set all the players to random or dummy, and update the board everytime the player has to play just to get an answer to every call
+
+# Making the connection (28-04-2021)
+I am using conda as my Python distribution, so to be able to run python from cmd I need
+  - `conda init -all` to be able to use all the shells properly
+  - `conda activate [env]` before using the shell to tun python. If not, importing numpy will not work for example
+To do this from Java using ProcessBuilder, the best way is to create a bat file. I guess for Linux it would be the same thing with a bash file, but for linux I guess there will be no need for conda
+The idea is that the responsability for the execution of python code is tranfered to the user, who has to adapt the bat/bash file. This file will then run the python script.
+
+There are some thing to keep in mind. If the communication is made using files, then each turn will take a lot more time. This is not so bad if we just want to test the PythonPlayer once or twice, but training a model is not a good idea. To do so, I would have to look at other options that make data sharing much faster.
+
+I will now define the file format to transfer information. This file format will have to be common on both Python and Java side.
+The idea is that the python player will just be an intermediate step, getting information from the board, passing it to Python, then receiving the action and doing it on the Java board side. It will take time, but it should work
+
+# Making the connection II (29-04-2021)
+It works. I am able to play Lux using a Java player that gets all his moves from running a python script an getting back the output.
+For now, I create a file to communicate the state of the game. I plan to test using the args as a command line instruction to see if it is faster.
+
+Next step is to formalize both classes (Java and Python) and then modify my PyRisk to be the most compatible possible.
+
