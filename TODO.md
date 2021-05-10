@@ -66,3 +66,11 @@ For now, I create a file to communicate the state of the game. I plan to test us
 
 Next step is to formalize both classes (Java and Python) and then modify my PyRisk to be the most compatible possible.
 
+# Making the connection III (04-05-2021)
+I have formalized the connection. There is a "general" Jave class and Python counterpart to use.
+
+Now the biggest design work to do is to make PyLux more compatible with the representation of the board used in the commuunication.
+As I can not pass the java Board itself, I pass to python the information about the board in some encoding I defined. I pass the continents, tue countries, the players, etc. I would like to make PyLux compatible with this representation of the GameState so that the Python players in Java are just normal PyLux players wraped with the communication class.
+
+
+

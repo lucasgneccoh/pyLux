@@ -15,7 +15,8 @@ class Agent(object):
   All players should extend from this class
   '''  
   def __init__(self, name='agent'):
-    '''! Constructor. By default sets the *console_debug* and *human* attributes to **False**
+    '''! Constructor. By default sets the *console_debug* and *human* 
+    attributes to **False**
     
     :param name: The name of the agent
     :type name: str
@@ -36,7 +37,7 @@ class Agent(object):
     self.board = board
     
   
-  def pickCountry(self):
+  def pickCountry(self) -> int:
     '''! Choose an empty country at the beginning of the game
     '''
     pass
@@ -695,6 +696,21 @@ class FlatMC(TreeSearch):
   def name(self):    
     return self.name_string
   
+
+'''
+For the python player in Java, the representation of the board is much more basic.
+Instead of having the pyRisk board with the world object and all its methods, 
+the board that comes from Java is represented using:
+  - List of countries with code, name, owner, continent, armies, moveableArmies
+  - List of continents with code, name, bonus
+  - List of incoming edges for each node.
+  - List of players with player code, name, income, number of cards
+  
+  use Board.fromDicts and Board.toDicts to handle such a representation
+'''
+
+
+
 
   
 all_agents = {'random': RandomAgent, 'random_agressive':RandomAgressiveAgent,

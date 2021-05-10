@@ -87,6 +87,7 @@ class World(object):
   '''
   def __init__(self, path, load = True):
     '''!
+    
     Parameters
     -----------------
     mapLoader: MapLoader
@@ -96,6 +97,30 @@ class World(object):
     if load:
       self.load_from_json()
       
+  @staticmethod
+  def fromDicts(continents:dict, countries:dict, inLinks:dict):    
+    world = World(path = None, load = False)
+    # Graph
+    graph = nx.DiGraph()
+    graph.add_nodes_from([i for i in countries])
+    for k, v in inLinks.items():
+      graph.add_edges_from([(x,k) for x in v])
+    world.map_graph = graph
+    # Continents
+    world.continents = {k: Continent(**c.__dict__) for k, c in continents.items()}
+    # Countries
+    world.countries = {k: Country(**c.__dict__) for k, c in countries.items()}
+    return world
+    
+  def toDicts(self):
+    countries = {k: v for k, v in self.countries.items()}
+    continents = {k: v for k, v in self.continents.items()}
+    inLinks = {n:self.predecessors(n) for n in self.countries}
+    return continents, countries, inLinks
+    
+    
+    
+    
   def load_from_json(self):
     '''!
     Read the JSON file and define the map_graph, countries and continents attributes
@@ -257,10 +282,13 @@ class Attr_dict(dict):
 
 class Continent(Attr_dict):
   '''! Represents a continent
+    Must have at least the following fields
+      - code
+      - bonus
   '''
   def __init__(self, **kwargs):    
     super().__init__(**kwargs)
-    self.owner = -1
+    if not hasattr(self, 'owner'): self.owner = -1
   
   def __repr__(self):
     return f'{self.name}. bonus = {self.bonus}, owner = {self.owner}'
@@ -279,13 +307,18 @@ class Country(Attr_dict):
   The country-code is a unique number used to identify countries.
   The array returned by the Board.getCountries() will always be ordered \
   by country-code.
+    Must have at least the following fields
+      - code
+      - name
+      - continent
   '''
   def __init__(self, **kwargs):    
     super().__init__(**kwargs)
-    self.armies = 0
-    self.movable_armies = 0
-    self.owner = -1
-    self.continent = -1
+    
+    if not hasattr(self, 'armies'): self.armies = 0
+    if not hasattr(self, 'moveable_armies'): self.moveable_armies = 0
+    if not hasattr(self, 'owner'): self.owner = -1
+    if not hasattr(self, 'continent'): self.continent = -1
     
   def __hash__(self):
     '''! Countries will be completely caracterized by their code
@@ -501,12 +534,17 @@ class Deck(object):
 
 #%% Board
 class Board(object):
-  '''! Class containing all the information about the world and about the players. It is used to play the actual game, and contains the game logic and flow.
+  '''! Class containing all the information about the world and about the 
+  players. It is used to play the actual game, and contains the game logic 
+  and flow.
   '''
   board_count = 0
   
   def __init__(self, world, players):
-    '''! Setup the board with the given world representing the map, and the list of players. We take different game settings either from the world or from a dictionary of preferences to allow players to easily customize their games
+    '''! Setup the board with the given world representing the map, 
+    and the list of players. We take different game settings either from 
+    the world or from a dictionary of preferences to allow players to 
+    easily customize their games
     '''
     
     self.board_id = Board.board_count
@@ -519,7 +557,6 @@ class Board(object):
     # This should come from the MapLoader
     # Because it will change in each map
     armiesForPlayers = {2:45, 3: 35, 4: 30, 5: 25, 6:20}
-    #armiesForPlayers = {2:10, 3: 10, 4: 30, 5: 25, 6:20} # For testing
     if N > 6: 
       initialArmies = 20
     elif N < 2:
@@ -575,6 +612,53 @@ class Board(object):
       p.initialArmies = int(initialArmies)
       p.num_countries = 0
     
+  @staticmethod
+  def fromDicts(continents:dict, countries:dict, inLinks:dict,\
+                players:dict, misc:dict):
+    world = World.fromDicts(continents, countries, inLinks)
+    new_players = {}
+    for i, attrs in players.items():
+      # TODO: Maybe define a way to change this default agent
+      p = agent.RandomAgent(attrs['name'])
+      new_players[i] = p
+    board = Board(world, list(new_players.values()))
+    prefs = misc.get('prefs')
+    if not prefs is None:
+      board.setPreferences(prefs)
+      
+    # TODO: give players theirs cards (in number)
+    for i, attrs in players.items():
+      for n in range(int(attrs['cards'])):
+        new_players[i].cards.append(board.deck.draw())
+    board.gamePhase = misc['gamePhase']
+    while board.activePlayer.code != int(misc['activePlayer']):
+      board.activePlayer = next(board.playerCycle)
+    return board
+  
+  def toDicts(self):
+    ''' Used to transform the board into a simple representation like the one given by Java
+      when using a Python player in java.
+      The idea is that this representation can be the input of general players, and also
+      a more compact way of giving the board to a neural network
+      
+      Returns:
+        Dict of countries ('code', 'name', 'continent', 'owner', 'armies', 'moveableArmies')
+        Dict of continents ('code', 'name', 'bonus')
+        Dict with player information ('code', 'name', 'income', 'cards')
+        Dict with incoming links for each node
+        Dict with other information, such as the gamePhase, nextCashArmies, etc
+      
+    '''
+    
+    countries = {c['code']: c for c in self.countries()}
+    continents = {i: c for i,c in self.world.continents.items()}
+    players = {p.code:{'code':p.code, 'name':p.name(),
+                       'income': self.getPlayerIncome(p.code),
+                       'cards':len(p.cards)} for i, p in self.players.items()}
+    inLinks = {n.code: [c.code for c in self.world.predecessors(n.code)] for n in self.countries()}
+    misc = {'gamePhase': self.gamePhase, 'activePlayer':self.activePlayer.code}
+    return continents, countries, inLinks, players, misc
+    
   
   def setPreferences(self, prefs):
     self.prefs = prefs
@@ -587,7 +671,7 @@ class Board(object):
       else:
         setattr(self, a, r)
         
-#%% Play related functions
+#%% Board: Play related functions
   
   def randomInitialPick(self):
     '''! Picks countries at random for all the players until no empty country is left
@@ -803,11 +887,11 @@ class Board(object):
     self.prepareStart()
   
   
-  def updateMovable(self):
-    '''! Sets the movable armies of every country equal to the number of armies. Should be called after every "attack" phase and before "fortify" phase
+  def updatemoveable(self):
+    '''! Sets the moveable armies of every country equal to the number of armies. Should be called after every "attack" phase and before "fortify" phase
     '''
     for c in self.countries():
-      c.movable_armies = c.armies
+      c.moveable_armies = c.armies
 
   def updateContinentOwner(self, cont):
     '''! Looks over the member countries to see if the same player owns them all
@@ -968,7 +1052,7 @@ class Board(object):
     if self.gamePhase == 'fortify':
       if self.console_debug: print(f"Board:play: {self.gamePhase}")
       if not p.human:
-        self.updateMovable()
+        self.updatemoveable()
         p.fortifyPhase()
         self.gamePhase = 'end'
 
@@ -1145,15 +1229,15 @@ class Board(object):
     if cO.owner != self.activePlayer.code: return -1
     if cD.owner != self.activePlayer.code: return -1
     if not cD in self.world.getAdjoiningList(cO.code, kind=1): return -1
-    if cO.movable_armies < numberOfArmies: return -1
+    if cO.moveable_armies < numberOfArmies: return -1
  
-    # Even if movable_armies == armies, we have to always leave one army at least    
+    # Even if moveable_armies == armies, we have to always leave one army at least    
     aux = numberOfArmies-1 if numberOfArmies == cO.armies else numberOfArmies
     
     if self.console_debug:
       print(f'Board:Fortify: From {cO.id} to {cD.id}, armies = {aux}')
     cO.armies -= aux
-    cO.movable_armies -= aux
+    cO.moveable_armies -= aux
     cD.armies += aux
     return 1
     
@@ -1559,8 +1643,7 @@ class Board(object):
     other_attrs = ['deck', 'cardSequence', 'nextCashArmies']
     for a in other_attrs:
       setattr(new_board, a, copy.deepcopy(getattr(self, a)))
-  
-    
+      
     # Active player must be the same, and playerCycle at the same player
     while new_board.activePlayer.code != act_code:
       new_board.activePlayer = next(new_board.playerCycle)   
@@ -1575,8 +1658,7 @@ class Board(object):
     '''
     oldActivePlayerCode = self.activePlayer.code
     
-    
-    # Also change every player
+    # Change all players to newAgent to do the rollout
     for i, p in self.players.items():
       p.console_debug = sim_console_debug
       newPlayer = self.copyPlayer(i, newAgent) 
@@ -1585,17 +1667,15 @@ class Board(object):
       self.players[i].setPrefs(i, self)
       self.players[i].human = False
     
-    self.activePlayer = self.players[oldActivePlayerCode]  
+      
     self.playerCycle = itertools.cycle(list(self.players.values()))
+    self.activePlayer = next(self.playerCycle)
     while self.activePlayer.code != oldActivePlayerCode:
       self.activePlayer = next(self.playerCycle)
     self.prepareStart()
     
     # Simulate the game    
     initRounds = self.roundCount
-    if sum([p.human for i, p in self.players.items()]) >0:
-      print('Can not simulate, there are human players')
-      return
           
     cont = 0
     self.console_debug = sim_console_debug
@@ -1603,7 +1683,6 @@ class Board(object):
       self.play()
       cont += 1 # for safety      
       
-    # print(f'Board {self} ended, returning from Board.simulate')
 
   def __repr__(self):
     '''! Gives a String representation of the board. '''
@@ -1648,7 +1727,6 @@ class Board(object):
   
   def replacePlayer(self, player:int, newAgent):
     oldActivePlayerCode = self.activePlayer.code
-    # Also change every player
 
     newPlayer = self.copyPlayer(player, newAgent) 
     self.players[player] = newPlayer      
@@ -1700,7 +1778,7 @@ if __name__ == '__main__':
   pMC = agent.FlatMC('MC', agent.RandomAgent, budget=40)
   pP = agent.PeacefulAgent()
  
-  players = [pR2, pMC]
+  players = [pR2, pR1]
   # Set board
   prefs = {'initialPhase': False, 'useCards':True,
            'transferCards':True, 'immediateCash': True,
@@ -1709,6 +1787,47 @@ if __name__ == '__main__':
   board = Board(world, players)
   board.setPreferences(prefs)
   
+  #%% Test play
+  if False:
+    import tqdm
+    N = 60
+    start = time.process_time()
+    iter_times = []
+    armies = []
+    countries = []
+    board.console_debug = False
+    
+    pMC.budget = 500
+    pMC.inner_placeArmies_budget = 100
+    pMC.console_debug = True
+    
+    for i in tqdm.tqdm(range(N)):
+      in_start = time.process_time()
+      board.play()
+      iter_times.append(time.process_time()-in_start)
+      armies.append(board.getAllPlayersArmies())
+      countries.append(board.getAllPlayersNumCountries())
+      if board.gameOver: break
+    total = time.process_time()-start
+    
+    armies = np.array(armies)
+    countries = np.array(countries)
+    
+    print(f"Total time: {total} sec \t Avg time per play: {total/N}")
+    board.report()
+    
+    import matplotlib.pyplot as plt
+    for i, p in enumerate(players):
+      plt.plot(armies[:,i], label=p.name())
+    plt.legend()
+    plt.title("Armies")
+    plt.show()
+    
+    for i, p in enumerate(players):
+      plt.plot(countries[:,i], label=p.name())
+    plt.legend()
+    plt.title("Countries")
+    plt.show()
   
   #%% Test deepcopy 
   if False:
@@ -1766,46 +1885,21 @@ if __name__ == '__main__':
     sim_board.report()
     
     
-  #%% Test play
-  if True:
-    import tqdm
-    N = 60
-    start = time.process_time()
-    iter_times = []
-    armies = []
-    countries = []
-    board.console_debug = False
-    
-    pMC.budget = 500
-    pMC.inner_placeArmies_budget = 100
-    pMC.console_debug = True
-    
-    for i in tqdm.tqdm(range(N)):
-      in_start = time.process_time()
-      board.play()
-      iter_times.append(time.process_time()-in_start)
-      armies.append(board.getAllPlayersArmies())
-      countries.append(board.getAllPlayersNumCountries())
-      if board.gameOver: break
-    total = time.process_time()-start
-    
-    armies = np.array(armies)
-    countries = np.array(countries)
-    
-    print(f"Total time: {total} sec \t Avg time per play: {total/N}")
-    board.report()
-    
-    import matplotlib.pyplot as plt
-    for i, p in enumerate(players):
-      plt.plot(armies[:,i], label=p.name())
-    plt.legend()
-    plt.title("Armies")
-    plt.show()
-    
-    for i, p in enumerate(players):
-      plt.plot(countries[:,i], label=p.name())
-    plt.legend()
-    plt.title("Countries")
-    plt.show()
-    
   
+    
+  #%% Test fromDicts, toDicts
+  if True:
+    for _ in range(3):
+      board.play()
+    continents, countries, inLinks, players, misc = board.toDicts()
+    board_copy = Board.fromDicts(continents, countries, inLinks,\
+                                 players, misc)
+      
+    print(board.countries())
+    print(board_copy.countries())
+    print()
+    print(board.activePlayer.code)
+    print(board_copy.activePlayer.code)
+  
+    
+    
