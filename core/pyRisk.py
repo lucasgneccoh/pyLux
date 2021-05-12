@@ -11,6 +11,13 @@ import pandas as pd
 
 import agent
 
+from string import ascii_lowercase
+
+def iter_all_strings():
+    for size in itertools.count(1):
+        for s in itertools.product(ascii_lowercase, repeat=size):
+            yield "".join(s)
+
 #%% World, countries and continents
 class World(object):
   '''!Creates a graph representing the world. Nodes are countries.
@@ -316,7 +323,7 @@ class Country(Attr_dict):
     super().__init__(**kwargs)
     
     if not hasattr(self, 'armies'): self.armies = 0
-    if not hasattr(self, 'moveable_armies'): self.moveable_armies = 0
+    if not hasattr(self, 'moveableArmies'): self.moveableArmies = 0
     if not hasattr(self, 'owner'): self.owner = -1
     if not hasattr(self, 'continent'): self.continent = -1
     
@@ -333,7 +340,10 @@ class Country(Attr_dict):
   def __repr__(self) -> str:
     '''! Returns a String representation of the Country.  '''
     return f'{self.id} - {self.name}. owner = {self.owner}, armies = {self.armies}'
-    
+
+  def encode(self) -> str:
+    return f'{self.id}_{self.owner}_{self.armies}'
+  
   def addArmies(self, armies):
     '''! Adds armies to the army count of the the Country'''
     self.armies = self.armies + armies
@@ -538,7 +548,7 @@ class Board(object):
   players. It is used to play the actual game, and contains the game logic 
   and flow.
   '''
-  board_count = 0
+  board_codes = iter_all_strings()
   
   def __init__(self, world, players):
     '''! Setup the board with the given world representing the map, 
@@ -547,14 +557,13 @@ class Board(object):
     easily customize their games
     '''
     
-    self.board_id = Board.board_count
-    Board.board_count += 1
+    self.board_id = next(Board.board_codes)
   
     # Game setup
     self.world = world
     N = len(players)
     
-    # This should come from the MapLoader
+    # TODO: This should come from the MapLoader
     # Because it will change in each map
     armiesForPlayers = {2:45, 3: 35, 4: 30, 5: 25, 6:20}
     if N > 6: 
@@ -568,7 +577,7 @@ class Board(object):
     self.orig_players = copy.deepcopy(players)
     self.players = {i: p for i, p in enumerate(players)}
     for i, p in self.players.items():
-      p.setPrefs(i, self)
+      p.setPrefs(i)
       
     self.startingPlayers = N    
     self.nextCashArmies = 0 
@@ -611,6 +620,8 @@ class Board(object):
       p.income = 0
       p.initialArmies = int(initialArmies)
       p.num_countries = 0
+
+  
     
   @staticmethod
   def fromDicts(continents:dict, countries:dict, inLinks:dict,\
@@ -749,7 +760,7 @@ class Board(object):
     p = self.activePlayer
     if p.human: return # only made for AI that has  pickCountry method
     
-    country = p.pickCountry()
+    country = p.pickCountry(self)
     
     if not country is None and country.owner == -1:
       country.owner = p.code
@@ -790,7 +801,7 @@ class Board(object):
     
     p = self.activePlayer
     armies = p.income    
-    p.placeInitialArmies(armies)
+    p.placeInitialArmies(self, armies)
     p.income -= armies    
     self.endTurn()
     
@@ -847,22 +858,12 @@ class Board(object):
     for i, cont in self.world.continents.items():
       cont.bonus = cont.bonus*(1+self.continentIncrease)
     
-    # for i, p in self.players.items():
-    #   if p.num_countries==0:
-    #     p.is_alive = False
-    #   s = 0
-    #   for c in self.countries():
-    #     if c.owner == p.code: s+= 1
-    #   if s == 0:
-    #     p.is_alive = False
-    #     if p.num_countries > 0:
-    #       raise Exception(f"Something is wrong with the num_countries attribute. Player {p.code}, {p.name()} has num_countries={p.num_countries} but in reality has {s} countries")
-          
     s = 0
     for i, p in self.players.items():
       if p.is_alive: s += 1
     
     if s == 1: self.gameOver = True
+    if self.console_debug: print(f"Board:setupNewRound: Found {s} players alive. gameOver = {self.gameOver}")
     return
       
   def prepareStart(self):
@@ -891,7 +892,7 @@ class Board(object):
     '''! Sets the moveable armies of every country equal to the number of armies. Should be called after every "attack" phase and before "fortify" phase
     '''
     for c in self.countries():
-      c.moveable_armies = c.armies
+      c.moveableArmies = c.armies
 
   def updateContinentOwner(self, cont):
     '''! Looks over the member countries to see if the same player owns them all
@@ -924,146 +925,149 @@ class Board(object):
     
     p = self.activePlayer
     if self.console_debug: print(f"Board:play: Starting play for ({p.code}), {p.name()}")
+    
+    if not p.is_alive:
+      if self.console_debug: print("Board:play: Returning, player is not alive")
+      self.endTurn()
+
+    else:
+    
+      #if self.console_debug: print(f"Board {self.board_id}:play: ({p.code}) {p.name()}: {self.gamePhase}")
+      # Initial phase
+      if 'initial' in self.gamePhase:
+        if self.initialPhase:
+          # Initial Pick
+          if self.gamePhase == 'initialPick':
+            if self.pickInitialCountries:
+              # The picking will end with a endTurn(), so everything is fine
+              if not p.human:
+                #print("Board:play: Launching initialPickOneComputer")
+                self.initialPickOneComputer()
+                if len(self.countriesLeft())==0:
+                  self.gamePhase = 'initialFortify'
+                  return
+              else: #Must wait for manual call to pickInitialOneHuman
+                #print("Board:play: Initial pick huamn. Waiting")
+                pass
+            else:
+              # No endTurn(), so we must do it manually here
+              self.randomInitialPick()
+              self.prepareStart()
+              return
+          
+          # Initial Fortify
+          if self.gamePhase == 'initialFortify':
+            over = False
+            if p.initialArmies==0 and p.income==0:
+              # Check if the phase is finished
+              N = self.getNumberOfPlayers()
+              cont = 1
+              q = next(self.playerCycle)
+              while (q.initialArmies==0 and q.income==0) and cont < N:
+                cont += 1
+                q = next(self.playerCycle)
+              if cont >= N: 
+                over=True
+              else:
+                self.activePlayer = q
+              
+            if not over:
+              if not self.activePlayer.human:        
+                self.initialFortifyComputer()          
+              else:
+                pass
+            else:
+              # Go to last player before endTurn()
+              while self.activePlayer.code != self.lastPlayerCode:
+                self.activePlayer = next(self.playerCycle)
+              self.gamePhase = 'startTurn'
+              self.endTurn()
+              return
+        else:
+          if self.console_debug: print("No initial phase, setting everything random")
+          # No initial phase, everything at random
+          if self.console_debug: print("random pick")
+          self.randomInitialPick()
+          self.prepareStart() # So that next player has income updated
+          if self.console_debug: print("random fortify")
+          self.randomInitialFotify()
+          # Go to last player before endTurn()
+          while self.activePlayer.code != self.lastPlayerCode:
+            self.activePlayer = next(self.playerCycle)
+          self.gamePhase = 'startTurn'
+          self.endTurn() # So that next player has income updated
+          return
+        
+
+      # Start turn: Give armies and place them    
+      try:
+        if self.console_debug: print(f"Board:play: {self.gamePhase}")
+        if self.gamePhase == 'startTurn':      
+          if not p.human:
+            armies = p.income
+            cashed = 0
+            if self.useCards:
+              # Card cash          
+              card_set = p.cardPhase(self, p.cards)
+              if not card_set is None:
+                cashed += self.cashCards(*card_set)
+    
+              # If player has more than 5 cards, keep asking
+              # If player does not cash, must force the cash
+              while len(p.cards)>=5:
+                card_set = p.cardPhase(self, p.cards)
+                if not card_set is None:
+                  cashed += self.cashCards(*card_set)
+                else:
+                  # Force the cash
+                  card_set = Deck.yieldCashableSet(p.cards)
+                  if not card_set is None:
+                    cashed += self.cashCards(*card_set)
+                  else:
+                    # Error
+                    print("More than 5 cards but not able to find a cashable set. Maybe the deck has too many wildcards?")
+                    break
+              armies += cashed
+            
+    
+            p.placeArmies(self, armies)
+            p.income = 0
+            self.gamePhase = 'attack'
+          else:
+            pass
+      except Exception as e:
+        print(e)
+        raise(e)
+        
+      # Attack
+      if self.gamePhase == 'attack':
+        if self.console_debug: print(f"Board:play: {self.gamePhase}")
+        if not p.human:
+          p.attackPhase(self)     
+          self.gamePhase = 'fortify'
+          
+      
+      # Fortify
+      if self.gamePhase == 'fortify':
+        if self.console_debug: print(f"Board:play: {self.gamePhase}")
+        if not p.human:
+          self.updatemoveable()
+          p.fortifyPhase(self)
+          self.gamePhase = 'end'
+
+
+      # End turn
+      if self.gamePhase == 'end':
+        if self.console_debug: print(f"Board:play: {self.gamePhase}")        
+        self.gamePhase = 'startTurn'
+        self.endTurn()
+        if self.console_debug: print("Board:play: Returning, end of turn")
+
     if p.code == self.firstPlayerCode and self.gamePhase == "startTurn":
       # New round has begun
       if self.console_debug: print("Board:play: Setting up new round")
       self.setupNewRound()
-    if not p.is_alive:
-      if self.console_debug: print("Board:play: Returning, player is not alive")
-      self.endTurn()
-      return 
-    
-    #if self.console_debug: print(f"Board {self.board_id}:play: ({p.code}) {p.name()}: {self.gamePhase}")
-    # Initial phase
-    if 'initial' in self.gamePhase:
-      if self.initialPhase:
-        # Initial Pick
-        if self.gamePhase == 'initialPick':
-          if self.pickInitialCountries:
-            # The picking will end with a endTurn(), so everything is fine
-            if not p.human:
-              #print("Board:play: Launching initialPickOneComputer")
-              self.initialPickOneComputer()
-              if len(self.countriesLeft())==0:
-                self.gamePhase = 'initialFortify'
-                return
-            else: #Must wait for manual call to pickInitialOneHuman
-              #print("Board:play: Initial pick huamn. Waiting")
-              pass
-          else:
-            # No endTurn(), so we must do it manually here
-            self.randomInitialPick()
-            self.prepareStart()
-            return
-        
-        # Initial Fortify
-        if self.gamePhase == 'initialFortify':
-          over = False
-          if p.initialArmies==0 and p.income==0:
-            # Check if the phase is finished
-            N = self.getNumberOfPlayers()
-            cont = 1
-            q = next(self.playerCycle)
-            while (q.initialArmies==0 and q.income==0) and cont < N:
-              cont += 1
-              q = next(self.playerCycle)
-            if cont >= N: 
-              over=True
-            else:
-              self.activePlayer = q
-            
-          if not over:
-            if not self.activePlayer.human:        
-              self.initialFortifyComputer()          
-            else:
-              pass
-          else:
-            # Go to last player before endTurn()
-            while self.activePlayer.code != self.lastPlayerCode:
-              self.activePlayer = next(self.playerCycle)
-            self.gamePhase = 'startTurn'
-            self.endTurn()
-            return
-      else:
-        if self.console_debug: print("No initial phase, setting everything random")
-        # No initial phase, everything at random
-        if self.console_debug: print("random pick")
-        self.randomInitialPick()
-        self.prepareStart() # So that next player has income updated
-        if self.console_debug: print("random fortify")
-        self.randomInitialFotify()
-        # Go to last player before endTurn()
-        while self.activePlayer.code != self.lastPlayerCode:
-          self.activePlayer = next(self.playerCycle)
-        self.gamePhase = 'startTurn'
-        self.endTurn() # So that next player has income updated
-        return
-      
-
-    # Start turn: Give armies and place them    
-    try:
-      if self.console_debug: print(f"Board:play: {self.gamePhase}")
-      if self.gamePhase == 'startTurn':      
-        if not p.human:
-          armies = p.income
-          cashed = 0
-          if self.useCards:
-            # Card cash          
-            card_set = p.cardPhase(p.cards)
-            if not card_set is None:
-              cashed += self.cashCards(*card_set)
-  
-            # If player has more than 5 cards, keep asking
-            # If player does not cash, must force the cash
-            while len(p.cards)>=5:
-              card_set = p.cardPhase(p.cards)
-              if not card_set is None:
-                cashed += self.cashCards(*card_set)
-              else:
-                # Force the cash
-                card_set = Deck.yieldCashableSet(p.cards)
-                if not card_set is None:
-                  cashed += self.cashCards(*card_set)
-                else:
-                  # Error
-                  print("More than 5 cards but not able to find a cashable set. Maybe the deck has too many wildcards?")
-                  break
-            armies += cashed
-          
-  
-          p.placeArmies(armies)
-          p.income = 0
-          self.gamePhase = 'attack'
-        else:
-          pass
-    except Exception as e:
-      print(e)
-      raise(e)
-      
-    # Attack
-    if self.gamePhase == 'attack':
-      if self.console_debug: print(f"Board:play: {self.gamePhase}")
-      if not p.human:
-        p.attackPhase()     
-        self.gamePhase = 'fortify'
-        
-    
-    # Fortify
-    if self.gamePhase == 'fortify':
-      if self.console_debug: print(f"Board:play: {self.gamePhase}")
-      if not p.human:
-        self.updatemoveable()
-        p.fortifyPhase()
-        self.gamePhase = 'end'
-
-
-    # End turn
-    if self.gamePhase == 'end':
-      if self.console_debug: print(f"Board:play: {self.gamePhase}")        
-      self.gamePhase = 'startTurn'
-      self.endTurn()
-      if self.console_debug: print("Board:play: Returning, end of turn")
-      return
+      self.prepareStart()
 
 
   def cashCards(self, card, card2, card3):
@@ -1154,7 +1158,7 @@ class Board(object):
       if cD.armies < 1: 
         stop=True
         # Attacker won
-        armies = attacker.moveArmiesIn(countryCodeAttacker, countryCodeDefender)
+        armies = attacker.moveArmiesIn(self, countryCodeAttacker, countryCodeDefender)
         if armies >= cA.armies: armies = cA.armies-1
         if armies < aDice: armies = aDice
         cA.armies -= armies
@@ -1174,7 +1178,7 @@ class Board(object):
               while len(attacker.cards)>=5 and self.immediateCash:
                 # Bot players - Run cardPhase                
                 if not attacker.human:
-                  card_set = attacker.cardPhase(attacker.cards)
+                  card_set = attacker.cardPhase(self, attacker.cards)
                   if not card_set is None:
                     if self.console_debug:
                       print("****************************")
@@ -1202,7 +1206,7 @@ class Board(object):
                   # leave them to be properly cashed at startTurn
                   break
               if armies > 0:
-                attacker.placeArmies(armies)
+                attacker.placeArmies(self, armies)
                  
         self.tookOverCountry = True    
         if self.console_debug:
@@ -1229,15 +1233,15 @@ class Board(object):
     if cO.owner != self.activePlayer.code: return -1
     if cD.owner != self.activePlayer.code: return -1
     if not cD in self.world.getAdjoiningList(cO.code, kind=1): return -1
-    if cO.moveable_armies < numberOfArmies: return -1
+    if cO.moveableArmies < numberOfArmies: return -1
  
-    # Even if moveable_armies == armies, we have to always leave one army at least    
+    # Even if moveableArmies == armies, we have to always leave one army at least    
     aux = numberOfArmies-1 if numberOfArmies == cO.armies else numberOfArmies
     
     if self.console_debug:
       print(f'Board:Fortify: From {cO.id} to {cD.id}, armies = {aux}')
     cO.armies -= aux
-    cO.moveable_armies -= aux
+    cO.moveableArmies -= aux
     cD.armies += aux
     return 1
     
@@ -1651,21 +1655,28 @@ class Board(object):
     return new_board
     
     
-  def simulate(self, newAgent, maxRounds = 60,
+  def simulate(self, newAgent, playerCode, changeAllAgents = True, maxRounds = 60,
                safety=10e5, sim_console_debug = False):
     '''! Use to facilitate the playouts for search algorithms. Should be called from a copy of the actual board, because it would change the game.
     The player that called the simulation should give a new agent representing a policy it would follow, so that in the new copy the player will be changed with this new agent, and the game will be played until the end or for a maximum number of rounds.
     '''
     oldActivePlayerCode = self.activePlayer.code
+
+    # Change first the player that executed the simulation
+    # with its default policy
+    newPlayer = self.copyPlayer(playerCode, newAgent)
+    self.players[playerCode] = newPlayer  
+    self.players[playerCode].setPrefs(playerCode)
+    self.players[playerCode].human = False
     
     # Change all players to newAgent to do the rollout
     for i, p in self.players.items():
-      p.console_debug = sim_console_debug
-      newPlayer = self.copyPlayer(i, newAgent) 
-      self.players[i] = newPlayer
-      
-      self.players[i].setPrefs(i, self)
-      self.players[i].human = False
+      if changeAllAgents or p.human:
+        p.console_debug = sim_console_debug
+        newPlayer = self.copyPlayer(i, newAgent) 
+        self.players[i] = newPlayer  
+        self.players[i].setPrefs(i)
+        self.players[i].human = False
     
       
     self.playerCycle = itertools.cycle(list(self.players.values()))
@@ -1684,9 +1695,20 @@ class Board(object):
       cont += 1 # for safety      
       
 
+  def encodePlayer(self, p):
+    return f'{p.code}_{len(p.cards)}'
+    
+  def encode(self):
+    countries = '_'.join([c.encode() for c in self.countries()])
+    players = '_'.join([self.encodePlayer(p) for _, p in self.players.items() if p.is_alive])
+    return countries + '-' + players
+
+  def __hash__(self):
+    return hash(self.encode())
+
   def __repr__(self):
     '''! Gives a String representation of the board. '''
-    return 'Board with id {}'.format(self.board_id)
+    return self.encode()
    
   
   def report(self):
@@ -1699,7 +1721,7 @@ class Board(object):
     for i, p in self.players.items():
       num_conts = sum([(c.owner==p.code) for i, c in self.world.continents.items()])
       bonus = sum([(c.owner==p.code)*int(c.bonus) for i, c in self.world.continents.items()])
-      print(f'\t{i}\t{p.name()}\n\t\t: initialArmies={p.initialArmies}, income={p.income}, armies={self.getPlayerArmies(p.code)}, countries={p.num_countries}')
+      print(f'\t{i}\t{p.name()}\t{p.__class__}\n\t\t: initialArmies={p.initialArmies}, income={p.income}, armies={self.getPlayerArmies(p.code)}, countries={p.num_countries}')
       print(f'\t\t: cards={len(p.cards)}, continents={num_conts}, bonus = {bonus}')
     
       
@@ -1730,7 +1752,7 @@ class Board(object):
 
     newPlayer = self.copyPlayer(player, newAgent) 
     self.players[player] = newPlayer      
-    self.players[player].setPrefs(player, self)
+    self.players[player].setPrefs(player)
         
     self.playerCycle = itertools.cycle(list(self.players.values()))
     self.activePlayer = next(self.playerCycle)
@@ -1747,7 +1769,7 @@ class Board(object):
       newPlayer = newAgent.__class__()
       
     for n in oldPlayer.__dict__:
-      if n != 'board':
+      if n != 'name_string':
         setattr(newPlayer, n, copy.deepcopy(getattr(oldPlayer,n)))
     newPlayer.console_debug = False
     return newPlayer
@@ -1775,10 +1797,12 @@ if __name__ == '__main__':
   # Set players
   aggressiveness = 0.7
   pH, pR1, pR2 = agent.Human('PocketNavy'), agent.RandomAgent('Red',aggressiveness), agent.RandomAgent('Green',aggressiveness)
-  pMC = agent.FlatMC('MC', agent.RandomAgent, budget=40)
+  pMC = agent.FlatMC('MC', agent.RandomAgent, budget=300)
+  pMC2 = agent.FlatMC('MC', agent.RandomAgent, budget=300)
   pP = agent.PeacefulAgent()
+  pA = agent.RandomAggressiveAgent('RandomAgressive')
  
-  players = [pR2, pR1]
+  players = [pR1, pMC]
   # Set board
   prefs = {'initialPhase': False, 'useCards':True,
            'transferCards':True, 'immediateCash': True,
@@ -1790,20 +1814,29 @@ if __name__ == '__main__':
   #%% Test play
   if False:
     import tqdm
+    
     N = 60
     start = time.process_time()
     iter_times = []
     armies = []
     countries = []
-    board.console_debug = False
+    board.console_debug = True
     
     pMC.budget = 500
     pMC.inner_placeArmies_budget = 100
     pMC.console_debug = True
     
-    for i in tqdm.tqdm(range(N)):
+    for i in range(N):
       in_start = time.process_time()
       board.play()
+      board.report()
+      print('-'*30)
+      
+      user_msg = input("Press q to quit, c to continue: ")
+      while not user_msg in ['q', 'c']:
+        user_msg = input("Press q to quit, c to continue: ")
+      if user_msg == 'q': break
+      print('-'*30)
       iter_times.append(time.process_time()-in_start)
       armies.append(board.getAllPlayersArmies())
       countries.append(board.getAllPlayersNumCountries())
@@ -1875,20 +1908,35 @@ if __name__ == '__main__':
   
   #%% Test simulate
   if False:
-    
-    for i in range(70):
+    pMC.console_debug = False
+    players = [pMC, pR1]
+    board = Board(world, players)
+    board.setPreferences(prefs)
+    for i in range(2):
       board.play()
     board.report()
-    sim_board = copy.deepcopy(board)
-    sim_board.report()
-    sim_board.simulate(agent.RandomAgent(), 20, safety = 10e5)
-    sim_board.report()
-    
+
+    for j in range(5):
+      sim_board = copy.deepcopy(board)
+
+      # newAgent (instance, not class), playerCode
+      
+      sim_board.simulate(agent.RandomAgent(),pMC.code, changeAllAgents=False,
+                         maxRounds=20, safety = 10e5, sim_console_debug=False)
+      print(f"\nBoard after simulation {j}\n")
+      sim_board.report()
+      print("\nScore for 0")
+      pMC2.setPrefs(0)
+      print(pMC2.score(sim_board))
+      print("\nScore for 1")
+      pMC2.setPrefs(1)
+      print(pMC2.score(sim_board))
+      
     
   
     
   #%% Test fromDicts, toDicts
-  if True:
+  if False:
     for _ in range(3):
       board.play()
     continents, countries, inLinks, players, misc = board.toDicts()
@@ -1900,6 +1948,18 @@ if __name__ == '__main__':
     print()
     print(board.activePlayer.code)
     print(board_copy.activePlayer.code)
+
+  test_dict = {}
+  test_dict[board] = {}
+  c = board.countries()[0]
+  move = agent.Move(c,c,1,'startTurn')
+  test_dict[board][move] = 'testing'
+  move = agent.Move(c,c,1,'attack')
+  test_dict[board][move] = 'testing 2'
   
-    
+  test_dict[board] = 5
+  board.gamePhase = 'other'
+  test_dict[board] += 5
+  print(test_dict)
+  
     

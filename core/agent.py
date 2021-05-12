@@ -25,7 +25,7 @@ class Agent(object):
     self.human = False
     self.console_debug = False
   
-  def setPrefs(self, code:int, board):
+  def setPrefs(self, code:int):
     '''! Puts the agent into the game by assigning it a code and giving it the reference to the game board
     
     :param code: The internal code of the agent in the game.
@@ -33,18 +33,17 @@ class Agent(object):
     :param board: Reference to the board with the game information
     :type :py:module:`pyRisk`.:py:class:`Board`
     '''
-    self.code = code
-    self.board = board
+    self.code = code    
     
   
-  def pickCountry(self) -> int:
+  def pickCountry(self, board) -> int:
     '''! Choose an empty country at the beginning of the game
     '''
     pass
     
-  def placeInitialArmies(self,numberOfArmies:int):
+  def placeInitialArmies(self, board, numberOfArmies:int):
     '''! Place armies in owned countries. No attack phase follows.
-    Use self.board.placeArmies(numberArmies:int, country:Country)
+    Use board.placeArmies(numberArmies:int, country:Country)
     
     :param numberOfArmies: The number of armies the agent must place on the board
     :type numberOfArmies: int
@@ -52,7 +51,7 @@ class Agent(object):
     pass
   
   
-  def cardPhase(self, cards):
+  def cardPhase(self, board, cards):
     '''! Call to exchange cards.
     May return None, meaning no cash
     Use :py:module:`pyRisk`.:py:module:`Deck` methods to check for sets and get best sets
@@ -65,9 +64,9 @@ class Agent(object):
     pass
   
   
-  def placeArmies(self, numberOfArmies:int):
+  def placeArmies(self, board, numberOfArmies:int):
     '''! Given a number of armies, place them on the board
-    Use self.board.placeArmies(numberArmies:int, country:Country) to place the armies
+    Use board.placeArmies(numberArmies:int, country:Country) to place the armies
     
     :param numberOfArmies: The number of armies the agent must place on the board
     :type numberOfArmies: int
@@ -75,10 +74,10 @@ class Agent(object):
     pass
   
   
-  def attackPhase(self):
+  def attackPhase(self, board):
     '''! Call to attack. 
     Can attack till dead or make single rolls.
-    Use res = self.board.attack(source_code:int, target_code:int, tillDead:bool) to do the attack
+    Use res = board.attack(source_code:int, target_code:int, tillDead:bool) to do the attack
     Every call to board.attack yields a result as follows:
       - 7: Attacker conquered the target country. This will call to moveArmiesIn(self, countryCodeAttacker:int, countryCodeDefender:int) to determine the number of armies to move to the newly conquered territory
       - 13: Defender won. You are left with only one army and can therefore not continue the attack
@@ -89,12 +88,12 @@ class Agent(object):
     '''
     pass
     
-  def moveArmiesIn(self, countryCodeAttacker:int, countryCodeDefender:int) -> int:
+  def moveArmiesIn(self, board, countryCodeAttacker:int, countryCodeDefender:int) -> int:
     '''! This method is called when an attack led to a conquer. 
     You can choose the number of armies to send to the conquered territory. 
     The returned value should be between the number of rolled dice and the number of armies in the attacking country minus 1.
     The number of dice rolled is always 3 except when you have 3 or less armies, in which case it will be the number of attacking armies minus 1.
-    Notice that by default, this method returns all the movable armies.
+    Notice that by default, this method returns all the moveable armies.
     
     
     :param countryCodeAttacker: Internal code of the attacking country
@@ -105,12 +104,12 @@ class Agent(object):
     :rtype int
     '''
     # Default is to move all but one army
-    return self.board.world.countries[countryCodeAttacker].armies-1
+    return board.world.countries[countryCodeAttacker].armies-1
 
-  def fortifyPhase(self):
+  def fortifyPhase(self, board):
     '''! Call to fortify.
-    Just before this call, board will update the movable armies in each territory to the number of armies.
-    You can fortify multiple times, always between your countries that are linked and have movable armies.
+    Just before this call, board will update the moveable armies in each territory to the number of armies.
+    You can fortify multiple times, always between your countries that are linked and have moveable armies.
     '''
     pass
   
@@ -167,70 +166,70 @@ class RandomAgent(Agent):
     self.max_attacks = max_attacks
     
   
-  def pickCountry(self):
+  def pickCountry(self, board):
     '''! Pick at random one of the empty countries
     '''    
-    options = self.board.countriesLeft()
+    options = board.countriesLeft()
     if options:
       return np.random.choice(options)
     else:
       return None
   
-  def placeInitialArmies(self, numberOfArmies:int):
+  def placeInitialArmies(self, board, numberOfArmies:int):
     '''! Pick at random one of the empty countries
     '''  
     
-    countries = self.board.getCountriesPlayer(self.code)
+    countries = board.getCountriesPlayer(self.code)
     for _ in range(numberOfArmies):
       c = np.random.choice(countries)      
-      self.board.placeArmies(1, c)
+      board.placeArmies(1, c)
   
-  def cardPhase(self, cards):
+  def cardPhase(self, board, cards):
     '''! Only cash when forced, then cash best possible set
     '''
     if len(cards)<5 or not pyRisk.Deck.containsSet(cards): 
       return None
-    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, self.board.world.countries)
+    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
     if not c is None:      
       return c
   
-  def placeArmies(self, numberOfArmies:int):
+  def placeArmies(self, board, numberOfArmies:int):
     '''! Place armies at random one by one, but on the countries with enemy borders
     '''
     
-    countries = self.board.getCountriesPlayer(self.code)
+    countries = board.getCountriesPlayer(self.code)
     for _ in range(numberOfArmies):
       c = np.random.choice(countries)
-      self.board.placeArmies(1, c)
+      board.placeArmies(1, c)
   
-  def attackPhase(self):
+  def attackPhase(self, board):
     '''! Attack a random number of times, from random countries, to random targets.
     The till_dead parameter is also set at random using an aggressiveness parameter
     '''  
     
     nbAttacks = np.random.randint(self.max_attacks)
     for _ in range(nbAttacks):
-      canAttack = self.board.getCountriesPlayerThatCanAttack(self.code)
+      canAttack = board.getCountriesPlayerThatCanAttack(self.code)
       if len(canAttack)==0: return
       source = np.random.choice(canAttack)
-      options = self.board.world.getCountriesToAttack(source.code)
+      options = board.world.getCountriesToAttack(source.code)
       if not options or source.armies <= 1: continue      
       target = np.random.choice(options)      
       tillDead = True if np.random.uniform()<self.aggressiveness else False
-      _ = self.board.attack(source.code, target.code, tillDead)
+      _ = board.attack(source.code, target.code, tillDead)
       # if self.console_debug: print(f"{self.name()}: Attacking {source.id} -> {target_c.id}: tillDead {tillDead}: Result {res}")
     
     return 
   
-  def fortifyPhase(self):
+  def fortifyPhase(self, board):
     '''! For now, no fortification is made
     '''
     if self.console_debug: print(f"{self.name()}: Fortify: Nothing")
     return 
 
-class RandomAgressiveAgent(Agent):
+class RandomAggressiveAgent(RandomAgent):
 
-  def __init__(self, name='random', aggressiveness = 0.5):
+  def __init__(self, name='randomAggressive', aggressiveness = 0.5):
     '''! Constructor of random agent.
     
     :param name: Name of the agent.
@@ -240,73 +239,62 @@ class RandomAgressiveAgent(Agent):
     '''
     super().__init__(name)
     self.aggressiveness = aggressiveness
-    
   
-  def pickCountry(self):
-    '''! Pick at random one of the empty countries
-    '''    
-    options = self.board.countriesLeft()
-    if options:
-      return np.random.choice(options)
-    else:
-      return None
-  
-  def placeInitialArmies(self, numberOfArmies:int):
+  def placeInitialArmies(self, board, numberOfArmies:int):
     '''! Pick at random one of the empty countries
     '''  
-    countries  = self.board.getCountriesPlayerWithEnemyNeighbors(self.code)
+    countries  = board.getCountriesPlayerWithEnemyNeighbors(self.code)
     if not countries:
-      countries = self.board.getCountriesPlayer(self.code)
+      countries = board.getCountriesPlayer(self.code)
     for _ in range(numberOfArmies):
-      c = np.random.choice(countries)
-      # if self.console_debug: print(f"{self.name()}: Placing 1 armies in {c.id}")
-      self.board.placeArmies(1, c)
+      c = np.random.choice(countries)      
+      board.placeArmies(1, c)
   
-  def cardPhase(self, cards):
+  def cardPhase(self, board, cards):
     '''! Only cash when forced, then cash best possible set
     '''
     if len(cards)<5 or not pyRisk.Deck.containsSet(cards): 
       return None
-    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, self.board.world.countries)
+    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
     if not c is None:      
       return c
   
-  def placeArmies(self, numberOfArmies:int):
+  def placeArmies(self, board, numberOfArmies:int):
     '''! Place armies at random one by one, but on the countries with enemy borders
     '''
-    countries = self.board.getCountriesPlayerWithEnemyNeighbors(self.code)
+    countries = board.getCountriesPlayerWithEnemyNeighbors(self.code)
     if len(countries)==0: 
       # Must have won
-      countries = self.board.getCountriesPlayer(self.code)
-      # player_countries = '-'.join([c.id for c in self.board.getCountriesPlayer(self.code)])
-      # df = self.board.countriesPandas()
+      countries = board.getCountriesPlayer(self.code)
+      # player_countries = '-'.join([c.id for c in board.getCountriesPlayer(self.code)])
+      # df = board.countriesPandas()
       # print(df)
       # print(f"Player {self.code}, {self.name()} has no enemy neighbors on his countries:\n{player_countries }")
       
     for _ in range(numberOfArmies):
       c = np.random.choice(countries)
-      self.board.placeArmies(1, c)
+      board.placeArmies(1, c)
   
-  def attackPhase(self):
+  def attackPhase(self, board):
     '''! Attack a random number of times, from random countries, to random targets.
     The till_dead parameter is also set at random using an aggressiveness parameter
     '''  
     
     nbAttacks = np.random.randint(10)
     for _ in range(nbAttacks):
-      canAttack = self.board.getCountriesPlayerThatCanAttack(self.code)
+      canAttack = board.getCountriesPlayerThatCanAttack(self.code)
       if len(canAttack)==0: return
       source = np.random.choice(canAttack)
-      options = self.board.world.getCountriesToAttack(source.code)
+      options = board.world.getCountriesToAttack(source.code)
       if not options or source.armies <= 1: continue      
       target = np.random.choice(options)      
       tillDead = True if np.random.uniform()<self.aggressiveness else False
-      _ = self.board.attack(source.code, target.code, tillDead)
+      _ = board.attack(source.code, target.code, tillDead)
       # if self.console_debug: print(f"{self.name()}: Attacking {source.id} -> {target_c.id}: tillDead {tillDead}: Result {res}")
     
     return 
   
-  def fortifyPhase(self):
+  def fortifyPhase(self, board):
     '''! For now, no fortification is made
     '''
     if self.console_debug: print(f"{self.name()}: Fortify: Nothing")
@@ -340,46 +328,46 @@ class PeacefulAgent(Agent):
     
     
   
-  def pickCountry(self):
+  def pickCountry(self, board):
     '''! Pick at random one of the empty countries
     '''    
-    options = self.board.countriesLeft()
+    options = board.countriesLeft()
     if options:
       return np.random.choice(options)
     else:
       return None
   
-  def placeInitialArmies(self, numberOfArmies:int):
+  def placeInitialArmies(self, board, numberOfArmies:int):
     '''! Pick at random one of the empty countries
     '''  
     
-    countries = self.board.getCountriesPlayer(self.code)
+    countries = board.getCountriesPlayer(self.code)
     c = countries[0]
-    self.board.placeArmies(numberOfArmies, c)
+    board.placeArmies(numberOfArmies, c)
   
-  def cardPhase(self, cards):
+  def cardPhase(self, board, cards):
     '''! Only cash when forced, then cash best possible set
     '''
     if len(cards)<5 or not pyRisk.Deck.containsSet(cards): 
       return None
-    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, self.board.world.countries)
+    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
     if not c is None:      
       return c
   
-  def placeArmies(self, numberOfArmies:int):
+  def placeArmies(self, board, numberOfArmies:int):
     '''! Place armies at random one by one, but on the countries with enemy borders
     '''
-    countries = self.board.getCountriesPlayer(self.code)
+    countries = board.getCountriesPlayer(self.code)
     c = countries[0]
-    self.board.placeArmies(numberOfArmies, c)
+    board.placeArmies(numberOfArmies, c)
   
-  def attackPhase(self):
+  def attackPhase(self, board):
     '''! Always peace, never war
     '''  
 
     return 
   
-  def fortifyPhase(self):
+  def fortifyPhase(self, board):
     '''! No fortification needed in the path of peace
     '''
     if self.console_debug: print(f"{self.name()}: Fortify: Nothing")
@@ -393,13 +381,12 @@ class Move(object):
   In the attack and fortify phases, the number of legal moves can be very big if every possible number of armies is considered, so we may limit to some options (1, 5, all) 
   '''
   
-  gamePhase_encoder = {'initialPick': '0','initialFortify': '1','startTurn':'2', 'attack':'3', 'fortify':'4'}
   
   def __init__(self, source=None, target=None, details=0, gamePhase = 'unknown'):
     self.source = source
     self.target = target
     self.details = details
-    self.gamePhase = Move.gamePhase_encoder[gamePhase]
+    self.gamePhase = gamePhase
     
   def encode(self):
     '''! Unique code to represent the move'''
@@ -407,12 +394,12 @@ class Move(object):
       return self.gamePhase + '_pass'
     else:
       return '_'.join(list(map(str, [self.gamePhase, self.source.code, self.target.code, self.details])))
+
+  def __hash__(self):
+    return hash(self.encode())
     
   def __repr__(self):
-    if self.source is None:
-      return f"{list(Move.gamePhase_encoder.keys())[int(self.gamePhase)]}: pass"
-    else:
-      return f"{list(Move.gamePhase_encoder.keys())[int(self.gamePhase)]}: {self.source.id} -> {self.target.id}: {self.details}"
+    return self.encode()
   
   @staticmethod
   def buildLegalMoves(board, armies=0):
@@ -440,12 +427,12 @@ class Move(object):
       moves = []
       for source in board.getCountriesPlayer(p.code):
         for target in board.world.getCountriesToFortify(source.code):          
-          if source.movable_armies > 0:
+          if source.moveableArmies > 0:
             # Fortify all or 1
             moves.append(Move(source, target, 0,'fortify'))            
             # moves.append(Move(source, target, 1,'fortify'))
           
-          if source.movable_armies > 5:
+          if source.moveableArmies > 5:
             moves.append(Move(source, target, 5,'fortify'))
       moves.append(Move(None, None, None, 'fortify'))
       return moves
@@ -476,47 +463,67 @@ class Move(object):
 
 class TreeSearch(Agent):
   '''! Contains methods to generalize the game and be able to perform tree search.
-  Tree search algorithms like Flat MC or UCT should be based on this class
   '''
   def __init__(self, name='TreeSearch', playout_policy = RandomAgent):
     super().__init__(name)
     self.playout_policy = playout_policy
-    self.move_table = {}    
-    
+    self.move_table = {}
+
+  def isTerminal(self, board, depth):
+    ''' This function determines when to stop the search and use the
+        scoring function.        
+        Default: Game is over
+    '''
+    return board.getNumberOfPlayersLeft()==1
+
+  def selectAction(self, board, depth):
+    ''' Given a state, chose one of the children'''
+    moves = self.move_table[hash(board)]['moves']
+    return np.random.choice(moves)
+
+  def doRollout(self, board, depth):
+    ''' Given a leaf node 
+    '''
+    return 
   
-  def playout(self, sim_board):
+  def playout(self, sim_board, changeAllAgents = False, maxRounds = 60,
+              safety = 10e5, sim_console_debug = False):
     '''! Simulates a complete game using a policy
     '''    
-    sim_board.simulate(self.playout_policy())
+    sim_board.simulate(self.playout_policy(), self.code, changeAllAgents,
+                       maxRounds, safety, sim_console_debug)
     return sim_board
     
   def score(self, sim_board):
-    '''! This functions determines how to score a board.
-    One option is to give M>0 if player won, 0 otherwise. But if games are not finished, what would we do?
-    Maybe use the number or armies? Number of countries?
-    
-    Returns a number
+    '''! This functions determines how to score a board that is considered
+    to be terminal.
+    Notice that in the common cases, terminal means game is over.
+    It can also be used to simulate other
     '''
-    
-    # Very simple win/lose reward, but giving some reward if at least player was still alive
+    # Very simple win/lose reward, but giving some reward if at least
+    # player was still alive
     if sim_board.players[self.code].is_alive:
+      if sim_board.getNumberOfPlayersLeft()==1:
+        # Is the winner
+        return 1
+
+      # Game still going
       s = 0
       countries = sim_board.getNumberOfCountriesPlayer(self.code)
       income = sim_board.getPlayerIncome(self.code)
-      max_income, max_countries = 0, 0
-      for i, p in sim_board.players.items():
-        if p.code == self.code: continue
-        inc, con = sim_board.getPlayerIncome(i), sim_board.getNumberOfCountriesPlayer(i)
-        if inc > max_income: max_income = inc          
-        if con > max_countries: max_countries = con
+      max_income = max([sim_board.getPlayerIncome(i) for i in sim_board.players])
+      max_countries = max([sim_board.getNumberOfCountriesPlayer(i) for i in sim_board.players])
           
-      s += income - max_income
-      s += countries - max_countries
-      s += 50*(sim_board.getNumberOfPlayersLeft()==1) # Is the winner
-      return s/max(sim_board.roundCount,1)
+      s += 0.45* (income/max_income)
+      s += 0.45* (countries/max_countries)
+      # Not 1 in the best case to differentiate from actual winning
+      return s
     
     else:
-      return -10e6
+      return 0
+
+  def search(self, board, depth):
+    return
  
 
 class FlatMC(TreeSearch):
@@ -526,61 +533,54 @@ class FlatMC(TreeSearch):
     self.budget = budget
     self.inner_placeArmies_budget = budget//3
     
-  def run_flat_mc(self, init_board=None, budget=None, armies = 0):
-    board = init_board if not init_board is None else self.board
+  def run_flat_mc(self, board, budget=None, armies = 0):
     budget = budget if not budget is None else self.budget
     moves = Move.buildLegalMoves(board, armies)
     bestScore, bestMove = -9999999999, None
     if self.console_debug: 
-      print(f"--FlatMC:run_flat_mc: {self.board.gamePhase}\n Trying {len(moves)} moves, budget of {budget}")
+      print(f"--FlatMC:run_flat_mc: {board.gamePhase}\n Trying {len(moves)} moves, budget of {budget}")
     for m in moves: 
-      #print('Looking to pick...')
-      #print(m.source.id)
       total_reward = 0
       N = max(budget//len(moves), 1)
-      for i in range(N):  
-        #print(i,'... ')
+      for i in range(N):        
         sim_board = copy.deepcopy(board)
         sim_board.replacePlayer(self.code, self.playout_policy())
         
         sim_board.console_debug = False
-        #print('agent:FlatMC: armies before Move.play', sim_board.world.countries[m.source.code].armies)
-        # board.report()
         Move.play(sim_board, m)
-        #print('agent:FlatMC: armies after Move.play', sim_board.world.countries[m.source.code].armies)        
-        # print("Simulation")
+        
         self.playout(sim_board)  
         total_reward += self.score(sim_board)
-        # print(f"done: {score}")
+        
       score = total_reward/N
       if score > bestScore:
         if self.console_debug: 
           print(f"------ Found best move:\n\t\tscore: {score}\n\t\tmove {m}")
         bestMove = m
-        bestScore = score      
-      # print(bestScore)
+        bestScore = score
+      
     return bestMove
       
 
-  def pickCountry(self):
-    bestMove = self.run_flat_mc()
+  def pickCountry(self, board):
+    bestMove = self.run_flat_mc(board)
     return bestMove.source
     
     
-  def placeInitialArmies(self,numberOfArmies:int):
+  def placeInitialArmies(self, board, numberOfArmies:int):
     armies_put = 0
     while armies_put < numberOfArmies:
       # May use more budget than self.budget!
-      bestMove = self.run_flat_mc(
+      bestMove = self.run_flat_mc( board,
         budget = self.inner_placeArmies_budget,
         armies=numberOfArmies-armies_put)
       # print(bestMove, armies_put)
-      self.board.placeArmies(int(bestMove.details), bestMove.source)
+      board.placeArmies(int(bestMove.details), bestMove.source)
       armies_put += int(bestMove.details)
     return 
     
   
-  def cardPhase(self, cards):
+  def cardPhase(self, board, cards):
     return pyRisk.Deck.yieldCashableSet(cards)
 
     # # If cash is possible, simulate with and without cash to choose
@@ -594,7 +594,7 @@ class FlatMC(TreeSearch):
     
     # # With card cash     
     # for i in range(max(self.budget//2, 1)):
-    #   sim_board = copy.deepcopy(self.board)
+    #   sim_board = copy.deepcopy(board)
     #   cashed = sim_board.cashCards(*card_set)
     #   # Place the armies       
     #   armies_put = 0
@@ -611,7 +611,7 @@ class FlatMC(TreeSearch):
         
     # # Without cash
     # for i in range(max(self.budget//2, 1)):
-    #   sim_board = copy.deepcopy(self.board)    
+    #   sim_board = copy.deepcopy(board)    
     #   sim_board = self.playout(sim_board)
     #   score = self.score(sim_board)
     #   if score > bestScore:        
@@ -626,38 +626,40 @@ class FlatMC(TreeSearch):
     
   
   
-  def placeArmies(self, numberOfArmies:int):
+  def placeArmies(self, board, numberOfArmies:int):
     '''! Given a number of armies, place them on the board
-    Use self.board.placeArmies(numberArmies:int, country:Country) to place the armies
+    Use board.placeArmies(numberArmies:int, country:Country) to place the armies
     
     :param numberOfArmies: The number of armies the agent must place on the board
     :type numberOfArmies: int
     '''
     armies_put = 0
-    changed_phase, orig_phase = False, self.board.gamePhase
-    if self.board.gamePhase == 'attack':      
+    changed_phase, orig_phase = False, board.gamePhase
+    if board.gamePhase == 'attack':      
       # A card cash occured. Can place the armies at any territory
       # To call run_flat_mc, we need to change the gamePhase
-      self.board.gamePhase = 'startTurn'
+      board.gamePhase = 'startTurn'
       changed_phase = True
       
     while armies_put < numberOfArmies:      
-      bestMove = self.run_flat_mc(budget = self.inner_placeArmies_budget, armies=numberOfArmies-armies_put)
+      bestMove = self.run_flat_mc(board,
+                                  budget = self.inner_placeArmies_budget,
+                                  armies=numberOfArmies-armies_put)
       if bestMove is None or bestMove.source is None:
         raise Exception("FlatMC: Nowhere to place armies?. Possibly a call to placeArmies outside of the startTurn phase")        
-      self.board.placeArmies(int(bestMove.details), bestMove.source)
+      board.placeArmies(int(bestMove.details), bestMove.source)
       armies_put += int(bestMove.details)
   
     if changed_phase:
-      self.board.gamePhase = orig_phase
+      board.gamePhase = orig_phase
       
     return 
   
   
-  def attackPhase(self):
+  def attackPhase(self, board):
     '''! Call to attack. 
     Can attack till dead or make single rolls.
-    Use res = self.board.attack(source_code:int, target_code:int, tillDead:bool) to do the attack
+    Use res = board.attack(source_code:int, target_code:int, tillDead:bool) to do the attack
     Every call to board.attack yields a result as follows:
       - 7: Attacker conquered the target country. This will call to moveArmiesIn(self, countryCodeAttacker:int, countryCodeDefender:int) to determine the number of armies to move to the newly conquered territory
       - 13: Defender won. You are left with only one army and can therefore not continue the attack
@@ -672,25 +674,25 @@ class FlatMC(TreeSearch):
     res = 7
     while res != -1:
       # May use more budget
-      bestMove = self.run_flat_mc()
+      bestMove = self.run_flat_mc(board)
       # print("FLAT MC: Best move found was ", bestMove)
       if bestMove is None or bestMove.source is None: break
-      res = self.board.attack(bestMove.source.code, bestMove.target.code, bool(bestMove.details))
+      res = board.attack(bestMove.source.code, bestMove.target.code, bool(bestMove.details))
       if res == -1: 
         # print("FLAT MC: Error with the attack")
         raise Exception("FLatMC:attackPhase")
     return
     
-  def moveArmiesIn(self, countryCodeAttacker:int, countryCodeDefender:int) -> int:
+  def moveArmiesIn(self, board, countryCodeAttacker:int, countryCodeDefender:int) -> int:
     # Go with the default for now
-    return self.board.world.countries[countryCodeAttacker].armies-1
+    return board.world.countries[countryCodeAttacker].armies-1
 
-  def fortifyPhase(self):
+  def fortifyPhase(self, board):
     # For now, fortify at most 1 time
     for i in range(1):
-      bestMove = self.run_flat_mc()
+      bestMove = self.run_flat_mc(board)
       if bestMove is None or bestMove.source is None: return 
-      self.board.fortifyArmies(int(bestMove.details), bestMove.source.code, bestMove.target.code)
+      board.fortifyArmies(int(bestMove.details), bestMove.source.code, bestMove.target.code)
     
   
   def name(self):    
@@ -713,7 +715,7 @@ the board that comes from Java is represented using:
 
 
   
-all_agents = {'random': RandomAgent, 'random_agressive':RandomAgressiveAgent,
+all_agents = {'random': RandomAgent, 'random_aggressive':RandomAggressiveAgent,
               'human': Human,
               'flatMC':FlatMC, 'peace':PeacefulAgent}
     
