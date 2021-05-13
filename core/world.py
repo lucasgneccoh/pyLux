@@ -154,8 +154,8 @@ class World(object):
       # nx.set_node_attributes(self.map_graph, new_data)
       
     except Exception as e:
-      print("Worls: Problems while loading map")
-      print(e)
+      print("World: Problems while loading map")
+      raise e
       
   
   # Continent functions
