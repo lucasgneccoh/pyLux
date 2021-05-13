@@ -5,8 +5,10 @@ Created on Sun Apr 18 19:52:33 2021
 @author: lucas
 """
 
-from core import World, Board
-from core import agent
+
+from world import World
+from board import Board
+import agent
 
 
 #%% TESTING
@@ -15,8 +17,8 @@ if __name__ == '__main__':
   console_debug = True
   
   # Load map
-  path = 'support/maps/classic_world_map.json'
-  path = 'support/maps/test_map.json'
+  path = '../support/maps/classic_world_map.json'
+  path = '../support/maps/test_map.json'
     
   world = World(path)
   

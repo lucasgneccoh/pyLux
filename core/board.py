@@ -7,9 +7,9 @@ import random
 import time
 import pandas as pd
 
-from . import agent
-from core.deck import Deck, ListThenArithmeticCardSequence
-from core.world import World, Country, Continent
+import agent
+from deck import Deck, ListThenArithmeticCardSequence
+from world import World, Country, Continent
 
 
 from string import ascii_lowercase

@@ -124,10 +124,8 @@ class World(object):
 
     '''
     try:
-      with open(self.path,'r') as f:
-        print("Loading json")
-        data = json.load(f)
-        print("Done")
+      with open(self.path,'r') as f:        
+        data = json.load(f)        
       self.map_graph = nx.Graph(json_graph.node_link_graph(data['map_graph'])).to_directed()
       continents = data['continents']
       countries = data['countries']
