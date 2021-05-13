@@ -5,7 +5,7 @@ The agent module contains the pyRisk players.
 """
 
 import numpy as np
-import pyRisk
+from pyLux.core.deck import Deck
 import copy
 import itertools
 
@@ -187,9 +187,9 @@ class RandomAgent(Agent):
   def cardPhase(self, board, cards):
     '''! Only cash when forced, then cash best possible set
     '''
-    if len(cards)<5 or not pyRisk.Deck.containsSet(cards): 
+    if len(cards)<5 or not Deck.containsSet(cards): 
       return None
-    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
+    c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
     if not c is None:      
       return c
   
@@ -253,9 +253,9 @@ class RandomAggressiveAgent(RandomAgent):
   def cardPhase(self, board, cards):
     '''! Only cash when forced, then cash best possible set
     '''
-    if len(cards)<5 or not pyRisk.Deck.containsSet(cards): 
+    if len(cards)<5 or not Deck.containsSet(cards): 
       return None
-    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
+    c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
     if not c is None:      
       return c
   
@@ -316,7 +316,7 @@ class Human(Agent):
     return 'Homo sapiens sapiens'
 
 
-class PeacefulAgent(Agent):
+class PeacefulAgent(RandomAgent):
 
   def __init__(self, name='peace'):
     '''! Constructor of peaceful agent. It does not attack, so it serves as a very easy baseline
@@ -326,16 +326,6 @@ class PeacefulAgent(Agent):
     '''
     super().__init__(name)
     
-    
-  
-  def pickCountry(self, board):
-    '''! Pick at random one of the empty countries
-    '''    
-    options = board.countriesLeft()
-    if options:
-      return np.random.choice(options)
-    else:
-      return None
   
   def placeInitialArmies(self, board, numberOfArmies:int):
     '''! Pick at random one of the empty countries
@@ -345,14 +335,6 @@ class PeacefulAgent(Agent):
     c = countries[0]
     board.placeArmies(numberOfArmies, c)
   
-  def cardPhase(self, board, cards):
-    '''! Only cash when forced, then cash best possible set
-    '''
-    if len(cards)<5 or not pyRisk.Deck.containsSet(cards): 
-      return None
-    c = pyRisk.Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
-    if not c is None:      
-      return c
   
   def placeArmies(self, board, numberOfArmies:int):
     '''! Place armies at random one by one, but on the countries with enemy borders
@@ -588,7 +570,7 @@ class FlatMC(TreeSearch):
     
   
   def cardPhase(self, board, cards):
-    return pyRisk.Deck.yieldCashableSet(cards)
+    return Deck.yieldCashableSet(cards)
 
     # # If cash is possible, simulate with and without cash to choose
     # card_set = pyRisk.Deck.yieldCashableSet(cards)

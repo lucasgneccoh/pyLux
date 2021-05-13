@@ -1,1 +1,1 @@
-from . import pyRisk
+from pyLux.core import pyRisk

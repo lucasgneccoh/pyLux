@@ -9,9 +9,9 @@ import random
 import time
 import pandas as pd
 
-from . import agent
-from ./deck import Deck, ListThenArithmeticCardSequence
-from ./world import World
+from pyLux.core import agent
+from pyLux.core.deck import Deck, ListThenArithmeticCardSequence
+from pyLux.core.world import World
 
 
 from string import ascii_lowercase
