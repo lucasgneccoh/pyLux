@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import json
 import networkx as nx
 from networkx.readwrite import json_graph
@@ -126,7 +125,9 @@ class World(object):
     '''
     try:
       with open(self.path,'r') as f:
+        print("Loading json")
         data = json.load(f)
+        print("Done")
       self.map_graph = nx.Graph(json_graph.node_link_graph(data['map_graph'])).to_directed()
       continents = data['continents']
       countries = data['countries']
