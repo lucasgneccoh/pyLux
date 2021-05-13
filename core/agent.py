@@ -467,6 +467,13 @@ class TreeSearch(Agent):
   def __init__(self, name='TreeSearch', playout_policy = RandomAgent):
     super().__init__(name)
     self.playout_policy = playout_policy
+    # Dict: [Board (state)][Move (action)][Board (state)]
+    # Given a board, we have a set of possible moves
+    # For each move, there may be 1 or more states
+    # The only case where there are more moves is when attacking
+    # In any other case, the after state and action, there will be only one entry
+    # For the first part (state), there will be a tuple of things:
+    #   (N visits, 
     self.move_table = {}
 
   def isTerminal(self, board, depth):
@@ -478,7 +485,7 @@ class TreeSearch(Agent):
 
   def selectAction(self, board, depth):
     ''' Given a state, chose one of the children'''
-    moves = self.move_table[hash(board)]['moves']
+    moves = self.move_table[hash(board)]
     return np.random.choice(moves)
 
   def doRollout(self, board, depth):
