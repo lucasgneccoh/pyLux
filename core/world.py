@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import json
+import networkx as nx
+from networkx.readwrite import json_graphimport networkx as nx
+import copy
+
 #%% World, countries and continents
 class World(object):
   '''!Creates a graph representing the world. Nodes are countries.
