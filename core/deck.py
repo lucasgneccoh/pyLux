@@ -4,6 +4,7 @@
 
 import random
 import copy
+import itertools
 
 class AbstractCardSequence(object):
   '''! Represents a sequence of numbers corresponding to the armies cashed in the game
