@@ -2,6 +2,8 @@
 
 #%% Card sequence
 
+import random
+
 class AbstractCardSequence(object):
   '''! Represents a sequence of numbers corresponding to the armies cashed in the game
   '''

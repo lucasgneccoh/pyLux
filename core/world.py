@@ -2,7 +2,7 @@
 
 import json
 import networkx as nx
-from networkx.readwrite import json_graphimport networkx as nx
+from networkx.readwrite import json_graph
 import copy
 
 #%% World, countries and continents

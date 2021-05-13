@@ -1,1 +1,1 @@
-from pyLux import core
+from . import core

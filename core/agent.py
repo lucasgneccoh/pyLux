@@ -5,7 +5,7 @@ The agent module contains the pyRisk players.
 """
 
 import numpy as np
-from pyLux.core.deck import Deck
+from core.deck import Deck
 import copy
 import itertools
 
