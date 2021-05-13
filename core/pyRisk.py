@@ -11,7 +11,7 @@ import pandas as pd
 
 from pyLux.core import agent
 from pyLux.core.deck import Deck, ListThenArithmeticCardSequence
-from pyLux.core.world import World
+from pyLux.core.world import World, Country, Continent
 
 
 from string import ascii_lowercase
