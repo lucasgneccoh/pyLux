@@ -6,6 +6,7 @@ The agent module contains the pyRisk players.
 
 import numpy as np
 from deck import Deck
+from move import Move
 import copy
 import itertools
 
@@ -26,7 +27,8 @@ class Agent(object):
     self.console_debug = False
   
   def setPrefs(self, code:int):
-    '''! Puts the agent into the game by assigning it a code and giving it the reference to the game board
+    '''! Puts the agent into the game by assigning it a code and giving it
+    the reference to the game board
     
     :param code: The internal code of the agent in the game.
     :type code: int
@@ -45,7 +47,8 @@ class Agent(object):
     '''! Place armies in owned countries. No attack phase follows.
     Use board.placeArmies(numberArmies:int, country:Country)
     
-    :param numberOfArmies: The number of armies the agent must place on the board
+    :param numberOfArmies: The number of armies the agent must place on the
+    board
     :type numberOfArmies: int
     '''
     pass
@@ -54,7 +57,8 @@ class Agent(object):
   def cardPhase(self, board, cards):
     '''! Call to exchange cards.
     May return None, meaning no cash
-    Use :py:module:`pyRisk`.:py:module:`Deck` methods to check for sets and get best sets
+    Use :py:module:`pyRisk`.:py:module:`Deck` methods to check for sets and
+    get best sets
     
     :param cards: List with the player's cards
     :type cards: list[:py:module:`pyRisk`.:py:class:`Card`]
@@ -66,9 +70,11 @@ class Agent(object):
   
   def placeArmies(self, board, numberOfArmies:int):
     '''! Given a number of armies, place them on the board
-    Use board.placeArmies(numberArmies:int, country:Country) to place the armies
+    Use board.placeArmies(numberArmies:int, country:Country) to place the
+    armies
     
-    :param numberOfArmies: The number of armies the agent must place on the board
+    :param numberOfArmies: The number of armies the agent must place on the
+    board
     :type numberOfArmies: int
     '''
     pass
@@ -77,11 +83,18 @@ class Agent(object):
   def attackPhase(self, board):
     '''! Call to attack. 
     Can attack till dead or make single rolls.
-    Use res = board.attack(source_code:int, target_code:int, tillDead:bool) to do the attack
+    Use res = board.attack(source_code:int, target_code:int, tillDead:bool)
+    to do the attack
     Every call to board.attack yields a result as follows:
-      - 7: Attacker conquered the target country. This will call to moveArmiesIn(self, countryCodeAttacker:int, countryCodeDefender:int) to determine the number of armies to move to the newly conquered territory
-      - 13: Defender won. You are left with only one army and can therefore not continue the attack
-      - 0: Neither the attacker nor the defender won. If you want to deduce the armies you lost, you can demand the number of armies in your country.
+      - 7: Attacker conquered the target country. This will call to
+      moveArmiesIn(self, countryCodeAttacker:int, countryCodeDefender:int)
+      to determine the number of armies to move to the newly conquered
+      territory
+      - 13: Defender won. You are left with only one army and can therefore
+      not continue the attack
+      - 0: Neither the attacker nor the defender won. If you want to deduce
+      the armies you lost, you can demand the number of armies in your
+      country.
       - -1: There was an error
       
     You can attack multiple times during the attack phase.
@@ -91,8 +104,10 @@ class Agent(object):
   def moveArmiesIn(self, board, countryCodeAttacker:int, countryCodeDefender:int) -> int:
     '''! This method is called when an attack led to a conquer. 
     You can choose the number of armies to send to the conquered territory. 
-    The returned value should be between the number of rolled dice and the number of armies in the attacking country minus 1.
-    The number of dice rolled is always 3 except when you have 3 or less armies, in which case it will be the number of attacking armies minus 1.
+    The returned value should be between the number of rolled dice and the
+    number of armies in the attacking country minus 1.
+    The number of dice rolled is always 3 except when you have 3 or less
+    armies, in which case it will be the number of attacking armies minus 1.
     Notice that by default, this method returns all the moveable armies.
     
     
@@ -100,7 +115,8 @@ class Agent(object):
     :type countryCodeAttacker: int
     :param countryCodeDefender: Internal code of the defending country
     :type countryCodeDefender: int
-    :returns Number of armies to move from attacking country to newly conquered territory.
+    :returns Number of armies to move from attacking country to newly
+    conquered territory.
     :rtype int
     '''
     # Default is to move all but one army
@@ -108,8 +124,10 @@ class Agent(object):
 
   def fortifyPhase(self, board):
     '''! Call to fortify.
-    Just before this call, board will update the moveable armies in each territory to the number of armies.
-    You can fortify multiple times, always between your countries that are linked and have moveable armies.
+    Just before this call, board will update the moveable armies in each
+    territory to the number of armies.
+    You can fortify multiple times, always between your countries that are
+    linked and have moveable armies.
     '''
     pass
   
@@ -158,7 +176,9 @@ class RandomAgent(Agent):
     
     :param name: Name of the agent.
     :type name: str
-    :param aggressiveness: Level of aggressiveness. Determines the probability of attacking until dead. 1 means always attacking until dead when attacking.
+    :param aggressiveness: Level of aggressiveness. Determines the probability
+    of attacking until dead. 1 means always attacking until dead when
+    attacking.
     :type aggressiveness: float
     '''
     super().__init__(name)
@@ -194,7 +214,8 @@ class RandomAgent(Agent):
       return c
   
   def placeArmies(self, board, numberOfArmies:int):
-    '''! Place armies at random one by one, but on the countries with enemy borders
+    '''! Place armies at random one by one, but on the countries with enemy
+    borders
     '''
     
     countries = board.getCountriesPlayer(self.code)
@@ -203,8 +224,10 @@ class RandomAgent(Agent):
       board.placeArmies(1, c)
   
   def attackPhase(self, board):
-    '''! Attack a random number of times, from random countries, to random targets.
-    The till_dead parameter is also set at random using an aggressiveness parameter
+    '''! Attack a random number of times, from random countries, to random
+    targets.
+    The till_dead parameter is also set at random using an aggressiveness
+    parameter
     '''  
     
     nbAttacks = np.random.randint(self.max_attacks)
@@ -217,7 +240,7 @@ class RandomAgent(Agent):
       target = np.random.choice(options)      
       tillDead = True if np.random.uniform()<self.aggressiveness else False
       _ = board.attack(source.code, target.code, tillDead)
-      # if self.console_debug: print(f"{self.name()}: Attacking {source.id} -> {target_c.id}: tillDead {tillDead}: Result {res}")
+      
     
     return 
   
@@ -234,7 +257,9 @@ class RandomAggressiveAgent(RandomAgent):
     
     :param name: Name of the agent.
     :type name: str
-    :param aggressiveness: Level of aggressiveness. Determines the probability of attacking until dead. 1 means always attacking until dead when attacking.
+    :param aggressiveness: Level of aggressiveness. Determines the
+    probability of attacking until dead. 1 means always attacking
+    until dead when attacking.
     :type aggressiveness: float
     '''
     super().__init__(name)
@@ -260,7 +285,8 @@ class RandomAggressiveAgent(RandomAgent):
       return c
   
   def placeArmies(self, board, numberOfArmies:int):
-    '''! Place armies at random one by one, but on the countries with enemy borders
+    '''! Place armies at random one by one, but on the countries with
+    enemy borders
     '''
     countries = board.getCountriesPlayerWithEnemyNeighbors(self.code)
     if len(countries)==0: 
@@ -276,8 +302,10 @@ class RandomAggressiveAgent(RandomAgent):
       board.placeArmies(1, c)
   
   def attackPhase(self, board):
-    '''! Attack a random number of times, from random countries, to random targets.
-    The till_dead parameter is also set at random using an aggressiveness parameter
+    '''! Attack a random number of times, from random countries, to random
+    targets.
+    The till_dead parameter is also set at random using an aggressiveness
+    parameter
     '''  
     
     nbAttacks = np.random.randint(10)
@@ -303,7 +331,8 @@ class RandomAggressiveAgent(RandomAgent):
 class Human(Agent):
   '''! Agent used to represent a human player.
   It is made so that the GUI works fine.
-  It has no methods defined because the behaviour is modeled in the GUI, depending on the human actions (pygame events)
+  It has no methods defined because the behaviour is modeled in the GUI,
+  depending on the human actions (pygame events)
   '''
   def __init__(self, name='human'):
     super().__init__(name)
@@ -319,7 +348,8 @@ class Human(Agent):
 class PeacefulAgent(RandomAgent):
 
   def __init__(self, name='peace'):
-    '''! Constructor of peaceful agent. It does not attack, so it serves as a very easy baseline
+    '''! Constructor of peaceful agent. It does not attack, so it serves
+    as a very easy baseline
     
     :param name: Name of the agent.
     :type name: str
@@ -337,7 +367,8 @@ class PeacefulAgent(RandomAgent):
   
   
   def placeArmies(self, board, numberOfArmies:int):
-    '''! Place armies at random one by one, but on the countries with enemy borders
+    '''! Place armies at random one by one, but on the countries with
+    enemy borders
     '''
     countries = board.getCountriesPlayer(self.code)
     c = countries[0]
@@ -354,93 +385,7 @@ class PeacefulAgent(RandomAgent):
     '''
     if self.console_debug: print(f"{self.name()}: Fortify: Nothing")
     return 
-
-
-class Move(object):
-  '''! Class used to simpify the idea of legal moves for an agent
-  A move is just a tuple (source, target, armies) where wource and target are countries, and armies is an integer.
-  In the initial pick, initial fortify and start turn phases, source = target is just the chosen country.
-  In the attack and fortify phases, the number of legal moves can be very big if every possible number of armies is considered, so we may limit to some options (1, 5, all) 
-  '''
-  
-  
-  def __init__(self, source=None, target=None, details=0, gamePhase = 'unknown'):
-    self.source = source
-    self.target = target
-    self.details = details
-    self.gamePhase = gamePhase
-    
-  def encode(self):
-    '''! Unique code to represent the move'''
-    if self.source is None:
-      return self.gamePhase + '_pass'
-    else:
-      return '_'.join(list(map(str, [self.gamePhase, self.source.code, self.target.code, self.details])))
-
-  def __hash__(self):
-    return hash(self.encode())
-    
-  def __repr__(self):
-    return self.encode()
-  
-  @staticmethod
-  def buildLegalMoves(board, armies=0):
-    '''! Given a board, creates a list of all the legal moves
-    Armies is used on the initialFortify and startTurn phases
-    '''
-    p = board.activePlayer
-    if board.gamePhase == 'initialPick':
-      return [Move(c,c,0, 'initialPick') for c in board.countriesLeft()]
-    elif board.gamePhase in ['initialFortify', 'startTurn']:
-      if armies == 0: return []
-      return [Move(c,c,a, board.gamePhase) for c,a in itertools.product(board.getCountriesPlayer(p.code), range(armies,armies-1,-1))]
-    elif board.gamePhase == 'attack':
-      moves = []
-      for source in board.getCountriesPlayerThatCanAttack(p.code):
-        for target in board.world.getCountriesToAttack(source.code):
-          # Attack once
-          moves.append(Move(source, target, 0, 'attack'))
-          # Attack till dead
-          moves.append(Move(source, target, 1, 'attack'))
-      moves.append(Move(None, None, None, 'attack'))
-      return moves
-    elif board.gamePhase == 'fortify':    
-      # For the moment, only considering to fortify 5 or all
-      moves = []
-      for source in board.getCountriesPlayer(p.code):
-        for target in board.world.getCountriesToFortify(source.code):          
-          if source.moveableArmies > 0:
-            # Fortify all or 1
-            moves.append(Move(source, target, 0,'fortify'))            
-            # moves.append(Move(source, target, 1,'fortify'))
-          
-          if source.moveableArmies > 5:
-            moves.append(Move(source, target, 5,'fortify'))
-      moves.append(Move(None, None, None, 'fortify'))
-      return moves
-      
-  @staticmethod
-  def play(board, move):
-    '''! Simplifies the playing of a move by considering the different game phases
-    '''
-    if board.gamePhase == 'initialPick':
-      board.outsidePickCountry(move.source.code)
-    
-    elif board.gamePhase in ['initialFortify', 'startTurn']:
-      board.outsidePlaceArmies(move.source.code, move.details)
-    
-    elif board.gamePhase == 'attack':
-      if move.source is None: return
-      try:
-        board.attack(move.source.code, move.target.code, bool(move.details))
-      except Exception as e:
-        raise e
-    
-    elif board.gamePhase == 'fortify':   
-      if move.source is None: return
-      board.fortifyArmies(move.details, move.source.code, move.target.code)
-    
-                     
+                 
 #%% Tree search methods
 
 class TreeSearch(Agent):
@@ -465,15 +410,6 @@ class TreeSearch(Agent):
     '''
     return board.getNumberOfPlayersLeft()==1
 
-  def selectAction(self, board, depth):
-    ''' Given a state, chose one of the children'''
-    moves = self.move_table[hash(board)]
-    return np.random.choice(moves)
-
-  def doRollout(self, board, depth):
-    ''' Given a leaf node 
-    '''
-    return 
   
   def playout(self, sim_board, changeAllAgents = False, maxRounds = 60,
               safety = 10e5, sim_console_debug = False):
