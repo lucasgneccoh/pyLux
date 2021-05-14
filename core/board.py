@@ -103,7 +103,7 @@ class Board(object):
     
   @staticmethod
   def fromDicts(continents:dict, countries:dict, inLinks:dict,\
-                players:dict, misc:dict):
+                players:dict, misc:dict, defaultAgent = agent.RandomAgent):
     world = World.fromDicts(continents, countries, inLinks)
     new_players = {}
     for i, attrs in players.items():
@@ -115,7 +115,6 @@ class Board(object):
     if not prefs is None:
       board.setPreferences(prefs)
       
-    # TODO: give players theirs cards (in number)
     for i, attrs in players.items():
       for n in range(int(attrs['cards'])):
         new_players[i].cards.append(board.deck.draw())

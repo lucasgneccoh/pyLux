@@ -1,3 +1,4 @@
+import itertools
 class Move(object):
   '''! Class used to simpify the idea of legal moves for an agent
   A move is just a tuple (source, target, armies) where wource and target
