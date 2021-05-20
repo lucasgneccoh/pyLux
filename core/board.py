@@ -1300,6 +1300,7 @@ class Board(object):
           
           if source.moveableArmies > 5:
             #moves.append(Move(source, target, 5,'fortify'))
+            pass
       moves.append(Move(None, None, None, 'fortify'))
       return moves
       
