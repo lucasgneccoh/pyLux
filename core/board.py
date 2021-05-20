@@ -1135,29 +1135,29 @@ class Board(object):
     return new_board
     
     
-  def simulate(self, newAgent, playerCode, changeAllAgents = True, maxRounds = 60,
+  def simulate(self, newAgent, playerCode=0, changeAllAgents = True, maxRounds = 60,
                safety=10e5, sim_console_debug = False):
     '''! Use to facilitate the playouts for search algorithms. Should be called from a copy of the actual board, because it would change the game.
     The player that called the simulation should give a new agent representing a policy it would follow, so that in the new copy the player will be changed with this new agent, and the game will be played until the end or for a maximum number of rounds.
     '''
     oldActivePlayerCode = self.activePlayer.code
 
-    # Change first the player that executed the simulation
-    # with its default policy
-    newPlayer = self.copyPlayer(playerCode, newAgent)
-    self.players[playerCode] = newPlayer  
-    self.players[playerCode].setPrefs(playerCode)
-    self.players[playerCode].human = False
-    
-    # Change all players to newAgent to do the rollout
-    for i, p in self.players.items():
-      if changeAllAgents or p.human:
-        p.console_debug = sim_console_debug
-        newPlayer = self.copyPlayer(i, newAgent) 
-        self.players[i] = newPlayer  
-        self.players[i].setPrefs(i)
-        self.players[i].human = False
-        self.players[i].name_string += '_sim_' + str(i)
+    if not changeAllAgents:
+      # Change first the player that executed the simulation
+      # with its default policy
+      newPlayer = self.copyPlayer(playerCode, newAgent)
+      self.players[playerCode] = newPlayer  
+      self.players[playerCode].setPrefs(playerCode)
+      self.players[playerCode].human = False
+    else:
+      # Change all players to newAgent to do the rollout
+      for i, p in self.players.items():
+          p.console_debug = sim_console_debug
+          newPlayer = self.copyPlayer(i, newAgent) 
+          self.players[i] = newPlayer  
+          self.players[i].setPrefs(i)
+          self.players[i].human = False
+          self.players[i].name_string += '_sim_' + str(i)
     
       
     self.playerCycle = itertools.cycle(list(self.players.values()))
