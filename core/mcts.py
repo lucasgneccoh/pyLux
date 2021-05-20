@@ -9,25 +9,23 @@ class MCTS(object):
     self.rootPlayer = rootPlayer
     self.eps = 1e-8
 
-  def expandCondition(self, state, args):
-    ''' Determines when to expand a leaf.
-        Example: for flatMC or UCB, only the root is expanded (args['depth']==0)
-        For UCT or any other common MCTS algorithm, the leaf is always expanded
-    '''
-    return True
-
   def leafFunc(self, state, args):
     ''' When applied to a leaf, gives a distribution over actions from the
         current state, and the value of the leaf
         By default, we expand and perform a rollout
     '''
-    valid = Move.buildLegalMoves(state)
+    # Insert children
+    valid = state.legalMoves()
+    s = hash(state)
+    pi = np.ones((1, len(valid)))/len(valid)
+    self.Ps[s] = pi
     copy_state = copy.deepcopy(state)
     copy_state.simulate(agent.RandomAgent, 0, changeAllAgents=True)
-    return np.ones((1, len(valid)))/len(valid), Move.isTerminal(copy_state, args.rootPlayer)
+    return pi, copy_state.isTerminal(args.rootPlayer)
 
   def selectAction(self, legalMoves, state, args):
-    ''' Given a list of possible actions, select the action to perform
+    ''' Given a list of possible actions, select the action to perform while going
+        down the tree
         Default is UCB1
     '''
     c = np.sqrt(2)
@@ -47,7 +45,7 @@ class MCTS(object):
     ''' Advances the game from state by performing action
         Modifies the state inplace
     '''
-    Move.play(state, action)
+    state.playMove(action)
     return
     
     
@@ -58,9 +56,10 @@ class MCTS(object):
     '''
     currPlayer = state.activePlayer
     s = hash(state)
+    args.rootPlayer = self.rootPlayer
     
     # 1. If state is terminal, return score
-    v = Move.isTerminal(state, self.rootPlayer)
+    v = state.isTerminal(self.rootPlayer)
     if v != 0: return v
 
     # 2. If is leaf
@@ -70,41 +69,72 @@ class MCTS(object):
       # Esto entonces depende de la fase del juego
       # TODO: Como hacer que sea general? para flat MC, UCB por ejemplo
       pi, v = self.leafFunc(state) # pi must have size of legalMoves
+      return v
+    else:
+      # 3. Not a leaf, continue search
+      legalMoves = state.legalMoves()
+      action = self.selectAction(legalMoves, state, args)
+      a = hash(action)
+      self.playAction(state, action)
 
-      # If pi is None, that means no expansion must be made
-      # i.e FlatMC
-      # 2.2 Get valid moves
-      legalMoves = Move.buildLegalMoves(state)
+      args['depth'] += 1
+      v = self.search(state, args)
 
-      # 2.3 Mask policy and save it
-      pi = legalMoves * pi # Put 0 on invalid moves
-      if self.expandCondition(state, args): self.Ps[s] = pi
-      if s in self.Ns:
-        self.Ns[s] += 1
+      # 4. Backpropagate
+      if (s,a) in self.Qsa:
+        self.Qsa[(s,a)] = (self.Nsa[(s,a)]*self.Qsa[(s,a)] + v) / (self.Nsa[(s,a)] + 1)
+        self.Nsa[(s,a)] += 1
       else:
-        self.Ns[s] = 0
+        self.Qsa[(s,a)] = v
+        self.Nsa[(s,a)] = 1
+
+      self.Ns[s] += 1
       return v
 
-    # 3. Not a leaf, continue search
-    legalMoves = Move.buildLegalMoves(state)
-    action = self.selectAction(legalMoves, state, args)
-    a = hash(action)
-    self.playAction(state, action)
+  def getPolicy(state):
+    s = hash(state)
+    return self.Ps[s]
 
-    args['depth'] += 1
-    v = self.search(state, args)
+class FlatMC(MCTS):
+  def __init__(self, rootPlayer):
+    super().__init__(rootPlayer)
 
-    # 4. Backpropagate
-    if (s,a) in self.Qsa:
-      self.Qsa[(s,a)] = (self.Nsa[(s,a)]*self.Qsa[(s,a)] + v) / (self.Nsa[(s,a)] + 1)
-      self.Nsa[(s,a)] += 1
+  def leafFunc(self, state, args):
+    if args['depth'] == 0:
+      valid = state.legalMoves()
+      s = hash(state)
+      pi = np.ones((1, len(valid)))/len(valid)
+      self.Ps[s] = pi
+      copy_state = copy.deepcopy(state)
+      copy_state.simulate(agent.RandomAgent, 0, changeAllAgents=True)
+      return pi, copy_state.isTerminal(args.rootPlayer)
     else:
-      self.Qsa[(s,a)] = v
-      self.Nsa[(s,a)] = 1
+      copy_state = copy.deepcopy(state)
+      copy_state.simulate(agent.RandomAgent, 0, changeAllAgents=True)
+      return None, copy_state.isTerminal(args.rootPlayer)
 
-    self.Ns[s] += 1
-    return v
+  def selectAction(self, legalMoves, state, args):
+    return np.random.choice(legalMoves)
       
+class UBC1(MCTS):
+  def __init__(self, rootPlayer):
+    super().__init__(rootPlayer)
+
+  def leafFunc(self, state, args):
+    if args['depth'] == 0:
+      valid = state.legalMoves()
+      s = hash(state)
+      pi = np.ones((1, len(valid)))/len(valid)
+      self.Ps[s] = pi
+      copy_state = copy.deepcopy(state)
+      copy_state.simulate(agent.RandomAgent, 0, changeAllAgents=True)
+      return pi, copy_state.isTerminal(args.rootPlayer)
+    else:
+      copy_state = copy.deepcopy(state)
+      copy_state.simulate(agent.RandomAgent, 0, changeAllAgents=True)
+      return None, copy_state.isTerminal(args.rootPlayer)
+
     
+  
     
     

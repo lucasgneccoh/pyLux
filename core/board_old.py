@@ -10,7 +10,6 @@ import pandas as pd
 import agent
 from deck import Deck, ListThenArithmeticCardSequence
 from world import World, Country, Continent
-from move import Move
 
 
 from string import ascii_lowercase
@@ -109,7 +108,7 @@ class Board(object):
     new_players = {}
     for i, attrs in players.items():
       # TODO: Maybe define a way to change this default agent
-      p = defaultAgent(attrs['name'])
+      p = agent.RandomAgent(attrs['name'])
       new_players[i] = p
     board = Board(world, list(new_players.values()))
     prefs = misc.get('prefs')
@@ -141,15 +140,9 @@ class Board(object):
     
     countries = {c['code']: c for c in self.countries()}
     continents = {i: c for i,c in self.world.continents.items()}
-    players = dict()
-    for i, p in self.players.items():
-      print(i, p.code, p)
-      players[p.code] = {'code':p.code, 'name':p.name(),
+    players = {p.code:{'code':p.code, 'name':p.name(),
                        'income': self.getPlayerIncome(p.code),
-                       'cards':len(p.cards),
-                       'alive':p.is_alive}
-      print(players)
-      print("END FOR")
+                       'cards':len(p.cards)} for i, p in self.players.items()}
     inLinks = {n.code: [c.code for c in self.world.predecessors(n.code)] for n in self.countries()}
     misc = {'gamePhase': self.gamePhase, 'activePlayer':self.activePlayer.code}
     return continents, countries, inLinks, players, misc
@@ -336,10 +329,11 @@ class Board(object):
     '''! Performs the necessary actions at the end of a round (all players played)
     '''
     self.roundCount += 1
-    if self.roundCount != 1:
-      # Update continent bonus if it is not the first round
-      for i, cont in self.world.continents.items():
-        cont.bonus = cont.bonus*(1+self.continentIncrease)
+    if self.roundCount == 1: return
+    
+    # Update continent bonus if it is not the first round
+    for i, cont in self.world.continents.items():
+      cont.bonus = cont.bonus*(1+self.continentIncrease)
     
     s = 0
     for i, p in self.players.items():
@@ -755,6 +749,7 @@ class Board(object):
     p.income -= armies
     if self.console_debug:
       print(f'outsidePlaceArmies: Placed {armies} armies in {c.id}')
+    if p.income == 0: self.endTurn()
     return 0
     
     
@@ -940,7 +935,7 @@ class Board(object):
   def playerIsStillInTheGame(self, player:int):
     '''! Return if player is alive or not
     '''
-    p = self.players.get(player)
+    p = self.players.get[player]
     if not p is None: return p.is_alive
     return None
     
@@ -1122,7 +1117,7 @@ class Board(object):
     for i, p in new_board.players.items():
       for n in self.players[i].__dict__:
         if n != 'board':
-          setattr(p, n, copy.deepcopy(getattr(self.players[i], n)))
+          setattr(p, n, copy.deepcopy(getattr(self.players[i], n), memo))
     
     new_board.setPreferences(self.prefs)
     # Extra copying
@@ -1249,8 +1244,10 @@ class Board(object):
       newPlayer = oldPlayer.__class__()
     else:
       newPlayer = newAgent.__class__()
+      
     for n in oldPlayer.__dict__:
-      setattr(newPlayer, n, copy.deepcopy(getattr(oldPlayer,n)))
+      if n != 'name_string':
+        setattr(newPlayer, n, copy.deepcopy(getattr(oldPlayer,n)))
     newPlayer.console_debug = False
     return newPlayer
   
@@ -1261,102 +1258,5 @@ class Board(object):
                           'owner':[c.owner for c in board.countries()],
                           'armies':[c.armies for c in board.countries()]})
     return df
-
-  def showPlayers(self):
-    for i, p in self.players.items():
-      print(i, p.code, p)
-
-
-  def legalMoves(self):
-    '''! Given a board, creates a list of all the legal moves
-    Armies is used on the initialFortify and startTurn phases
-    '''
-    p = self.activePlayer
-    armies = p.income
-    if self.gamePhase == 'initialPick':
-      return [Move(c,c,0, 'initialPick') for c in self.countriesLeft()]
-    elif self.gamePhase in ['initialFortify', 'startTurn']:
-      if armies == 0: return []
-      return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), range(armies,armies-1,-1))]
-    elif self.gamePhase == 'attack':
-      moves = []
-      for source in self.getCountriesPlayerThatCanAttack(p.code):
-        for target in self.world.getCountriesToAttack(source.code):
-          # Attack once
-          moves.append(Move(source, target, 0, 'attack'))
-          # Attack till dead
-          moves.append(Move(source, target, 1, 'attack'))
-      moves.append(Move(None, None, None, 'attack'))
-      return moves
-    elif self.gamePhase == 'fortify':    
-      # For the moment, only considering to fortify 5 or all
-      moves = []
-      for source in self.getCountriesPlayer(p.code):
-        for target in self.world.getCountriesToFortify(source.code):          
-          if source.moveableArmies > 0:
-            # Fortify all or 1
-            moves.append(Move(source, target, 0,'fortify'))            
-            # moves.append(Move(source, target, 1,'fortify'))
-          
-          if source.moveableArmies > 5:
-            moves.append(Move(source, target, 5,'fortify'))
-      moves.append(Move(None, None, None, 'fortify'))
-      return moves
-      
-
-  def playMove(self, move):
-    '''! Simplifies the playing of a move by considering the different game phases
-    '''
-    if self.gamePhase == 'initialPick':
-      self.outsidePickCountry(move.source.code)
-      if len(self.countriesLeft())==0:
-          self.gamePhase = 'initialFortify'
-      self.endTurn()
-      return 0
-    
-    elif self.gamePhase == 'initialFortify':
-      self.outsidePlaceArmies(move.source.code, move.details)
-      if(sum([p.initialArmies + p.income for i, p in self.players.items()])==0):
-        self.gamePhase = 'startTurn'
-      if self.activePlayer.income == 0:
-        self.endTurn()
-
-    elif self.gamePhase == 'startTurn':  
-      self.outsidePlaceArmies(move.source.code, move.details)
-      if self.activePlayer.income == 0:
-        self.gamePhase = 'attack'
-      
-      
-    
-    elif self.gamePhase == 'attack':
-      if move.source is None:
-          self.updatemoveable()
-          self.gamePhase = 'fortify'
-          return 0
-      try:
-        return self.attack(move.source.code, move.target.code, bool(move.details))
-      except Exception as e:
-        raise e
-    
-    elif self.gamePhase == 'fortify':   
-      if move.source is None:
-          self.gamePhase = 'startTurn'
-          self.endTurn()
-          if self.activePlayer.code == self.firstPlayerCode:
-            # New round has begun          
-            self.setupNewRound()
-            self.prepareStart()
-          return 0
-        
-      return self.fortifyArmies(move.details, move.source.code, move.target.code)
-      
-
-  def isTerminal(self, rootPlayer):
-    if self.getNumberOfPlayersLeft()==1:
-      if self.players[rootPlayer].is_alive: return 1
-      return -1
-    # Not over
-    return 0
-    
 
 

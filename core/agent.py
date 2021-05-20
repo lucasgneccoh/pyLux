@@ -25,6 +25,16 @@ class Agent(object):
     self.name_string = name
     self.human = False
     self.console_debug = False
+
+  def __deepcopy__(self, memo):
+    newPlayer = self.__class__()
+    for n in self.__dict__:
+      setattr(newPlayer, n, getattr(self, n))
+    return newPlayer
+
+  def copyToAgent(self, newPlayer):
+    for n in self.__dict__:
+      setattr(newPlayer, n, getattr(self, n))
   
   def setPrefs(self, code:int):
     '''! Puts the agent into the game by assigning it a code and giving it
@@ -460,7 +470,7 @@ class FlatMC(TreeSearch):
     
   def run_flat_mc(self, board, budget=None, armies = 0):
     budget = budget if not budget is None else self.budget
-    moves = Move.buildLegalMoves(board, armies)
+    moves = board.legalMoves()
     bestScore, bestMove = -9999999999, None
     if self.console_debug: 
       print(f"--FlatMC:run_flat_mc: {board.gamePhase}\n Trying {len(moves)} moves, budget of {budget}")
@@ -472,7 +482,7 @@ class FlatMC(TreeSearch):
         sim_board.replacePlayer(self.code, self.playout_policy())
         
         sim_board.console_debug = False
-        Move.play(sim_board, m)
+        sim_board.playMove(m)
         
         self.playout(sim_board)  
         total_reward += self.score(sim_board)

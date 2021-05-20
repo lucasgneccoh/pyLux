@@ -9,6 +9,10 @@ Created on Sun Apr 18 19:52:33 2021
 from world import World
 from board import Board
 import agent
+import time
+import numpy as np
+import copy
+from mcts import MCTS, FlatMC, UCB1
 
 
 #%% TESTING
@@ -31,20 +35,22 @@ if __name__ == '__main__':
   pP = agent.PeacefulAgent()
   pA = agent.RandomAggressiveAgent('RandomAgressive')
  
-  players = [pR1, pMC]
+  players = [pR1, pA]
   # Set board
   prefs = {'initialPhase': False, 'useCards':True,
            'transferCards':True, 'immediateCash': True,
            'continentIncrease': 0.05, 'pickInitialCountries':True,
            'armiesPerTurnInitial':4,'console_debug':False}  
-  board = Board(world, players)
-  board.setPreferences(prefs)
+  board_orig = Board(world, players)
+  board_orig.setPreferences(prefs)
+  board_orig.showPlayers()
   
   #%% Test play
   if False:
+    print("\nTest play\n")
     import tqdm
-    
-    N = 60
+    board = copy.deepcopy(board_orig)
+    N = 20
     start = time.process_time()
     iter_times = []
     armies = []
@@ -93,6 +99,8 @@ if __name__ == '__main__':
   
   #%% Test deepcopy 
   if False:
+    print("\nTest deepcopy\n")
+    board = copy.deepcopy(board_orig)
     board_copy = copy.deepcopy(board)
     for i in range(10):
       board.play()
@@ -137,15 +145,17 @@ if __name__ == '__main__':
   
   #%% Test simulate
   if False:
+    print("\nTest simulate\n")
     pMC.console_debug = False
-    players = [pMC, pR1]
-    board = Board(world, players)
+    players = [pMC, copy.deepcopy(pR2)]
+    board = Board(copy.deepcopy(world), players)
+    board.showPlayers()
     board.setPreferences(prefs)
     for i in range(2):
       board.play()
     board.report()
 
-    for j in range(5):
+    for j in range(2):
       sim_board = copy.deepcopy(board)
 
       # newAgent (instance, not class), playerCode
@@ -166,9 +176,19 @@ if __name__ == '__main__':
     
   #%% Test fromDicts, toDicts
   if False:
+    print("\nTest fromDicts, toDicts\n")
+    print('board_orig')
+    board_orig.showPlayers()
+    board = copy.deepcopy(board_orig)
+    board.showPlayers()
+    board.report()
+    print('board')
+    for i, p in board.players.items():
+      print(i, p.code, p)
     for _ in range(3):
       board.play()
     continents, countries, inLinks, players, misc = board.toDicts()
+    print(players)
     board_copy = Board.fromDicts(continents, countries, inLinks,\
                                  players, misc)
       
@@ -178,18 +198,35 @@ if __name__ == '__main__':
     print(board.activePlayer.code)
     print(board_copy.activePlayer.code)
 
-  test_dict = {}
-  test_dict[board] = {}
-  c = board.countries()[0]
-  move = agent.Move(c,c,1,'startTurn')
-  test_dict[board][move] = 'testing'
-  move = agent.Move(c,c,1,'attack')
-  test_dict[board][move] = 'testing 2'
-  
-  test_dict[board] = 5
-  board.gamePhase = 'other'
-  test_dict[board] += 5
-  print(test_dict)
+  #%% Dicts and hashes
+  if False:
+    print('\nTesting dicts and hashs\n')
+    test_dict = {}
+    test_dict[board] = {}
+    c = board.countries()[0]
+    move = agent.Move(c,c,1,'startTurn')
+    test_dict[board][move] = 'testing'
+    move = agent.Move(c,c,1,'attack')
+    test_dict[board][move] = 'testing 2'
+    
+    test_dict[board] = 5
+    board.gamePhase = 'other'
+    test_dict[board] += 5
+    print(test_dict)
+    
+
+
+  #%% Test MCTS
+  if True:
+    print("\nTest MCTS\n")
+    players = [copy.deepcopy(pR1), copy.deepcopy(pR2)]
+    board = Board(copy.deepcopy(world), players)
+    p = board.activePlayer
+    mcts = MCTS(p.code)
+    N = 10
+    
+    for i in range(N):
+      
   
     
 
