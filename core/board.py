@@ -1283,7 +1283,7 @@ class Board(object):
       for source in self.getCountriesPlayerThatCanAttack(p.code):
         for target in self.world.getCountriesToAttack(source.code):
           # Attack once
-          moves.append(Move(source, target, 0, 'attack'))
+          # moves.append(Move(source, target, 0, 'attack'))
           # Attack till dead
           moves.append(Move(source, target, 1, 'attack'))
       moves.append(Move(None, None, None, 'attack'))
@@ -1299,7 +1299,7 @@ class Board(object):
             # moves.append(Move(source, target, 1,'fortify'))
           
           if source.moveableArmies > 5:
-            moves.append(Move(source, target, 5,'fortify'))
+            #moves.append(Move(source, target, 5,'fortify'))
       moves.append(Move(None, None, None, 'fortify'))
       return moves
       
