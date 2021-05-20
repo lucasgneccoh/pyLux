@@ -1159,6 +1159,7 @@ class Board(object):
         self.players[i] = newPlayer  
         self.players[i].setPrefs(i)
         self.players[i].human = False
+        self.players[i].name_string += '_sim_' + str(i)
     
       
     self.playerCycle = itertools.cycle(list(self.players.values()))
