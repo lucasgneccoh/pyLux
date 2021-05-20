@@ -1277,7 +1277,8 @@ class Board(object):
       return [Move(c,c,0, 'initialPick') for c in self.countriesLeft()]
     elif self.gamePhase in ['initialFortify', 'startTurn']:
       if armies == 0: return []
-      return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), range(armies,armies-1,-1))]
+      # return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), range(armies,armies-1,-1))]
+      return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), range(1))]
     elif self.gamePhase == 'attack':
       moves = []
       for source in self.getCountriesPlayerThatCanAttack(p.code):
