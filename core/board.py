@@ -325,12 +325,8 @@ class Board(object):
       base = self.getNumberOfCountriesPlayer(p.code)
       p.income += max(int(base/3),3)
     elif self.gamePhase == "initialFortify":
-      if p.income >0:
-        # There are armies still in income
-        pass
-      else:
-        p.income = min(p.initialArmies, self.armiesPerTurnInitial)
-        p.initialArmies -= p.income
+      p.income = min(p.initialArmies, self.armiesPerTurnInitial)
+      p.initialArmies -= p.income
   
   def setupNewRound(self):
     '''! Performs the necessary actions at the end of a round (all players played)
