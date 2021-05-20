@@ -478,7 +478,8 @@ class Board(object):
           return
         
 
-      # Start turn: Give armies and place them    
+      # Start turn: Give armies and place them
+      p = self.activePlayer
       try:
         if self.console_debug: print(f"Board:play: {self.gamePhase}")
         if self.gamePhase == 'startTurn':      

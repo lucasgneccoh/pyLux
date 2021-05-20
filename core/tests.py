@@ -217,7 +217,7 @@ if __name__ == '__main__':
 
 
   #%% Test MCTS
-  if True:
+  if False:
     print("\nTest MCTS\n")
     players = [copy.deepcopy(pR1), copy.deepcopy(pR2)]
     board = Board(copy.deepcopy(world), players)
