@@ -452,8 +452,7 @@ class Board(object):
                 self.prepareStart()
               
             if not over:
-              if not self.activePlayer.human:
-                print(f"Initial fortify for {self.activePlayer.code}")
+              if not self.activePlayer.human:                
                 self.initialFortifyComputer()          
               else:
                 pass
