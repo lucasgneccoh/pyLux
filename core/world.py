@@ -132,20 +132,19 @@ class World(object):
       # Create the actual countries and continents
       aux_countries = {c['id']: Country(**c, code=i) for i,c in enumerate(countries)}
       
-      self.continents = {str(i): Continent(**c) for i,c in enumerate(continents)}
+      self.continents = {i: Continent(**c) for i,c in enumerate(continents)}
       for k, cont in self.continents.items():
         cont['countries_id'] = [ID for ID in cont['countries']]
         cont['countries'] = []
         for c in cont['countries_id']:
-          cont['countries'].append(str(aux_countries[c].code))
-          aux_countries[c]['continent'] = str(k)
+          cont['countries'].append(int(aux_countries[c].code))
+          aux_countries[c]['continent'] = int(k)
           
-      self.countries = {str(v.code): v for _,v in aux_countries.items()}
+      self.countries = {int(v.code): v for _,v in aux_countries.items()}
       
       # Update attributes from keyword values
       for _, c in self.countries.items(): c.dictToAttr()
       for _, c in self.continents.items(): c.dictToAttr()
-      
       relabel = {c.id: c.code for _, c in self.countries.items()}
       nx.relabel_nodes(self.map_graph, relabel, copy=False)
       
