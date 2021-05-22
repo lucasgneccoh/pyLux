@@ -142,14 +142,11 @@ class Board(object):
     countries = {c['code']: c for c in self.countries()}
     continents = {i: c for i,c in self.world.continents.items()}
     players = dict()
-    for i, p in self.players.items():
-      print(i, p.code, p)
+    for i, p in self.players.items():      
       players[p.code] = {'code':p.code, 'name':p.name(),
                        'income': self.getPlayerIncome(p.code),
                        'cards':len(p.cards),
-                       'alive':p.is_alive}
-      print(players)
-      print("END FOR")
+                       'alive':p.is_alive}      
     inLinks = {n.code: [c.code for c in self.world.predecessors(n.code)] for n in self.countries()}
     misc = {'gamePhase': self.gamePhase, 'activePlayer':self.activePlayer.code}
     return continents, countries, inLinks, players, misc
