@@ -97,12 +97,12 @@ class World(object):
     graph = nx.DiGraph()
     graph.add_nodes_from([i for i in countries])
     for k, v in inLinks.items():
-      graph.add_edges_from([(x,k) for x in v])
+      graph.add_edges_from([(int(x),int(k)) for x in v])
     world.map_graph = graph
     # Continents
-    world.continents = {k: Continent(**c) for k, c in continents.items()}
+    world.continents = {int(k): Continent(**c) for k, c in continents.items()}
     # Countries
-    world.countries = {k: Country(**c) for k, c in countries.items()}
+    world.countries = {int(k): Country(**c) for k, c in countries.items()}
     return world
     
   def toDicts(self):
