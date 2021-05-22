@@ -12,7 +12,7 @@ import agent
 import time
 import numpy as np
 import copy
-from mcts import MCTS, FlatMC, UCB1
+from mcts import MCTS
 
 
 #%% TESTING
@@ -175,7 +175,7 @@ if __name__ == '__main__':
   
     
   #%% Test fromDicts, toDicts
-  if False:
+  if True:
     print("\nTest fromDicts, toDicts\n")
     print('board_orig')
     board_orig.showPlayers()
@@ -187,16 +187,23 @@ if __name__ == '__main__':
       print(i, p.code, p)
     for _ in range(3):
       board.play()
+      
+    print("\n\n Turning board to Dicts")
     continents, countries, inLinks, players, misc = board.toDicts()
     print(players)
-    board_copy = Board.fromDicts(continents, countries, inLinks,\
+    board_copy_1 = copy.deepcopy(board)
+    board_copy_2 = Board.fromDicts(continents, countries, inLinks,\
                                  players, misc)
       
+    print("Orig board:")
     print(board.countries())
-    print(board_copy.countries())
+    print("\nCopy 1")
+    print(board_copy_1.countries())
+    print("\nCopy 2")
+    print(board_copy_2.countries())
     print()
     print(board.activePlayer.code)
-    print(board_copy.activePlayer.code)
+    print(board_copy_2.activePlayer.code)
 
   #%% Dicts and hashes
   if False:
@@ -226,6 +233,7 @@ if __name__ == '__main__':
     N = 10
     
     for i in range(N):
+      pass
       
   
     

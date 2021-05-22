@@ -100,9 +100,9 @@ class World(object):
       graph.add_edges_from([(x,k) for x in v])
     world.map_graph = graph
     # Continents
-    world.continents = {k: Continent(**c.__dict__) for k, c in continents.items()}
+    world.continents = {k: Continent(**c) for k, c in continents.items()}
     # Countries
-    world.countries = {k: Country(**c.__dict__) for k, c in countries.items()}
+    world.countries = {k: Country(**c) for k, c in countries.items()}
     return world
     
   def toDicts(self):
@@ -271,6 +271,11 @@ class Attr_dict(dict):
   def dictToAttr(self):
     for k,v in self.items():
       setattr(self, k, v)
+  
+  def attrToDict(self):
+    for k in self.__dict__:
+      self[k] = getattr(self, k)
+  
 
 
 class Continent(Attr_dict):

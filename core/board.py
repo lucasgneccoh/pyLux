@@ -139,6 +139,12 @@ class Board(object):
       
     '''
     
+    for c in self.countries():
+      c.attrToDict()
+    
+    for _, c in self.world.continents.items():
+      c.attrToDict()
+      
     countries = {c['code']: c for c in self.countries()}
     continents = {i: c for i,c in self.world.continents.items()}
     players = dict()
