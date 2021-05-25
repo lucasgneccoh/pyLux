@@ -122,6 +122,11 @@ class Board(object):
     board.gamePhase = misc['gamePhase']
     while board.activePlayer.code != int(misc['activePlayer']):
       board.activePlayer = next(board.playerCycle)
+      
+    while board.nextCashArmies != int(misc['nextCashArmies']):
+      board.nextCashArmies = board.cardSequence.nextCashArmies()
+      if board.nextCashArmies > int(misc['nextCashArmies']):
+        raise Exception("Board:fromDicts: Error with nextCashArmies. The value was not a value obtained from the default card sequence")
     return board
   
   def toDicts(self):
@@ -154,7 +159,8 @@ class Board(object):
                        'cards':len(p.cards),
                        'alive':p.is_alive}      
     inLinks = {n.code: [c.code for c in self.world.predecessors(n.code)] for n in self.countries()}
-    misc = {'gamePhase': self.gamePhase, 'activePlayer':self.activePlayer.code}
+    misc = {'gamePhase': self.gamePhase, 'activePlayer':self.activePlayer.code,
+            'nextCashArmies':self.nextCashArmies}
     return continents, countries, inLinks, players, misc
     
   
