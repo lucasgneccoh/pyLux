@@ -173,6 +173,7 @@ class Board(object):
     if rootPlayer == 0: return new
     numPlayers = len(self.players)
     map_players = {(rootPlayer + i)%numPlayers: i for i in range(numPlayers)}
+    map_to_orig = {i: (rootPlayer + i)%numPlayers for i in range(numPlayers)}
     map_players[-1] = -1
     # Update countries
     for c in new.countries():
@@ -197,7 +198,7 @@ class Board(object):
     
     # Update continents
     new.updateContinents()
-    return new
+    return new, map_to_orig
   
   def setPreferences(self, prefs):
     self.prefs = prefs
