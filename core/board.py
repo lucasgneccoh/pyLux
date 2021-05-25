@@ -169,8 +169,8 @@ class Board(object):
         Returns a copy of the current board with the canonical representation
     '''
     rootPlayer = int(rootPlayer)
-    if rootPlayer == 0: return
     new = copy.deepcopy(self)
+    if rootPlayer == 0: return new
     numPlayers = len(self.players)
     map_players = {(rootPlayer + i)%numPlayers: i for i in range(numPlayers)}
     map_players[-1] = -1
@@ -1360,14 +1360,14 @@ class Board(object):
       return 0
     
     elif self.gamePhase == 'initialFortify':
-      self.outsidePlaceArmies(move.source.code, move.details)
+      self.outsidePlaceArmies(move.source.code, int(move.details))
       if(sum([p.initialArmies + p.income for i, p in self.players.items()])==0):
         self.gamePhase = 'startTurn'
       if self.activePlayer.income == 0:
         self.endTurn()
 
     elif self.gamePhase == 'startTurn':  
-      self.outsidePlaceArmies(move.source.code, move.details)
+      self.outsidePlaceArmies(move.source.code, int(move.details))
       if self.activePlayer.income == 0:
         self.gamePhase = 'attack'
       
@@ -1382,6 +1382,7 @@ class Board(object):
         return self.attack(move.source.code, move.target.code, bool(move.details))
       except Exception as e:
         raise e
+        
     
     elif self.gamePhase == 'fortify':   
       if move.source is None:
