@@ -164,6 +164,30 @@ class Board(object):
             'nextCashArmies':self.nextCashArmies}
     return continents, countries, inLinks, players, misc
     
+  def toCanonical(self, rootPlayer):
+    ''' The idea is that rootPlayer becomes player 0,the rest are moved accordingly
+        Returns a copy of the current board with the canonical representation
+    '''
+    rootPlayer = int(rootPlayer)
+    if rootPlayer == 0: return
+    new = copy.deepcopy(self)
+    numPlayers = len(self.players)
+    map_players = {(rootPlayer + i)%numPlayers: i for i in range(numPlayers)}
+    map_players[-1] = -1
+    # Update countries
+    for c in new.countries():
+      c.owner = map_players[c.owner]
+    
+    # Update players dictionary  
+    copy_players = copy.deepcopy(new.players)
+    for i in range(numPlayers):
+      new.players[map_players[i]] = copy_players[i]
+      new.players[map_players[i]].code = map_players[i]
+      new.players[map_players[i]].setPrefs(map_players[i])
+    
+    # Update continents
+    new.updateContinents()
+    return new
   
   def setPreferences(self, prefs):
     self.prefs = prefs
