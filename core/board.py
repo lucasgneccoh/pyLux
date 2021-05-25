@@ -185,6 +185,16 @@ class Board(object):
       new.players[map_players[i]].code = map_players[i]
       new.players[map_players[i]].setPrefs(map_players[i])
     
+    # Update activePlayer and playerCycle
+    newActive = map_players[self.activePlayer.code]
+    new.playerCycle = itertools.cycle(list(new.players.values()))
+    while new.activePlayer.code != newActive:
+      new.activePlayer = next(new.playerCycle)
+    
+    new.firstPlayerCode = map_players[self.firstPlayerCode]
+    new.lastPlayerCode = map_players[self.lastPlayerCode]
+    
+    
     # Update continents
     new.updateContinents()
     return new
