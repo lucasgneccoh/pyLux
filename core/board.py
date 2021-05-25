@@ -157,7 +157,8 @@ class Board(object):
       players[p.code] = {'code':p.code, 'name':p.name(),
                        'income': self.getPlayerIncome(p.code),
                        'cards':len(p.cards),
-                       'alive':p.is_alive}      
+                       'alive':p.is_alive,
+                       'countries':p.num_countries}      
     inLinks = {n.code: [c.code for c in self.world.predecessors(n.code)] for n in self.countries()}
     misc = {'gamePhase': self.gamePhase, 'activePlayer':self.activePlayer.code,
             'nextCashArmies':self.nextCashArmies}
