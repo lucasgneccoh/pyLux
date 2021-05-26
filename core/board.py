@@ -170,8 +170,9 @@ class Board(object):
     '''
     rootPlayer = int(rootPlayer)
     new = copy.deepcopy(self)
-    if rootPlayer == 0: return new
     numPlayers = len(self.players)
+    if rootPlayer == 0: return new, {i: i for i in range(numPlayers)}
+    
     map_players = {(rootPlayer + i)%numPlayers: i for i in range(numPlayers)}
     map_to_orig = {i: (rootPlayer + i)%numPlayers for i in range(numPlayers)}
     map_players[-1] = -1
@@ -1309,6 +1310,7 @@ class Board(object):
   def showPlayers(self):
     for i, p in self.players.items():
       print(i, p.code, p)
+
 
 
   def legalMoves(self):
