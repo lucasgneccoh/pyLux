@@ -791,6 +791,8 @@ class Board(object):
   
   def outsidePlaceArmies(self, country_code:int, armies:int):
     p = self.activePlayer
+    if armies == 0:
+      armies = p.income
     c = self.world.countries.get(country_code)
     if c is None: return -1
     if c.owner != p.code: return -1    
