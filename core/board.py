@@ -1372,6 +1372,7 @@ class Board(object):
         self.endTurn()
 
     elif self.gamePhase == 'startTurn':  
+      print(f"PlayMove:PlaceArmies: {move.source.id}, {move.details}")
       self.outsidePlaceArmies(move.source.code, int(move.details))
       if self.activePlayer.income == 0:
         self.gamePhase = 'attack'
@@ -1384,6 +1385,7 @@ class Board(object):
           self.gamePhase = 'fortify'
           return 0
       try:
+        print(f"PlayMove:Attack: {move.source.id}, {move.target.id}")
         return self.attack(move.source.code, move.target.code, bool(move.details))
       except Exception as e:
         raise e
@@ -1398,9 +1400,9 @@ class Board(object):
             self.setupNewRound()
             self.prepareStart()
           return 0
-      print(f"Fortified: {move.source.moveableArmies}, {move.target.moveableArmies}")
+      print(f"PlayMove:Fortified: {move.source.moveableArmies}, {move.target.moveableArmies}")
       res = self.fortifyArmies(int(move.details), move.source.code, move.target.code)
-      print(f"Fortified: {move.source.moveableArmies}, {move.target.moveableArmies}")
+      print(f"PlayMove:Fortified: {move.source.moveableArmies}, {move.target.moveableArmies}")
       return res
       
 
