@@ -1407,7 +1407,9 @@ class Board(object):
         raise e
         
     
-    elif self.gamePhase == 'fortify':   
+    elif self.gamePhase == 'fortify': 
+      if move.source.moveableArmies == 0 or move.source.armies ==1:
+        move.source = None
       if move.source is None:
           self.gamePhase = 'startTurn'
           self.endTurn()

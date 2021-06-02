@@ -332,7 +332,7 @@ class Country(Attr_dict):
     return f'{self.id} - {self.name}. owner = {self.owner}, armies = {self.armies}'
 
   def encode(self) -> str:
-    return f'{self.id}_{self.owner}_{self.armies}'
+    return f'{self.id}_{self.owner}_{self.armies}_{self.moveableArmies}'
   
   def addArmies(self, armies):
     '''! Adds armies to the army count of the the Country'''
