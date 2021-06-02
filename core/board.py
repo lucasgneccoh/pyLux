@@ -1408,7 +1408,13 @@ class Board(object):
         
     
     elif self.gamePhase == 'fortify': 
-      if move.source is None or move.source.moveableArmies == 0 or move.source.armies ==1:
+      pass_move = False
+      if move.source is None or move.target is None:
+        pass_move = True
+      elif move.source.moveableArmies == 0 or move.source.armies ==1:
+        pass_move = True
+      
+      if pass_move:
         self.gamePhase = 'startTurn'
         self.endTurn()
         if self.activePlayer.code == self.firstPlayerCode:
