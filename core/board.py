@@ -1146,12 +1146,28 @@ class Board(object):
   def getAttackListTarget(self, target:int):
     '''! Countries that can attack the target
     '''
-    return list(self.world.predecessors(target))
+    t = self.world.countries[target]
+    return [s for s in list(self.world.predecessors(target)) if s.owner != t.owner and s.armies > 1]
     
   def getAttackListSource(self, source:int):
     '''! Countries that can be attacked from source
     '''
-    return list(self.world.successors(source))
+    s = self.world.countries[source]
+    if s.armies < 2: return []
+    return [t for t in list(self.world.successors(source)) if s.owner != t.owner]
+    
+  def getFortifyListTarget(self, target:int):
+    '''! Countries that can attack the target
+    '''
+    t = self.world.countries[target]
+    return [s for s in list(self.world.predecessors(target)) if s.owner == t.owner and s.moveableArmies > 0]
+    
+  def getFortifyListSource(self, source:int):
+    '''! Countries that can be attacked from source
+    '''
+    s = self.world.countries[source]
+    if s.moveableArmies == 0: return []
+    return [t for t in list(self.world.successors(source)) if s.owner == t.owner]
     
   def getCountriesPlayer(self, player:int): 
     '''! Return a list of countries currently owned by player
