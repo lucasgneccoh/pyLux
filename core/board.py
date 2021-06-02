@@ -1408,8 +1408,7 @@ class Board(object):
         
     
     elif self.gamePhase == 'fortify': 
-      if move.source.moveableArmies == 0 or move.source.armies ==1:
-        move.source = None
+      
       if move.source is None:
           self.gamePhase = 'startTurn'
           self.endTurn()
@@ -1418,6 +1417,10 @@ class Board(object):
             self.setupNewRound()
             self.prepareStart()
           return 0
+          
+      if move.source.moveableArmies == 0 or move.source.armies ==1:
+        move.source = None
+        
       print(f"PlayMove:Fortified: 1 {move.source.moveableArmies}, {move.target.moveableArmies}")
       res = self.fortifyArmies(int(move.details), move.source.code, move.target.code)
       print(f"PlayMove:Fortified: 2 {move.source.moveableArmies}, {move.target.moveableArmies}")
