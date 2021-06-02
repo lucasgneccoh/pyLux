@@ -1398,8 +1398,10 @@ class Board(object):
             self.setupNewRound()
             self.prepareStart()
           return 0
-        
-      return self.fortifyArmies(move.details, move.source.code, move.target.code)
+      print(f"Fortified: {move.source.moveableArmies}, {move.target.moveableArmies}")
+      res = self.fortifyArmies(int(move.details), move.source.code, move.target.code)
+      print(f"Fortified: {move.source.moveableArmies}, {move.target.moveableArmies}")
+      return res
       
 
   def isTerminal(self, rootPlayer):
