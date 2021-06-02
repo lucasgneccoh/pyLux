@@ -1423,9 +1423,9 @@ class Board(object):
           self.prepareStart()
         return 0
         
-      print(f"PlayMove:Fortified: 1 {move.source.moveableArmies}, {move.target.moveableArmies}")
+      #print(f"PlayMove:Fortified: 1 {move.source.moveableArmies}, {move.target.moveableArmies}")
       res = self.fortifyArmies(int(move.details), move.source.code, move.target.code)
-      print(f"PlayMove:Fortified: 2 {move.source.moveableArmies}, {move.target.moveableArmies}")
+      #print(f"PlayMove:Fortified: 2 {move.source.moveableArmies}, {move.target.moveableArmies}")
       return res
       
 
