@@ -1257,7 +1257,7 @@ class Board(object):
    
   
   def report(self):
-    print('------- Board report --------')
+    print('\n------- Board report --------')
     print('Board id :', self.board_id)
     print('Game phase :', self.gamePhase)
     print("Round count: ", self.roundCount)
