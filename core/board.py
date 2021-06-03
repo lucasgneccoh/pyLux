@@ -695,7 +695,12 @@ class Board(object):
         cD.armies += armies
 
         if defender.num_countries == 0:
-          defender.is_alive = False
+          defender.is_alive = False          
+          
+          if self.getNumberOfPlayersLeft() == 1: 
+            self.gameOver = True
+            return 99
+          
           # Player has been eliminated. 
           # Must do cardPhase if more than 5 cards or self.immediateCash==True
           if self.useCards:
