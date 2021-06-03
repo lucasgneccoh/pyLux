@@ -1246,7 +1246,7 @@ class Board(object):
   def encode(self):
     countries = '_'.join([c.encode() for c in self.countries()])
     players = '_'.join([self.encodePlayer(p) for _, p in self.players.items() if p.is_alive])
-    return countries + '-' + players + '-'+ self.gamePhase
+    return countries + '-' + players + '-'+ self.gamePhase + '-' + str(self.activePlayer.code)
 
   def __hash__(self):
     return hash(self.encode())
