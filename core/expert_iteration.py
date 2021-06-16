@@ -25,6 +25,10 @@ from torch_geometric.data import download_url
 import torch_geometric.transforms as T
 from torch_geometric import utils
 
+def print_message_over(message):
+    sys.stdout.write('\r{0}'.format(message))
+    sys.stdout.flush()
+
 def build_expert_mcts(apprentice):
     return MCTS(root=None, apprentice=apprentice, max_depth = 50, 
                 sims_per_eval = 5, num_MCTS_sims = 10000,
