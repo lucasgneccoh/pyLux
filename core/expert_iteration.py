@@ -163,18 +163,18 @@ args = parseInputs()
 inputs = read_json(args.inputs)
 
 
-iterations = inputs.iterations
-num_samples = inputs.num_samples
-max_depth = inputs.max_depth
-initial_apprentice_mcts_sims = inputs.initial_apprentice_mcts_sims
-expert_mcts_sims = inputs.expert_mcts_sims
+iterations = inputs["iterations"]
+num_samples = inputs["num_samples"]
+max_depth = inputs["max_depth"]
+initial_apprentice_mcts_sims = inputs["initial_apprentice_mcts_sims"]
+expert_mcts_sims = inputs["expert_mcts_sims"]
 
-path_data = inputs.path_data
-path_model = inputs.path_model
-batch_size = inputs.batch_size
-model_args =  inputs['model_parameters']
+path_data = inputs["path_data"]
+path_model = inputs"[path_model"]
+batch_size = inputs["batch_size"]
+model_args =  read_json(inputs["model_parameters"])
 
-path_board = inputs.path_board
+path_board = inputs["path_board"]
 
 # ---------------- Model -------------------------
 
