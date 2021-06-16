@@ -2,7 +2,11 @@ from board import Board
 from world import World, Country, Continent
 from move import Move
 import numpy as np
+import copy
 import torch
+from model import boardToData, buildGlobalFeature
+
+import torch_geometric
 
 def heuristic_score_players(state):
     all_income = sum([state.getPlayerIncome(i) for i in state.players])
