@@ -209,8 +209,8 @@ move_types = ['initialPick', 'initialFortify', 'startTurn',
                      
 # Create folders to store data
 for folder in move_types:
-    os.path.makedirs(os.path.join(path_data, folder))
-os.path.makedirs(path_model)
+    os.makedirs(os.path.join(path_data, folder), exist_ok = True)
+os.makedirs(path_model, exist_ok = True)
                                 
 from random import shuffle
 
