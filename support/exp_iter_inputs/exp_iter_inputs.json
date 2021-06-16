@@ -1,0 +1,12 @@
+{
+  "path_board": "../support/maps/test_map.json",
+  "iterations": 2,
+  "num_samples": 2,
+  "max_depth": 10,
+  "initial_apprentice_mcts_sims": 100,
+  "expert_mcts_sims": 200,
+  "path_data": "../data",
+  "path_model": "../models",
+  "batch_size": 4,
+  "model_parameters": "../model_parameters/model_default_parameters.json"
+}

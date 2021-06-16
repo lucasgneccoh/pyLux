@@ -1,0 +1,11 @@
+{
+"board_input_dim":12, "global_input_dim": 19, 
+"hidden_global_dim":32, "num_global_layers":4,
+"hidden_conv_dim":32, "num_conv_layers":4, 
+"hidden_pick_dim":32, "num_pick_layers":4, "out_pick_dim":1,
+"hidden_place_dim":32, "num_place_layers":4, "out_place_dim":1,
+"hidden_attack_dim":32, "num_attack_layers":4,  "out_attack_dim":1,
+"hidden_fortify_dim":32, "num_fortify_layers":4,  "out_fortify_dim":1,
+"hidden_value_dim":32,  "num_value_layers":4,
+"dropout":0.4
+} 

@@ -12,9 +12,10 @@ import agent
 import time
 import numpy as np
 import copy
-from mcts import MCTS, MctsApprentice, NetApprentice
-import model
+# from mcts import MCTS, MctsApprentice, NetApprentice
+# import model
 
+import json
 
 #%% TESTING
 if __name__ == '__main__':
@@ -176,7 +177,7 @@ if __name__ == '__main__':
   
     
   #%% Test fromDicts, toDicts
-  if True:
+  if False:
     print("\nTest fromDicts, toDicts\n")
     print('board_orig')
     board_orig.showPlayers()
@@ -226,6 +227,10 @@ if __name__ == '__main__':
 
   #%% Test model and self play
   
+  with open("../support/exp_iter_inputs/exp_iter_inputs.json",'r') as f:        
+    inputs = json.load(f)
+  
+  print(inputs)
       
   
     

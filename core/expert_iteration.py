@@ -10,6 +10,7 @@ import itertools
 import numpy as np
 import copy
 import sys
+import json
 
 import torch
 import torch.nn as nn
@@ -25,6 +26,20 @@ from torch_geometric.data import Dataset as G_Dataset
 from torch_geometric.data import download_url
 import torch_geometric.transforms as T
 from torch_geometric import utils
+
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+
+def parseInputs():
+  parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+  parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
+  args = parser.parse_args()
+  return args
+  
+def read_json(path):
+  with open(path, 'r') as f:
+    data = json.load(f)
+  return data
+    
 
 def print_message_over(message):
     sys.stdout.write('\r{0}'.format(message))
@@ -142,32 +157,39 @@ def create_self_play_data(path, root, num_samples, start_sample, apprentice, exp
 def TPT_Loss(output, target):
     return -(target*torch.log(output)).sum()
 
+
+# ---------------- Start -------------------------
+args = parseInputs()
+inputs = read_json(args.inputs)
+
+
+iterations = inputs.iterations
+num_samples = inputs.num_samples
+max_depth = inputs.max_depth
+initial_apprentice_mcts_sims = inputs.initial_apprentice_mcts_sims
+expert_mcts_sims = inputs.expert_mcts_sims
+
+path_data = inputs.path_data
+path_model = inputs.path_model
+batch_size = inputs.batch_size
+model_args =  inputs['model_parameters']
+
+path_board = inputs.path_board
+
 # ---------------- Model -------------------------
 
-batch_size = 4
 
 
-model_args = {'board_input_dim':12, 'global_input_dim': 19, 
-            'hidden_global_dim':32, 'num_global_layers':4,
-            'hidden_conv_dim':32, 'num_conv_layers':4, 
-            'hidden_pick_dim':32, 'num_pick_layers':4, 'out_pick_dim':1,
-            'hidden_place_dim':32, 'num_place_layers':4, 'out_place_dim':1,
-            'hidden_attack_dim':32, 'num_attack_layers':4,  'out_attack_dim':1,
-            'hidden_fortify_dim':32, 'num_fortify_layers':4,  'out_fortify_dim':1,
-            'hidden_value_dim':32,  'num_value_layers':4,
-            'dropout':0.4} 
 
 #%%% Create Board
-# path = '../support/maps/classic_world_map.json'
-path = '../support/maps/test_map.json'
-
-world = World(path)
+world = World(path_board)
 
 
 # Set players
 pR1, pR2, pR3 = agent.RandomAgent('Red'), agent.RandomAgent('Blue'), agent.RandomAgent('Green')
 players = [pR1, pR2, pR3]
 # Set board
+# TODO: Send to inputs
 prefs = {'initialPhase': True, 'useCards':True,
         'transferCards':True, 'immediateCash': True,
         'continentIncrease': 0.05, 'pickInitialCountries':True,
@@ -198,14 +220,7 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
 criterion = TPT_Loss
 
 
-iterations = 2
-num_samples = 2
-max_depth = 10
-initial_apprentice_mcts_sims = 100
-expert_mcts_sims = 200
 
-path_data = "../data"
-path_model = "../models"
 move_types = ['initialPick', 'initialFortify', 'startTurn',
                                 'attack', 'fortify']
                                 
