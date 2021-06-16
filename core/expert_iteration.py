@@ -57,7 +57,7 @@ def isint(n):
     except:
         return False
         
-def create_self_play_data(path, root, num_samples, start_sample, apprentice, expert, max_depth = 100, verbose = False):
+def create_self_play_data(path, root, num_samples, start_sample, apprentice, expert, max_depth = 100, saved_states_per_episode=1, verbose = False):
     """ Function to create episodes from self play.
         Visited states are saved and then re visited with the expert to label the data
 
@@ -121,6 +121,7 @@ def create_self_play_data(path, root, num_samples, start_sample, apprentice, exp
         # ******************* SAVE STATES ***************************
         # Take some states from episode
         # Choose which kind of move we are going to save
+        
         to_save = next(move_to_save)
         
         try:
@@ -132,10 +133,11 @@ def create_self_play_data(path, root, num_samples, start_sample, apprentice, exp
                 if to_save == init_to_save:
                     raise Exception("Episode is empty? No dataset could be created for any game phase")
                 options = [s for s in episode if s.gamePhase == to_save]
-            states_to_save = np.random.choice(options, min(3, len(episode)))
+            states_to_save = np.random.choice(options, min(saved_states_per_episode, len(options)))
         except Exception as e:
             raise e
 
+        # Get expert move for the chosen states
         for i, state in enumerate(states_to_save):
             print_message_over(f"Saving states: Saved {i}/{len(states_to_save)}... Total: {samples}/{num_samples}")
             policy_exp, value_exp, _ = expert.getActionProb(state, temp=1, num_sims = None, use_val = False)
@@ -168,6 +170,7 @@ inputs = read_json(args.inputs)
 
 iterations = inputs["iterations"]
 num_samples = inputs["num_samples"]
+saved_states_per_episode = inputs["saved_states_per_episode"]
 max_depth = inputs["max_depth"]
 initial_apprentice_mcts_sims = inputs["initial_apprentice_mcts_sims"]
 expert_mcts_sims = inputs["expert_mcts_sims"]
@@ -252,7 +255,8 @@ for i in range(iterations):
     # Sample self play
     # Use expert to calculate targets
     create_self_play_data(path_data, state, num_samples, num_samples*i,
-                          apprentice, expert, max_depth = max_depth, verbose=True)
+                          apprentice, expert, max_depth = max_depth,
+                          saved_states_per_episode = saved_states_per_episode, verbose=True)
 
     # Train network on dataset
     shuffle(move_types)
