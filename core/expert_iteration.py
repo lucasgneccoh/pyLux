@@ -262,7 +262,11 @@ for i in range(iterations):
     shuffle(move_types)
     for j, move_type in enumerate(move_types):
         save_path = f"{path_model}/model_{i}_{j}_{move_type}.tar"
-        risk_dataset = RiskDataset(root = f'{path_data}/{move_type}')
+        root_path = f'{path_data}/{move_type}'
+        
+        if len(os.listdir(os.path.join(root_path, 'raw'))<batch_size: continue
+        
+        risk_dataset = RiskDataset(root = root_path)
         # TODO: add validation data
         loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
         train_model(net, optimizer, scheduler, criterion, device,
