@@ -2,11 +2,15 @@ import sys
 import json
 import time
 import copy
-import pyLux
+from board import Board, World, Country, Continent
+from deck import Deck
 import agent
 # For the GUI
 import pygame
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import os
+print(os.getcwd())
+
 
 
 def parseInputs():
@@ -269,7 +273,7 @@ if __name__ == "__main__":
   prefs['console_debug'] = console_debug
   
   # Load map
-  world = pyLux.World(prefs['map_path'])
+  world = World(prefs['map_path'])
   
   
   # Set players
@@ -281,7 +285,7 @@ if __name__ == "__main__":
     players.append(ag)
   
   # Set board
-  board = pyLux.Board(world, players)
+  board = Board(world, players)
   board.setPreferences(prefs)
   
 #%% Draw the board
@@ -484,7 +488,7 @@ if __name__ == "__main__":
           
         # Check if more than 5 cards at the start of the turn
         if board.gamePhase == 'startTurn' and len(board.activePlayer.cards)>=5:
-          card_set = pyLux.Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
+          card_set = Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
           if not card_set is None:
             armies = board.cashCards(*card_set)
             if console_debug: print(f"GUI:Force cashed {armies} armies")
@@ -647,7 +651,7 @@ if __name__ == "__main__":
                   action_msg = 'No cash after turn start phase!'
                   continue
                 showing_cards = False
-                card_set = pyLux.Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
+                card_set = Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
                 if not card_set is None:
                   armies = board.cashCards(*card_set)
                   if console_debug: print(f"GUI:Cashed {armies} armies")

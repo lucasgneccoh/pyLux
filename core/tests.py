@@ -6,13 +6,14 @@ Created on Sun Apr 18 19:52:33 2021
 """
 
 
-from world import World
+from world import World, Country, Continent
 from board import Board
 import agent
 import time
 import numpy as np
 import copy
-from mcts import MCTS
+from mcts import MCTS, MctsApprentice, NetApprentice
+import model
 
 
 #%% TESTING
@@ -223,17 +224,8 @@ if __name__ == '__main__':
     
 
 
-  #%% Test MCTS
-  if False:
-    print("\nTest MCTS\n")
-    players = [copy.deepcopy(pR1), copy.deepcopy(pR2)]
-    board = Board(copy.deepcopy(world), players)
-    p = board.activePlayer
-    mcts = MCTS(p.code)
-    N = 10
-    
-    for i in range(N):
-      pass
+  #%% Test model and self play
+  
       
   
     
