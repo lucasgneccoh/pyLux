@@ -2,8 +2,8 @@ import agent
 from board import Board
 from world import World, Country, Continent
 from move import Move
-from mcts import MCTS, MctsApprentice, NetApprentice, maskAndMoves
-from model import boardToData, GCN_risk, RiskDataset
+from mcts import MCTS, MctsApprentice, NetApprentice, maskAndMoves, buildMove
+from model import boardToData, GCN_risk, RiskDataset, saveBoardObs
 
 import os
 import itertools
