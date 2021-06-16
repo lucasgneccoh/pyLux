@@ -264,7 +264,7 @@ for i in range(iterations):
         save_path = f"{path_model}/model_{i}_{j}_{move_type}.tar"
         root_path = f'{path_data}/{move_type}'
         
-        if len(os.listdir(os.path.join(root_path, 'raw'))<batch_size: continue
+        if len(os.listdir(os.path.join(root_path, 'raw')))<batch_size: continue
         
         risk_dataset = RiskDataset(root = root_path)
         # TODO: add validation data
