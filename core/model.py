@@ -4,6 +4,7 @@ from move import Move
 
 import itertools
 import os
+import json
 
 import torch
 import torch.nn as nn
