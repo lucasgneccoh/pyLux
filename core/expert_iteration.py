@@ -3,7 +3,7 @@ from board import Board
 from world import World, Country, Continent
 from move import Move
 from mcts import MCTS, MctsApprentice, NetApprentice
-import model
+from model import boardToData, GCN_risk, RiskDataset
 
 import os
 import itertools
@@ -58,7 +58,7 @@ def create_self_play_data(path, root, num_samples, start_sample, apprentice, exp
         samples_type[k] = val
 
     move_to_save = itertools.cycle(list(samples_type.keys()))
-    edge_index = model.boardToData(root).edge_index
+    edge_index = boardToData(root).edge_index
     while samples<num_samples:     
 
         # ******************* PLAY EPISODE ***************************
@@ -174,7 +174,7 @@ board_orig.setPreferences(prefs)
 num_nodes = board_orig.world.map_graph.number_of_nodes()
 num_edges = board_orig.world.map_graph.number_of_edges()
 
-model = model.GCN_risk(num_nodes, num_edges, 
+net = GCN_risk(num_nodes, num_edges, 
                  model_args['board_input_dim'], model_args['global_input_dim'],
                  model_args['hidden_global_dim'], model_args['num_global_layers'],
                  model_args['hidden_conv_dim'], model_args['num_conv_layers'],
@@ -186,9 +186,9 @@ model = model.GCN_risk(num_nodes, num_edges,
                  model_args['dropout'])
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-model.to(device)
+net.to(device)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
 criterion = TPT_Loss
 
@@ -196,7 +196,7 @@ criterion = TPT_Loss
 
 # Define initial apprentice
 apprentice = MctsApprentice(num_MCTS_sims = 200, temp=1, max_depth=100)
-# apprentice = NetApprentice(model)
+# apprentice = NetApprentice(net)
 
 # build expert
 expert = build_expert_mcts(None) # Start with only MCTS with no inner apprentice
@@ -234,9 +234,9 @@ for i in range(iterations):
         risk_dataset = RiskDataset(root = f'{path_data}/{move_type}')
         # TODO: add validation data
         loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
-        train_model(model, optimizer, scheduler, criterion, device,
+        train_model(net, optimizer, scheduler, criterion, device,
                     5, loader, val_loader = loader, eval_every = 1,
                     load_path = None, save_path = save_path)
 
     # build expert with trained net
-    expert = build_expert_mcts(NetApprentice(model))
+    expert = build_expert_mcts(NetApprentice(net))
