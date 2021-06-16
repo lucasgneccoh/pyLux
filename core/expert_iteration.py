@@ -147,6 +147,24 @@ model_args = {'board_input_dim':12, 'global_input_dim': 19,
             'hidden_value_dim':32,  'num_value_layers':4,
             'dropout':0.4} 
 
+#%%% Create Board
+# path = '../support/maps/classic_world_map.json'
+path = '../support/maps/test_map.json'
+
+world = World(path)
+
+
+# Set players
+pR1, pR2, pR3 = agent.RandomAgent('Red'), agent.RandomAgent('Blue'), agent.RandomAgent('Green')
+players = [pR1, pR2, pR3]
+# Set board
+prefs = {'initialPhase': True, 'useCards':True,
+        'transferCards':True, 'immediateCash': True,
+        'continentIncrease': 0.05, 'pickInitialCountries':True,
+        'armiesPerTurnInitial':4,'console_debug':False}
+        
+board_orig = Board(world, players)
+board_orig.setPreferences(prefs)
 
 num_nodes = board_orig.world.map_graph.number_of_nodes()
 num_edges = board_orig.world.map_graph.number_of_edges()
