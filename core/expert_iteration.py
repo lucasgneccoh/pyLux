@@ -4,9 +4,12 @@ from world import World, Country, Continent
 from move import Move
 from mcts import MCTS, MctsApprentice, NetApprentice
 import model
+
 import os
 import itertools
 import numpy as np
+import copy
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
