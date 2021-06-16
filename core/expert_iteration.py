@@ -198,22 +198,26 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
 criterion = TPT_Loss
 
 
-
-# Define initial apprentice
-apprentice = MctsApprentice(num_MCTS_sims = 200, temp=1, max_depth=100)
-# apprentice = NetApprentice(net)
-
-# build expert
-expert = build_expert_mcts(None) # Start with only MCTS with no inner apprentice
-expert.num_MCTS_sims = 1000
-
-
 iterations = 2
-num_samples = 50
+num_samples = 2
+max_depth = 10
+initial_apprentice_mcts_sims = 100
+expert_mcts_sims = 200
+
 path_data = "../data"
 path_model = "../models"
 move_types = ['initialPick', 'initialFortify', 'startTurn',
                                 'attack', 'fortify']
+                                
+                                
+                                
+# Define initial apprentice
+apprentice = MctsApprentice(num_MCTS_sims = initial_apprentice_mcts_sims, temp=1, max_depth=max_depth)
+# apprentice = NetApprentice(net)
+
+# build expert
+expert = build_expert_mcts(None) # Start with only MCTS with no inner apprentice
+expert.num_MCTS_sims = expert_mcts_sims
                      
 # Create folders to store data
 for folder in move_types:
@@ -230,7 +234,7 @@ for i in range(iterations):
     # Sample self play
     # Use expert to calculate targets
     create_self_play_data(path_data, state, num_samples, num_samples*i,
-                          apprentice, expert, max_depth = 100, verbose=True)
+                          apprentice, expert, max_depth = max_depth, verbose=True)
 
     # Train network on dataset
     shuffle(move_types)
