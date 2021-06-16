@@ -2,6 +2,7 @@ from board import Board
 from world import World, Country, Continent
 from move import Move
 import numpy as np
+import torch
 
 def heuristic_score_players(state):
     all_income = sum([state.getPlayerIncome(i) for i in state.players])
