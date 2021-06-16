@@ -170,7 +170,7 @@ initial_apprentice_mcts_sims = inputs["initial_apprentice_mcts_sims"]
 expert_mcts_sims = inputs["expert_mcts_sims"]
 
 path_data = inputs["path_data"]
-path_model = inputs"[path_model"]
+path_model = inputs["path_model"]
 batch_size = inputs["batch_size"]
 model_args =  read_json(inputs["model_parameters"])
 
