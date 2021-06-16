@@ -58,7 +58,7 @@ def create_self_play_data(path, root, num_samples, start_sample, apprentice, exp
         samples_type[k] = val
 
     move_to_save = itertools.cycle(list(samples_type.keys()))
-    edge_index = boardToData(root).edge_index
+    edge_index = model.boardToData(root).edge_index
     while samples<num_samples:     
 
         # ******************* PLAY EPISODE ***************************
