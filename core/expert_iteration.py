@@ -1,3 +1,4 @@
+import agent
 from board import Board
 from world import World, Country, Continent
 from move import Move
