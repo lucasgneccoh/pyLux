@@ -152,6 +152,9 @@ def create_self_play_data(path, root, num_samples, start_sample, apprentice, exp
             samples += 1
             samples_type[phase] += 1
             print_message_over(f"Saving states: Saved {i+1}/{len(states_to_save)}... Total: {samples}/{num_samples}")
+            
+    print_message_over("Done!")
+    print()
 
 
 def TPT_Loss(output, target):
