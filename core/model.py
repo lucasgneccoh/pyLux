@@ -23,6 +23,31 @@ from torch_geometric import utils
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
+def save_checkpoint(path, epoch, model, optimizer, scheduler=None, other={}):
+    state_dict = {
+            'epoch': epoch,
+            'model': model.state_dict(),
+            'optimizer': optimizer.state_dict()
+    }
+    if not scheduler is None: state_dict['scheduler'] = scheduler.state_dict()
+    state_dict.update(other)
+    torch.save(state_dict, path)
+
+def load_checkpoint(load_path, model, optimizer, device):
+    state_dict = torch.load(load_path, map_location=device)
+    model.load_state_dict(state_dict['model'])
+    optimizer.load_state_dict(state_dict['optimizer'])
+    return state_dict
+
+def save_dict(save_path, state_dict):
+    torch.save(state_dict, save_path)
+    
+def load_dict(load_path, device):
+    with open(load_path, 'r') as f:
+        state_dict = torch.load(f, map_location=device)
+    return state_dict
+
+
 ### Dataset
 
 def countryToTensor(c, board):    
