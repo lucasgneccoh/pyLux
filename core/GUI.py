@@ -436,7 +436,8 @@ if __name__ == "__main__":
     fill_and_label(b, color_msgbox, n, color_text)
   color_all(wildcard_containers, color_background)
   
-  # board.play()
+  if not prefs['initialPhase'] or not prefs['pickInitialCountries']:
+    board.play()
   
   color_continents(boxes_back, board)
   color_countries(boxes, board, player_colors)
@@ -542,7 +543,7 @@ if __name__ == "__main__":
                 continue
               else:
                 board.gamePhase = 'fortify'
-                board.updateMovable()
+                board.updatemoveable()
                 source, target = None, None
                 showing_cards = False
                 action_msg = None
@@ -612,7 +613,7 @@ if __name__ == "__main__":
                   continue
                 else:
                   board.gamePhase = 'fortify'
-                  board.updateMovable()
+                  board.updatemoveable()
                   source, target = None, None
                   showing_cards = False
                   action_msg = None
@@ -757,8 +758,8 @@ if __name__ == "__main__":
                     if console_debug: print(f'GUI:Human fortified {source.id} -> {target.id}')
                     
                     numberOfArmies = 1
-                    if bool_move_all: numberOfArmies = source.movable_armies
-                    if bool_move_5: numberOfArmies = min(5, source.movable_armies)
+                    if bool_move_all: numberOfArmies = source.moveableArmies
+                    if bool_move_5: numberOfArmies = min(5, source.moveableArmies)
                                         
                     board.fortifyArmies(numberOfArmies, source.code, target.code)
                     # Reset                    
