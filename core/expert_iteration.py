@@ -3,7 +3,7 @@ from board import Board
 from world import World, Country, Continent
 from move import Move
 from mcts import MCTS, MctsApprentice, NetApprentice, maskAndMoves, buildMove
-from model import boardToData, GCN_risk, RiskDataset, saveBoardObs, trainModel
+from model import boardToData, GCN_risk, RiskDataset, saveBoardObs, train_model
 
 import os
 import itertools
