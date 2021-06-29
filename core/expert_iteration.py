@@ -383,7 +383,7 @@ if __name__ == '__main__':
         for j in range(num_iter):
             aux = parmap(f, types, nprocs=num_cpu) 
             for a in aux:
-                for s in a[1]
+                for s in a[1]:
                     states_to_save.append(s) # parmap returns this [(i, x)]
         
         print("States to save: ", len(states_to_save))
