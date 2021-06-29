@@ -187,7 +187,7 @@ def whole_process(args):
         values.append(value_exp)
     
     save_states(path, states_to_save, policies, values)
-    return True
+    return move_type
 
 
     
