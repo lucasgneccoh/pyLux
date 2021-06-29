@@ -203,12 +203,14 @@ def par_self_play(num_samples, path, root, apprentice, expert, num_cpu, max_dept
         copy_a['move_type'] = next(move_types)
         args_list.append(copy_a)    
     
+    print("\tStarting pool calls")
     for i in range(num_iter):
-      with Pool(num_proc) as pool:
-          print(pool.map(whole_process, args_list))          
-          pool.close()
-          pool.terminate()
-      print(f"Done with iteration {i+1} of {num_iter}")
+        print(f"\t\tStarting with iteration {i+1} of {num_iter}")
+        with Pool(num_proc) as pool:
+            print(pool.map(whole_process, args_list))          
+            pool.close()
+            pool.terminate()
+        print(f"\t\tDone with iteration {i+1} of {num_iter}")
     
     
 
