@@ -1,9 +1,9 @@
 {
   "path_board": "../support/maps/test_map.json",
   "iterations": 2,
-  "num_samples": 80,
-  "max_depth": 40,
-  "saved_states_per_episode": 8,
+  "num_samples": 16,
+  "max_depth": 100,
+  "saved_states_per_episode": 4,
   "initial_apprentice_mcts_sims": 100,
   "expert_mcts_sims": 200,
   "path_data": "../data",
