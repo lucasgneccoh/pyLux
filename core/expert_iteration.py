@@ -244,7 +244,7 @@ def parmap(f, X, nprocs=multiprocessing.cpu_count()):
 
     [p.join() for p in proc]
 
-    return [{'id': i, 'data': x} for i, x in res]
+    return [(i, x) for i, x in res]
 
 
 
@@ -380,8 +380,8 @@ if __name__ == '__main__':
         num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
         states_to_save = []
         for j in range(num_iter):
-            aux = parmap(f, types, nprocs=num_cpu)
-            states_to_save.extend(aux['data'])
+            aux = parmap(f, types, nprocs=num_cpu)            
+            states_to_save.extend([a[1] for a in aux]) # parmap returns this [(i, x)]
         
         print("States to save: ", len(states_to_save))
         print(states_to_save[0])
@@ -391,7 +391,7 @@ if __name__ == '__main__':
         # Tag the states            
         f = lambda state: tag_with_expert_move(state, expert)
         aux = parmap(f, states_to_save, nprocs=num_cpu)
-        tagged = aux['data']
+        tagged = [a[1] for a in aux]
         
         # Save the states
         # simple_save_state(path, name, state, policy, value)
