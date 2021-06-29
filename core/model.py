@@ -157,7 +157,7 @@ class RiskDataset(G_Dataset):
                 except Exception as e:
                     print(e)
                     print(raw_path)
-                    raise e
+                    raise e  # For now just avoid the interruption of the program, and continue ?
 
     def len(self):
         return len(self.processed_file_names)
