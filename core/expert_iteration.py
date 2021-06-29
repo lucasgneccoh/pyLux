@@ -198,7 +198,7 @@ def whole_process(args):
     
 def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, saved_states_per_episode=1, verbose = False):
     cpus = cpu_count()
-    args = dict(zip(["path", "root", "apprentice", "expert", "max_depth", "saved_states_per_episode", "verbose"], [path, root, apprentice, expert, max_depth, saved_states_per_episode, verbose])
+    args = dict(zip(["path", "root", "apprentice", "expert", "max_depth", "saved_states_per_episode", "verbose"], [path, root, apprentice, expert, max_depth, saved_states_per_episode, verbose]))
     num_proc = cpus
     num_iter = max(num_samples // (num_proc*saved_states_per_episode), 1)
     for i in range(num_iter):
