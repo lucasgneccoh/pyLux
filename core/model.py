@@ -68,6 +68,9 @@ def boardToData(board):
 
 def saveBoardObs(path, file_name, board, phase, target, value):
     temp = os.path.join(path, file_name)
+    if os.path.exists(temp):
+        print(f"File {temp} found: deleting")
+        os.remove(temp)
     with open(temp, 'w+') as f:
         continents, countries, inLinks, players, misc = board.toDicts()
         json.dump({'continents':continents, 'countries':countries,
