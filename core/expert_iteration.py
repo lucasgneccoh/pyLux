@@ -373,9 +373,10 @@ if __name__ == '__main__':
         
         # Play the games
         print("\tPlay the games")
-        types = []        
+        types = []
+        cycle = itertools.cycle(move_types)
         for _ in range(num_cpu):
-          types.append(next(itertools.cycle(move_types)))
+          types.append(next(cycle))
         f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = False)        
         # num_samples = iterations * num_cpu * saved_states_per_episode
         num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
