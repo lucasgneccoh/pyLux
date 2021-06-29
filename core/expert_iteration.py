@@ -171,7 +171,7 @@ def save_states(path, states, policies, values):
         # Save the board, value and target
         board, _ = state.toCanonical(state.activePlayer.code)
         phase = board.gamePhase
-        full_path = os.join(path, phase, 'raw')
+        full_path = os.path.join(path, phase, 'raw')
         num = len(os.listdir(full_path))+1
         saveBoardObs(full_path, 'board_{}.json'.format(num),
                         board, board.gamePhase, policy_exp.tolist(), value_exp.tolist())
