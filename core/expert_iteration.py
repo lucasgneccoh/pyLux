@@ -192,6 +192,7 @@ def whole_process(args):
 
     
 def par_self_play(num_samples, path, root, apprentice, expert, num_cpu, max_depth = 100, saved_states_per_episode=1, verbose = False):
+    # On the second iteration, this throws an Error 24 Too many open files
     cpus = cpu_count()
     args = dict(zip(["path", "root", "apprentice", "expert", "max_depth", "saved_states_per_episode", "verbose"], [path, root, apprentice, expert, max_depth, saved_states_per_episode, verbose]))
     num_proc = min(cpus, num_cpu)
@@ -213,6 +214,33 @@ def par_self_play(num_samples, path, root, apprentice, expert, num_cpu, max_dept
         print(f"\t\tDone with iteration {i+1} of {num_iter}")
     
     
+    
+def par_fun(f, q_in, q_out):
+    while True:
+        i, x = q_in.get()
+        if i is None:
+            break
+        q_out.put((i, f(x)))
+
+
+def parmap(f, X, nprocs=multiprocessing.cpu_count()):
+    q_in = multiprocessing.Queue(1)
+    q_out = multiprocessing.Queue()
+
+    proc = [multiprocessing.Process(target=par_fun, args=(f, q_in, q_out))
+            for _ in range(nprocs)]
+    for p in proc:
+        p.daemon = True
+        p.start()
+
+    sent = [q_in.put((i, x)) for i, x in enumerate(X)]
+    [q_in.put((None, None)) for _ in range(nprocs)]
+    res = [q_out.get() for _ in range(len(sent))]
+
+    [p.join() for p in proc]
+
+    return [(i, x) for i, x in res]
+
 
 
 def TPT_Loss(output, target):
@@ -326,12 +354,32 @@ if __name__ == '__main__':
         """
         
         print("Parallel self-play")
+        
+        """
+        # Method 1
         par_self_play(num_samples, path_data, state, 
                       apprentice, expert, num_cpu, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode,
                       verbose = True)        
+        """
+        
+        """
+        # Method 2. do it manually
+        """
+        
+        # Play the games
+        types = []        
+        for _ in range(num_cpu):
+          types.append(next(itertools.cycle(move_types)))
+        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = False)
+        states_to_save = parmap(f, types, nprocs=num_cpu)
+        print("States to save: ", len(states_to_save))
+        
+        # Tag the states
+        
+        # Save the states
         
         print("Training network")
-        
+        break
         # Train network on dataset
         shuffle(move_types)
         for j, move_type in enumerate(move_types):
