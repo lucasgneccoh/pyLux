@@ -173,7 +173,7 @@ def save_states(path, states, policies, values):
 
 def simple_save_state(path, name, state, policy, value):
     board, _ = state.toCanonical(state.activePlayer.code)
-    saveBoardObs(path, name,
+    saveBoardObs(os.path.join(path, board.gamePhase, 'raw'), name,
                         board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
     return True
 
@@ -386,18 +386,11 @@ if __name__ == '__main__':
                 for s in a[1]:
                     states_to_save.append(s) # parmap returns this [(i, x)]
         
-        print("States to save: ", len(states_to_save))
-        print(states_to_save[0])
-        
-        
-        
         # Tag the states    
         print("\tTag the states")
         f = lambda state: tag_with_expert_move(state, expert)
         aux = parmap(f, states_to_save, nprocs=num_cpu)
-        tagged = [a[1] for a in aux]
-        print("example")
-        print(tagged[0])
+        tagged = [a[1] for a in aux]        
         
         # Save the states
         print("\tSave the states")
