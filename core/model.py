@@ -124,32 +124,32 @@ class RiskDataset(G_Dataset):
             if not os.path.exists(name):
                 # Read data from raw_path.
                 try:
-                  with open(raw_path, 'r') as f:
-                      b = json.load(f)                  
-                      board = Board.fromDicts(b['continents'], 
-                                              b['countries'], b['inLinks'], 
-                                              b['players'], b['misc'])
-                                      
-                      data = boardToData(board)                
-                      global_x = buildGlobalFeature(b['players'], b['misc'])               
-                      # For some reason this was not working properly                           
-                      data.y = torch.Tensor(b['y'])
-                      data.value = torch.Tensor(b['value'])
-                      data.phase = b['misc']['gamePhase']       
-                      
-                      
+                    with open(raw_path, 'r') as f:
+                        b = json.load(f)                  
+                        board = Board.fromDicts(b['continents'], 
+                                                b['countries'], b['inLinks'], 
+                                                b['players'], b['misc'])
+                                        
+                        data = boardToData(board)                
+                        global_x = buildGlobalFeature(b['players'], b['misc'])               
+                        # For some reason this was not working properly                           
+                        data.y = torch.Tensor(b['y'])
+                        data.value = torch.Tensor(b['value'])
+                        data.phase = b['misc']['gamePhase']       
+                        
+                        
 
-                  #if (not self.pre_filter is None) and (not self.pre_filter(data)):
-                  #    continue
+                    #if (not self.pre_filter is None) and (not self.pre_filter(data)):
+                    #    continue
 
-                  #if self.pre_transform is not None:
-                  #    data = self.pre_transform(data)
+                    #if self.pre_transform is not None:
+                    #    data = self.pre_transform(data)
 
-                  torch.save({'data':data,'global':global_x}, name)
+                    torch.save({'data':data,'global':global_x}, name)
                 except Exception as e:
-                  print(e)
-                  print(raw_path)
-                  raise e
+                    print(e)
+                    print(raw_path)
+                    raise e
 
     def len(self):
         return len(self.processed_file_names)
