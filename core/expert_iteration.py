@@ -197,11 +197,11 @@ def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, 
     num_proc = cpus
     num_iter = max(num_samples // (num_proc*saved_states_per_episode), 1)
     move_types = itertools.cycle(['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify'])
-    args_list = [args]*num_proc
-    for a in rangee(num_proc):        
-        args_list[a]['move_type'] = mt
-        print(mt)
-    
+    args_list = []
+    for a in range(num_proc):
+        copy_a = copy.deepcopy(args)
+        copy_a['move_type'] = next(move_types)
+        args_list.append(copy_a)
     print("before par play")
     print([a['move_type'] for a in args_list])
     return 
