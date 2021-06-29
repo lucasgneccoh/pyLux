@@ -204,7 +204,7 @@ def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, 
         print(mt)
     
     print("before par play")
-    print([args_list['move_type']])
+    print([a['move_type'] for a in args_list])
     return 
     
     for i in range(num_iter):
