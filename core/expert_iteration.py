@@ -173,7 +173,7 @@ def save_states(path, states, policies, values):
 
 def simple_save_state(path, name, state, policy, value):
     board, _ = state.toCanonical(state.activePlayer.code)
-    saveBoardObs(os.path.join(path, board.gamePhase, 'raw'), name,
+    saveBoardObs(path, name,
                         board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
     return True
 
@@ -381,6 +381,7 @@ if __name__ == '__main__':
         num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
         states_to_save = []
         for j in range(num_iter):
+            print(f"\t\tIter {i+1} of {num_iter}. Number of processes: {num_cpu}")
             aux = parmap(f, types, nprocs=num_cpu) 
             for a in aux:
                 for s in a[1]:
@@ -403,11 +404,11 @@ if __name__ == '__main__':
         for k in range(len(tagged)):
             state, pol, val = tagged[k]
             phase = state.gamePhase
-            new = ('board_{}.json'.format(aux_dict[phase]), state, pol, val)
+            new = ('board_{}.json'.format(aux_dict[phase]), phase, state, pol, val)
             tagged[k] = new
             aux_dict[phase] += 1
         
-        f = lambda tupl:  simple_save_state(path_data, tupl[0], tupl[1], tupl[2], tupl[3])
+        f = lambda tupl:  simple_save_state(os.path.join(path_data, tupl[1], 'raw'), tupl[0], tupl[2], tupl[3], tupl[4])
         aux = parmap(f, tagged, nprocs=num_cpu)        
         
         print("Training network")
