@@ -199,9 +199,14 @@ def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, 
     move_types = itertools.cycle(['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify'])
     args_list = [args]*num_proc
     for a in args_list:
-        a['move_type'] = next(move_types) 
+        mt = next(move_types)
+        a['move_type'] = mt
+        print(mt)
+    
     print("before par play")
-    print(args_list)
+    print([args_list['move_type']])
+    return 
+    
     for i in range(num_iter):
       with Pool(cpus) as pool:
           print(pool.map(whole_process, args_list))
