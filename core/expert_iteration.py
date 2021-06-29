@@ -284,8 +284,7 @@ if __name__ == '__main__':
 
 
 
-    move_types = ['initialPick', 'initialFortify', 'startTurn',
-                                    'attack', 'fortify']
+    move_types = ['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify']
                                     
                                     
                                     
@@ -325,11 +324,10 @@ if __name__ == '__main__':
         print("Parallel self-play")
         par_self_play(num_samples, path_data, state, 
                       apprentice, expert, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode,
-                      verbose = True)
-
-        break # for testing
+                      verbose = True)        
         
         print("Training network")
+        
         # Train network on dataset
         shuffle(move_types)
         for j, move_type in enumerate(move_types):
@@ -343,7 +341,7 @@ if __name__ == '__main__':
             # TODO: add validation data
             loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
             train_model(net, optimizer, scheduler, criterion, device,
-                        5, loader, val_loader = loader, eval_every = 1,
+                        epochs = 10, loader, val_loader = None, eval_every = 3,
                         load_path = None, save_path = save_path)
 
         print("Building expert")
