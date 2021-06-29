@@ -16,6 +16,14 @@ import copy
 # import model
 
 import json
+import os
+
+def func_to_par(t):
+    time.sleep(t)
+    #return t*t
+    os.makedirs('../data/test_par/dir_{}'.format(t), exist_ok = True)
+    return True
+
 
 #%% TESTING
 if __name__ == '__main__':
@@ -226,12 +234,34 @@ if __name__ == '__main__':
 
 
   #%% Test model and self play
+  if False:
+    with open("../support/exp_iter_inputs/exp_iter_inputs.json",'r') as f:        
+      inputs = json.load(f)
+    
+    print(inputs)
+
+
+  # Multprocessing
   
-  with open("../support/exp_iter_inputs/exp_iter_inputs.json",'r') as f:        
-    inputs = json.load(f)
+  from multiprocessing import Pool, cpu_count
+  cpus = cpu_count()
+  print("CPUs: ", cpus)
   
-  print(inputs)
-      
+  inputs = [2,3,4,5]
+  
+  start = time.perf_counter()
+  for t in inputs:
+      print(func_to_par(t))
+  end = time.perf_counter()
+  print("SEQ: ", end - start)
+  
+  
+  start = time.perf_counter()
+  with Pool(4) as pool:
+      print(pool.map(func_to_par, inputs))
+  
+  end = time.perf_counter()
+  print("PAR: ", end - start)    
   
     
 
