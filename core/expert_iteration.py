@@ -29,6 +29,7 @@ from torch_geometric import utils
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
+import multiprocessing
 from multiprocessing import Pool, cpu_count
 
 from random import shuffle
