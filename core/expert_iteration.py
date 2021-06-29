@@ -168,7 +168,7 @@ def save_states(path, states, policies, values):
         full_path = os.path.join(path, phase, 'raw')
         num = len(os.listdir(full_path))+1
         saveBoardObs(full_path, 'board_{}.json'.format(num),
-                        board, board.gamePhase, policy_exp.ravel().tolist(), value_exp.ravel()tolist())
+                        board, board.gamePhase, policy_exp.ravel().tolist(), value_exp.ravel().tolist())
 
 
 
