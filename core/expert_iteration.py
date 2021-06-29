@@ -371,10 +371,15 @@ if __name__ == '__main__':
         types = []        
         for _ in range(num_cpu):
           types.append(next(itertools.cycle(move_types)))
-        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = False)
-        states_to_save = parmap(f, types, nprocs=num_cpu)
-        print("States to save: ", len(states_to_save))
+        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = False)        
+        # num_samples = iterations * num_cpu * saved_states_per_episode
+        num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
+        states_to_save = []
+        for j in range(num_iter):
+            aux = parmap(f, types, nprocs=num_cpu)
+            states_to_save.extend(aux)
         
+        print("States to save: ", len(states_to_save))
         # Tag the states
         
         # Save the states
