@@ -201,10 +201,7 @@ def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, 
     for a in range(num_proc):
         copy_a = copy.deepcopy(args)
         copy_a['move_type'] = next(move_types)
-        args_list.append(copy_a)
-    print("before par play")
-    print([a['move_type'] for a in args_list])
-    return 
+        args_list.append(copy_a)    
     
     for i in range(num_iter):
       with Pool(cpus) as pool:
