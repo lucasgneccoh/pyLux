@@ -204,8 +204,9 @@ def par_self_play(num_samples, path, root, apprentice, expert, num_cpu, max_dept
         args_list.append(copy_a)    
     
     for i in range(num_iter):
-      with Pool(cpus) as pool:
-          print(pool.map(whole_process, args_list))
+      with Pool(num_proc) as pool:
+          print(pool.map(whole_process, args_list))          
+          pool.close()
           pool.terminate()
       print(f"Done with iteration {i+1} of {num_iter}")
     
