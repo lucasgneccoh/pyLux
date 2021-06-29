@@ -159,7 +159,7 @@ def tag_with_expert_move(state, expert):
         policy_exp = policy_exp.detach().numpy()
     if isinstance(value_exp, torch.Tensor):
         value_exp = value_exp.detach().numpy()    
-    return policy_exp, value_exp
+    return state, policy_exp, value_exp
     
 def save_states(path, states, policies, values):
     for state, policy_exp, value_exp in zip(states, policies, values):
@@ -183,7 +183,7 @@ def whole_process(args):
     states_to_save = create_self_play_data(move_type, path, root, apprentice, max_depth, saved_states_per_episode, verbose)
     policies, values = [], []
     for state in states_to_save:
-        policy_exp, value_exp = tag_with_expert_move(state, expert)
+        _, policy_exp, value_exp = tag_with_expert_move(state, expert)
         policies.append(policy_exp)
         values.append(value_exp)
     
@@ -380,9 +380,15 @@ if __name__ == '__main__':
             states_to_save.extend(aux)
         
         print("States to save: ", len(states_to_save))
-        # Tag the states
+        print(states_to_save[0])
+        
+        # Tag the states        
+        f = lambda state: tag_with_expert_move(state, expert)
+        # tagged = parmap(f, states_to_save, nprocs=num_cpu)
         
         # Save the states
+        # f = lambda 
+        
         
         print("Training network")
         break
