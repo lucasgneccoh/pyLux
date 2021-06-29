@@ -191,10 +191,10 @@ def whole_process(args):
 
 
     
-def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, saved_states_per_episode=1, verbose = False):
+def par_self_play(num_samples, path, root, apprentice, expert, num_cpu, max_depth = 100, saved_states_per_episode=1, verbose = False):
     cpus = cpu_count()
     args = dict(zip(["path", "root", "apprentice", "expert", "max_depth", "saved_states_per_episode", "verbose"], [path, root, apprentice, expert, max_depth, saved_states_per_episode, verbose]))
-    num_proc = cpus
+    num_proc = min(cpus, num_cpu)
     num_iter = max(num_samples // (num_proc*saved_states_per_episode), 1)
     move_types = itertools.cycle(['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify'])
     args_list = []
@@ -206,6 +206,7 @@ def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, 
     for i in range(num_iter):
       with Pool(cpus) as pool:
           print(pool.map(whole_process, args_list))
+          pool.terminate()
       print(f"Done with iteration {i+1} of {num_iter}")
     
     
@@ -226,6 +227,7 @@ if __name__ == '__main__':
 
     iterations = inputs["iterations"]
     num_samples = inputs["num_samples"]
+    num_cpu = inputs["num_cpu"]
     saved_states_per_episode = inputs["saved_states_per_episode"]
     max_depth = inputs["max_depth"]
     initial_apprentice_mcts_sims = inputs["initial_apprentice_mcts_sims"]
@@ -322,7 +324,7 @@ if __name__ == '__main__':
         
         print("Parallel self-play")
         par_self_play(num_samples, path_data, state, 
-                      apprentice, expert, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode,
+                      apprentice, expert, num_cpu, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode,
                       verbose = True)        
         
         print("Training network")
