@@ -70,7 +70,7 @@ def play_episode(root, max_depth, apprentice):
     edge_index = boardToData(root).edge_index
     # ******************* PLAY EPISODE ***************************
     for i in range(max_depth):  
-        print_message_over(f"Playing episode: {i}/{max_depth}")
+        #print_message_over(f"Playing episode: {i}/{max_depth}")
 
         # Check if episode is over            
         if state.gameOver: break
@@ -203,7 +203,7 @@ def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, 
     num_iter = max(num_samples // (num_proc*saved_states_per_episode), 1)
     for i in range(num_iter):
       with Pool(cpus) as pool:
-          pool.map(whole_process, [args]*num_proc)
+          print(pool.map(whole_process, [args]*num_proc))
       print(f"Done with iteration {i+1} of {num_iter}")
     
     
