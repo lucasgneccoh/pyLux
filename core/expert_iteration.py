@@ -171,7 +171,11 @@ def save_states(path, states, policies, values):
         saveBoardObs(full_path, 'board_{}.json'.format(num),
                         board, board.gamePhase, policy_exp.ravel().tolist(), value_exp.ravel().tolist())
 
-
+def simple_save_state(path, name, state, policy, value):
+    board, _ = state.toCanonical(state.activePlayer.code)
+    saveBoardObs(path, name,
+                        board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
+    return True
 
 def whole_process(args):
     path, root = args['path'], args['root']    
@@ -240,7 +244,7 @@ def parmap(f, X, nprocs=multiprocessing.cpu_count()):
 
     [p.join() for p in proc]
 
-    return [(i, x) for i, x in res]
+    return [{'id': i, 'data': x} for i, x in res]
 
 
 
@@ -377,21 +381,37 @@ if __name__ == '__main__':
         states_to_save = []
         for j in range(num_iter):
             aux = parmap(f, types, nprocs=num_cpu)
-            states_to_save.extend(aux)
+            states_to_save.extend(aux['data'])
         
         print("States to save: ", len(states_to_save))
         print(states_to_save[0])
         
-        # Tag the states        
+        break
+        
+        # Tag the states            
         f = lambda state: tag_with_expert_move(state, expert)
-        # tagged = parmap(f, states_to_save, nprocs=num_cpu)
+        aux = parmap(f, states_to_save, nprocs=num_cpu)
+        tagged = aux['data']
         
         # Save the states
-        # f = lambda 
+        # simple_save_state(path, name, state, policy, value)
         
+        # Get the initial number for each move type
+        aux_dict = dict(zip(move_types, [len(os.listdir(os.path.join(path_data, t, 'raw')))+1 for t in move_types]))
+        
+        # Create the input for the parmap including the names of the files, the states and the targets        
+        for k in range(len(tagged)):
+            state, pol, val = tagged[k]
+            phase = state.gamePhase
+            new = ('board_{}.json'.format(aux_dict[phase]), state, pol, val)
+            tagged[k] = new
+            aux_dict[phase] += 1
+        
+        f = lambda tupl:  simple_save_state(path_data, tupl[0], tupl[1], tupl[2], tupl[3])
+        aux = parmap(f, tagged, nprocs=num_cpu)        
         
         print("Training network")
-        break
+        
         # Train network on dataset
         shuffle(move_types)
         for j, move_type in enumerate(move_types):
