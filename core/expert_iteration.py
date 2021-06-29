@@ -136,13 +136,10 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
     episode = play_episode(root, max_depth, apprentice)
         
     # ******************* SELECT STATES ***************************
-    # Take some states from episode
-    # Choose which kind of move we are going to save
-    to_save = move_type
-    
+    # Take some states from episode    
     try:
         # Define here how many states to select, and how
-        options = [s for s in episode if s.gamePhase == to_save]
+        options = [s for s in episode if s.gamePhase == move_type]
         if not options:
             # TODO: What to do in this case? For now just take some random states to avoid wasting the episode
             options = episode
@@ -171,7 +168,7 @@ def save_states(path, states, policies, values):
         full_path = os.path.join(path, phase, 'raw')
         num = len(os.listdir(full_path))+1
         saveBoardObs(full_path, 'board_{}.json'.format(num),
-                        board, board.gamePhase, policy_exp.tolist(), value_exp.tolist())
+                        board, board.gamePhase, policy_exp.ravel().tolist(), value_exp.ravel()tolist())
 
 
 
@@ -203,7 +200,8 @@ def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, 
     args_list = [args]*num_proc
     for a in args_list:
         a['move_type'] = next(move_types) 
-    
+    print("before par play")
+    print(args_list)
     for i in range(num_iter):
       with Pool(cpus) as pool:
           print(pool.map(whole_process, args_list))
