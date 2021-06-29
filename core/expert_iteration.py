@@ -197,9 +197,11 @@ def par_self_play(num_samples, path, root, apprentice, expert, max_depth = 100, 
     args = (path, root, apprentice, expert, max_depth, saved_states_per_episode, verbose)
     num_proc = cpus
     num_iter = max(num_samples // (num_proc*saved_states_per_episode), 1)
-    for _ in range(num_iter):
+    for i in range(num_iter):
       with Pool(cpus) as pool:
           pool.startmap(whole_process, [args]*num_proc)
+      print(f"Done with iteration {i+1} of {num_iter}")
+    
     
 
 
