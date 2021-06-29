@@ -213,6 +213,7 @@ def TPT_Loss(output, target):
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
+    print("Parsing args")
     args = parseInputs()
     inputs = read_json(args.inputs)
 
@@ -233,7 +234,7 @@ if __name__ == '__main__':
 
     # ---------------- Model -------------------------
 
-
+    print("Creating board")
 
     #%%% Create Board
     world = World(path_board)
@@ -255,6 +256,7 @@ if __name__ == '__main__':
     num_nodes = board_orig.world.map_graph.number_of_nodes()
     num_edges = board_orig.world.map_graph.number_of_edges()
 
+    print("Creating model")
     net = GCN_risk(num_nodes, num_edges, 
                      model_args['board_input_dim'], model_args['global_input_dim'],
                      model_args['hidden_global_dim'], model_args['num_global_layers'],
@@ -280,14 +282,18 @@ if __name__ == '__main__':
                                     
                                     
                                     
+    print("Defining apprentice")
     # Define initial apprentice
     apprentice = MctsApprentice(num_MCTS_sims = initial_apprentice_mcts_sims, temp=1, max_depth=max_depth)
     # apprentice = NetApprentice(net)
 
+
+    print("Defining expert")
     # build expert
     expert = build_expert_mcts(None) # Start with only MCTS with no inner apprentice
     expert.num_MCTS_sims = expert_mcts_sims
                          
+    print("Creating data folders")
     # Create folders to store data
     for folder in move_types:
         os.makedirs(os.path.join(path_data, folder, 'raw'), exist_ok = True)
@@ -299,6 +305,7 @@ if __name__ == '__main__':
     state.pickInitialCountries = True
     # state.play() # random init
     for i in range(iterations):
+        print(f"Starting iteration {i+1}")
        
         # Samples from self play
         # Use expert to calculate targets
@@ -307,16 +314,19 @@ if __name__ == '__main__':
                               apprentice, expert, max_depth = max_depth,
                               saved_states_per_episode = saved_states_per_episode, verbose=True)
         """
-                              
+        
+        print("Parallel self-play")
         par_self_play(num_samples, path_data, state, 
                       apprentice, expert, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode,
                       verbose = True)
 
         break # for testing
         
+        print("Training network")
         # Train network on dataset
         shuffle(move_types)
         for j, move_type in enumerate(move_types):
+            print(f"\t{j}:  {move_type}")
             save_path = f"{path_model}/model_{i}_{j}_{move_type}.tar"
             root_path = f'{path_data}/{move_type}'
             
@@ -329,5 +339,6 @@ if __name__ == '__main__':
                         5, loader, val_loader = loader, eval_every = 1,
                         load_path = None, save_path = save_path)
 
+        print("Building expert")
         # build expert with trained net
         expert = build_expert_mcts(NetApprentice(net))
