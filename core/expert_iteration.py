@@ -387,7 +387,10 @@ if __name__ == '__main__':
                 for s in a[1]:
                     states_to_save.append(s) # parmap returns this [(i, x)]
         
-        # Tag the states    
+        # Tag the states   
+        for s in states_to_save:
+          print("*** ", s.gamePhase)
+          
         print("\tTag the states")
         f = lambda state: tag_with_expert_move(state, expert)
         aux = parmap(f, states_to_save, nprocs=num_cpu)
