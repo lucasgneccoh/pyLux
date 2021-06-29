@@ -74,7 +74,7 @@ def saveBoardObs(path, file_name, board, phase, target, value):
     else:
         # Create file to have it in dir and avoid other processes not counting it
         with open(temp, 'w') as f:
-            f.close()
+            pass
       
     with open(temp, 'w') as f:
         continents, countries, inLinks, players, misc = board.toDicts()
