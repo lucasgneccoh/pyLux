@@ -372,6 +372,7 @@ if __name__ == '__main__':
         """
         
         # Play the games
+        print("\tPlay the games")
         types = []        
         for _ in range(num_cpu):
           types.append(next(itertools.cycle(move_types)))
@@ -388,12 +389,14 @@ if __name__ == '__main__':
         
         break
         
-        # Tag the states            
+        # Tag the states    
+        print("\tTag the states")
         f = lambda state: tag_with_expert_move(state, expert)
         aux = parmap(f, states_to_save, nprocs=num_cpu)
         tagged = [a[1] for a in aux]
         
         # Save the states
+        print("\tSave the states")
         # simple_save_state(path, name, state, policy, value)
         
         # Get the initial number for each move type
