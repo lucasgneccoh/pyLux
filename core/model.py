@@ -71,7 +71,12 @@ def saveBoardObs(path, file_name, board, phase, target, value):
     if os.path.exists(temp):
         print(f"File {temp} found: deleting")
         os.remove(temp)
-    with open(temp, 'w+') as f:
+    else:
+        # Create file to have it in dir and avoid other processes not counting it
+        with open(temp, 'w') as f:
+            f.close()
+      
+    with open(temp, 'w') as f:
         continents, countries, inLinks, players, misc = board.toDicts()
         json.dump({'continents':continents, 'countries':countries,
                     'inLinks': inLinks, 'players':players, 'misc':misc,
