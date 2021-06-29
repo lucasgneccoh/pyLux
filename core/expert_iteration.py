@@ -341,7 +341,7 @@ if __name__ == '__main__':
             # TODO: add validation data
             loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
             train_model(net, optimizer, scheduler, criterion, device,
-                        epochs = 10, loader, val_loader = None, eval_every = 3,
+                        epochs = 10, loader = loader, val_loader = None, eval_every = 3,
                         load_path = None, save_path = save_path)
 
         print("Building expert")
