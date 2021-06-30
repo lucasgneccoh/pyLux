@@ -1,14 +1,14 @@
 {
   "path_board": "../support/maps/test_map.json",
-  "iterations": 4,
-  "num_samples": 64,
-  "num_cpu": 16,
+  "iterations": 5,
+  "num_samples": 1024,
+  "num_cpu": 128,
   "max_depth": 100,
   "saved_states_per_episode": 4,
-  "initial_apprentice_mcts_sims": 100,
-  "expert_mcts_sims": 200,
+  "initial_apprentice_mcts_sims": 200,
+  "expert_mcts_sims": 500,
   "path_data": "../data",
   "path_model": "../data/models",
-  "batch_size": 4,
+  "batch_size": 32,
   "model_parameters": "../support/model_parameters/model_default_parameters.json"
 }

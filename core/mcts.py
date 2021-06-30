@@ -177,6 +177,7 @@ class MCTS(object):
             if not self.apprentice is None:
                 policy, value = self.apprentice.play(canon)
             else:
+                # No bias, just uniform sampling for the moment
                 policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
                         
             policy = policy * mask
@@ -194,7 +195,9 @@ class MCTS(object):
 
             # Fix order of value returned by net
             value = value.squeeze()
-            cor_value = torch.FloatTensor([value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
+            # Apprentice already does this
+            # cor_value = torch.FloatTensor([value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
+            cor_value = value
             return v, cor_value
         
         # Not a leaf, keep going down. Use values for the current player
@@ -208,6 +211,7 @@ class MCTS(object):
             # print(i, act)
             if self.Vs[s][i]>0.0:
                 if (s,a) in self.Rsa:
+                    # PUCT formula
                     uct = self.Rsa[(s,a)][p]+ self.cb*np.sqrt(np.log(self.Ns[s]) / max(self.Nsa[(s,a)], self.eps))
                     val = self.wb*self.Qsa[(s,a)] * (use_val) 
                     pol = self.wa*self.Ps[s][i]/(self.Nsa[(s,a)]+1)

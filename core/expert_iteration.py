@@ -389,8 +389,8 @@ if __name__ == '__main__':
                     states_to_save.append(s) # parmap returns this [(i, x)]
         
         # Tag the states   
-        for s in states_to_save:
-          print("*** ", s.gamePhase)
+        # for s in states_to_save:
+        #     print("*** ", s.gamePhase)
           
         print("\tTag the states")
         f = lambda state: tag_with_expert_move(state, expert)
