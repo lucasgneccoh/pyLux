@@ -12,8 +12,8 @@ import itertools
 
 
 # from mcts.py
-from board import Board
-from world import World, Country, Continent
+#from board import Board
+#from world import World, Country, Continent
 from move import Move
 import torch
 from model import boardToData, buildGlobalFeature
