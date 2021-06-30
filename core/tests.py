@@ -12,11 +12,32 @@ import agent
 import time
 import numpy as np
 import copy
+import model
+
 # from mcts import MCTS, MctsApprentice, NetApprentice
 # import model
 
 import json
 import os
+
+
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+
+import torch_geometric 
+from torch_geometric.data import DataLoader as G_DataLoader
+from torch_geometric.data import Data
+from torch_geometric.nn import GCNConv
+from torch_geometric.data import Dataset as G_Dataset
+from torch_geometric.data import download_url
+import torch_geometric.transforms as T
+from torch_geometric import utils
+
+
 
 def func_to_par(t):
     time.sleep(t)
@@ -242,26 +263,91 @@ if __name__ == '__main__':
 
 
   # Multprocessing
+  if False:
+    from multiprocessing import Pool, cpu_count
+    cpus = cpu_count()
+    print("CPUs: ", cpus)
+    
+    inputs = [2,3,4,5]
+    
+    start = time.perf_counter()
+    for t in inputs:
+        print(func_to_par(t))
+    end = time.perf_counter()
+    print("SEQ: ", end - start)
+    
+    
+    start = time.perf_counter()
+    with Pool(4) as pool:
+        print(pool.map(func_to_par, inputs))
+    
+    end = time.perf_counter()
+    print("PAR: ", end - start)    
   
-  from multiprocessing import Pool, cpu_count
-  cpus = cpu_count()
-  print("CPUs: ", cpus)
-  
-  inputs = [2,3,4,5]
-  
-  start = time.perf_counter()
-  for t in inputs:
-      print(func_to_par(t))
-  end = time.perf_counter()
-  print("SEQ: ", end - start)
-  
-  
-  start = time.perf_counter()
-  with Pool(4) as pool:
-      print(pool.map(func_to_par, inputs))
-  
-  end = time.perf_counter()
-  print("PAR: ", end - start)    
-  
+
+  # neuralMCTS test. It is failing to tag the moves in the expert iteration process
+  if True:
+    path_model = "../data/models"
+    EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs.json"
+    
+    # Create the net using the same parameters
+    inputs = read_json(EI_inputs_path)
+    model_args =  read_json(inputs["model_parameters"])
+    path_board = inputs["path_board"]
+
+    # ---------------- Model -------------------------
+
+    print("Creating board")
+
+    #%%% Create Board
+    world = World(path_board)
+
+
+    # Set players
+    pR1, pR2, pR3 = agent.RandomAgent('Red'), agent.RandomAgent('Blue'), agent.RandomAgent('Green')
+    players = [pR1, pR2, pR3]
+    # Set board
+    # TODO: Send to inputs
+    prefs = {'initialPhase': True, 'useCards':True,
+            'transferCards':True, 'immediateCash': True,
+            'continentIncrease': 0.05, 'pickInitialCountries':True,
+            'armiesPerTurnInitial':4,'console_debug':False}
+            
+    board_orig = Board(world, players)
+    board_orig.setPreferences(prefs)
+
+    num_nodes = board_orig.world.map_graph.number_of_nodes()
+    num_edges = board_orig.world.map_graph.number_of_edges()
+
+    print("Creating model")
+    net = GCN_risk(num_nodes, num_edges, 
+                     model_args['board_input_dim'], model_args['global_input_dim'],
+                     model_args['hidden_global_dim'], model_args['num_global_layers'],
+                     model_args['hidden_conv_dim'], model_args['num_conv_layers'],
+                     model_args['hidden_pick_dim'], model_args['num_pick_layers'], model_args['out_pick_dim'],
+                     model_args['hidden_place_dim'], model_args['num_place_layers'], model_args['out_place_dim'],
+                     model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
+                     model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
+                     model_args['hidden_value_dim'], model_args['num_value_layers'],
+                     model_args['dropout'])
+
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    net.to(device)
+    # Choose a model at random
+    model_name = np.random.choice(os.listdir(path_model))    
+    state_dict = load_dict(os.path.join(path_model, model_name), device)
+    net.load_state_dict(state_dict['model'])
+    
+    print("Model has been loaded")
+    print(net)
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 

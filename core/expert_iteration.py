@@ -95,6 +95,7 @@ def play_episode(root, max_depth, apprentice):
         probs = policy.squeeze().detach().numpy()
         probs =  probs / probs.sum()
 
+        # Random selection? e-greedy?
         ind = np.random.choice(range(len(actions)), p = probs)
         move = buildMove(state, actions[ind])
         
