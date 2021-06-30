@@ -10,6 +10,7 @@ from move import Move
 import copy
 import itertools
 
+
 class Agent(object):
   '''!Base class for an agent
   
@@ -634,6 +635,167 @@ class FlatMC(TreeSearch):
     return self.name_string
   
 
+class neuralMCTS(Agent):
+  '''! MCTS biased by a neural network  
+  '''  
+  def __init__(self, name='agent'):
+    '''! receive the 
+    '''
+    self.name_string = name
+    self.human = False
+    self.console_debug = False
+
+  def __deepcopy__(self, memo):
+    newPlayer = self.__class__()
+    for n in self.__dict__:
+      setattr(newPlayer, n, getattr(self, n))
+    return newPlayer
+
+  def copyToAgent(self, newPlayer):
+    for n in self.__dict__:
+      setattr(newPlayer, n, getattr(self, n))
+  
+  def setPrefs(self, code:int):
+    '''! Puts the agent into the game by assigning it a code and giving it
+    the reference to the game board
+    
+    :param code: The internal code of the agent in the game.
+    :type code: int
+    :param board: Reference to the board with the game information
+    :type :py:module:`pyRisk`.:py:class:`Board`
+    '''
+    self.code = code    
+    
+  
+  def pickCountry(self, board) -> int:
+    '''! Choose an empty country at the beginning of the game
+    '''
+    pass
+    
+  def placeInitialArmies(self, board, numberOfArmies:int):
+    '''! Place armies in owned countries. No attack phase follows.
+    Use board.placeArmies(numberArmies:int, country:Country)
+    
+    :param numberOfArmies: The number of armies the agent must place on the
+    board
+    :type numberOfArmies: int
+    '''
+    pass
+  
+  
+  def cardPhase(self, board, cards):
+    '''! Call to exchange cards.
+    May return None, meaning no cash
+    Use :py:module:`pyRisk`.:py:module:`Deck` methods to check for sets and
+    get best sets
+    
+    :param cards: List with the player's cards
+    :type cards: list[:py:module:`pyRisk`.:py:class:`Card`]
+    :returns List of three cards to cash
+    :rtype list[:py:module:`pyRisk`.:py:class:`Card`]
+    '''
+    pass
+  
+  
+  def placeArmies(self, board, numberOfArmies:int):
+    '''! Given a number of armies, place them on the board
+    Use board.placeArmies(numberArmies:int, country:Country) to place the
+    armies
+    
+    :param numberOfArmies: The number of armies the agent must place on the
+    board
+    :type numberOfArmies: int
+    '''
+    pass
+  
+  
+  def attackPhase(self, board):
+    '''! Call to attack. 
+    Can attack till dead or make single rolls.
+    Use res = board.attack(source_code:int, target_code:int, tillDead:bool)
+    to do the attack
+    Every call to board.attack yields a result as follows:
+      - 7: Attacker conquered the target country. This will call to
+      moveArmiesIn(self, countryCodeAttacker:int, countryCodeDefender:int)
+      to determine the number of armies to move to the newly conquered
+      territory
+      - 13: Defender won. You are left with only one army and can therefore
+      not continue the attack
+      - 0: Neither the attacker nor the defender won. If you want to deduce
+      the armies you lost, you can demand the number of armies in your
+      country.
+      - -1: There was an error
+      
+    You can attack multiple times during the attack phase.
+    '''
+    pass
+    
+  def moveArmiesIn(self, board, countryCodeAttacker:int, countryCodeDefender:int) -> int:
+    '''! This method is called when an attack led to a conquer. 
+    You can choose the number of armies to send to the conquered territory. 
+    The returned value should be between the number of rolled dice and the
+    number of armies in the attacking country minus 1.
+    The number of dice rolled is always 3 except when you have 3 or less
+    armies, in which case it will be the number of attacking armies minus 1.
+    Notice that by default, this method returns all the moveable armies.
+    
+    
+    :param countryCodeAttacker: Internal code of the attacking country
+    :type countryCodeAttacker: int
+    :param countryCodeDefender: Internal code of the defending country
+    :type countryCodeDefender: int
+    :returns Number of armies to move from attacking country to newly
+    conquered territory.
+    :rtype int
+    '''
+    # Default is to move all but one army
+    return board.world.countries[countryCodeAttacker].armies-1
+
+  def fortifyPhase(self, board):
+    '''! Call to fortify.
+    Just before this call, board will update the moveable armies in each
+    territory to the number of armies.
+    You can fortify multiple times, always between your countries that are
+    linked and have moveable armies.
+    '''
+    pass
+  
+  def name(self):
+    '''! Returns the name of the agent
+    :returns Name of the agent
+    :rtype str
+    '''
+    return self.name_string
+  
+  def version(self):
+    '''! Returns the version of the agent
+    :returns Version of the agent
+    :rtype str
+    '''
+    return '0'
+  
+  def description(self):
+    '''! Returns a short description of the agent
+    :returns Short description of the agent
+    :rtype str
+    '''
+    return 'Base description of agent'  
+  
+  def youWon(self):
+    '''! Returns a victory message
+    :returns Agent's victory message
+    :rtype str
+    '''
+    return '{} won the game'.format(self.name_string)
+  
+  def message(self):
+    '''! Returns some message. Not being used
+    :returns Message
+    :rtype str
+    '''
+    return 'Hello human, this is {}'.format(self.name_string) 
+
+
 '''
 For the python player in Java, the representation of the board is much more basic.
 Instead of having the pyRisk board with the world object and all its methods, 
@@ -652,5 +814,5 @@ the board that comes from Java is represented using:
   
 all_agents = {'random': RandomAgent, 'random_aggressive':RandomAggressiveAgent,
               'human': Human,
-              'flatMC':FlatMC, 'peace':PeacefulAgent}
+              'flatMC':FlatMC, 'peace':PeacefulAgent, 'neuralMCTS':neuralMCTS}
     
