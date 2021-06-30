@@ -7,7 +7,7 @@ import random
 import time
 import pandas as pd
 
-import agent
+from agent import RandomAgent
 from deck import Deck, ListThenArithmeticCardSequence
 from world import World, Country, Continent
 from move import Move
@@ -104,7 +104,7 @@ class Board(object):
     
   @staticmethod
   def fromDicts(continents:dict, countries:dict, inLinks:dict,\
-                players:dict, misc:dict, defaultAgent = agent.RandomAgent):
+                players:dict, misc:dict, defaultAgent = RandomAgent):
     world = World.fromDicts(continents, countries, inLinks)
     new_players = {}
     for i, attrs in players.items():
