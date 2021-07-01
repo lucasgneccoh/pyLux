@@ -20,7 +20,7 @@ from world import World
 import torch
 
 # Needs torch_geometric
-from model import boardToData, buildGlobalFeature, GCN_risk
+from model import boardToData, buildGlobalFeature, GCN_risk, load_dict, save_dict
 import torch_geometric
 
 
