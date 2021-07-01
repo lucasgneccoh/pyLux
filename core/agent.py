@@ -977,6 +977,21 @@ class neuralMCTS(Agent):
       return move
     
 
+def parseInputs():
+  parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+  parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
+  args = parser.parse_args()
+  return args
+  
+def read_json(path):
+  with open(path, 'r') as f:
+    data = json.load(f)
+  return data
+    
+
+def print_message_over(message):
+    sys.stdout.write('\r{0}'.format(message))
+    sys.stdout.flush()
 
 
 '''
