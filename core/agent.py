@@ -11,6 +11,8 @@ import copy
 import itertools
 from misc import print_message_over
 import json
+import os
+import sys
 
 from board import Board, Agent, RandomAgent
 from world import World
