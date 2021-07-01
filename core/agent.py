@@ -17,8 +17,8 @@ from world import World
 import torch
 
 # Needs torch_geometric
-#from model import boardToData, buildGlobalFeature
-#import torch_geometric
+from model import boardToData, buildGlobalFeature
+import torch_geometric
 
 
 
@@ -649,7 +649,7 @@ class UCTPlayer(Agent):
         '''
         return self.run(board)
 
-'''
+
 class PUCT(object):
 
     def __init__(self, apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
@@ -677,7 +677,7 @@ class PUCT(object):
         if not self.apprentice is None:
             policy, value = self.apprentice.play(canon)
         else:
-            # No bias, just uniform sampling for the moment
+            # No bias
             policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
                     
         policy = policy * mask
@@ -713,9 +713,9 @@ class PUCT(object):
             if self.Vs[s][i]>0.0:
                 if (s,a) in self.Rsa:
                     # PUCT formula
-                    uct = self.Rsa[(s,a)][p]+ self.cb*np.sqrt(np.log(self.Ns[s]) / max(self.Nsa[(s,a)], self.eps))
-                    val = self.wb*self.Qsa[(s,a)] * (use_val) 
-                    pol = self.wa*self.Ps[s][i]/(self.Nsa[(s,a)]+1)
+                    uct = self.Rsa[(s,a)][p]+ self.cb * np.sqrt(np.log(self.Ns[s]) / max(self.Nsa[(s,a)], self.eps))
+                    val = self.wb * self.Qsa[(s,a)] * (use_val) 
+                    pol = self.wa * self.Ps[s][i]/(self.Nsa[(s,a)]+1)
                     sc = uct + pol + val[p]
                 else:
                     # Unseen action, take it
@@ -846,11 +846,15 @@ class PUCT(object):
     
     
 class MctsApprentice(object):
-    def __init__(self, num_MCTS_sims = 1000, temp=1, max_depth=100):   
-        self.apprentice = MCTS(apprentice = None,
-                               num_MCTS_sims=num_MCTS_sims, max_depth=max_depth)
+    def __init__(self, num_MCTS_sims = 1000, temp=1, max_depth=100): 
+        self.max_depth = max_depth
+        self.num_MCTS_sims = num_MCTS_sims
+        self.apprentice = UCT(num_MCTS_sims=num_MCTS_sims, max_depth=max_depth)
         self.temp = temp
+        
     def play(self, state):
+        # Restart tree
+        self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
         prob, R, Q = self.apprentice.getActionProb(state, temp=self.temp)
         return prob, R
 
@@ -860,15 +864,19 @@ class NetApprentice(object):
     def __init__(self, net):
         self.apprentice = net
         
-    def play(self, state):
-        canon, map_to_orig = state.toCanonical(state.activePlayer.code)        
+    def play(self, canon):     
+        # state must be already in canonical form. The correction must be done outside
         batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
         mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
         
         if not self.apprentice is None:
+            # Get information relevant for global features
             _, _, _, players, misc = canon.toDicts()
+            # Build global features
             global_x = buildGlobalFeature(players, misc).unsqueeze(0)
+            
             pick, place, attack, fortify, value = self.apprentice.forward(batch, global_x)            
+            
             if canon.gamePhase == 'initialPick':
                 policy = pick
             elif canon.gamePhase in ['initialFortify', 'startTurn']:
@@ -878,162 +886,97 @@ class NetApprentice(object):
             elif canon.gamePhase == 'fortify':
                 policy = fortify
         else:
+            
             policy = torch.ones_like(mask) / max(mask.shape)
+            
         policy = policy * mask
-        value = value.squeeze()
-        cor_value = torch.FloatTensor([value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
-        return policy, cor_value
+        value = value.squeeze()        
+        return policy, value
 
 
 
 class neuralMCTS(Agent):
   """! MCTS biased by a neural network  
   """  
-  def __init__(self, apprentice, max_depth = 50, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2), name = "neuralMCTS", move_selection = "argmax", eps_greedy = 0.1):
-    """! Receive the apprentice. 
-      None means normal MCTS, it can be a MCTSApprentice or a NetApprentice
-      move_selection can be "argmax", "random_proportional" to choose it randomly using the probabilities
-      or "e_greddy" to use argmax eps_greedy % of the times, and random_proportional the other % of the times
-    """
-    self.name_string = name
-    self.MCTS = MCTS(apprentice, max_depth = max_depth, sims_per_eval = sims_per_eval,
-                    num_MCTS_sims = num_MCTS_sims,
-                    wa = wa, wb = wb, cb = cb)
-    self.human = False
-    self.console_debug = False
-    self.move_selection = move_selection
-    self.eps_greedy = eps_greedy
+  def __init__(self, apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
+                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False):
+      """! Receive the apprentice. 
+        None means normal MCTS, it can be a MCTSApprentice or a NetApprentice
+        move_selection can be "argmax", "random_proportional" to choose it randomly using the probabilities
+        or "e_greddy" to use argmax eps_greedy % of the times, and random_proportional the other % of the times
+      """
+      self.name = name    
+      self.human = False
+      self.console_debug = False
+      
+      self.apprentice = apprentice
+      self.max_depth = max_depth
+      self.sims_per_eval = sims_per_eval
+      self.num_MCTS_sims = num_MCTS_sims
+      self.wa = wa
+      self.wb = wb
+      self.cb = cb
+      self.temp = temp
+      self.use_val = use_val
   
-  
-  def playMove(self, board, temp=1, num_sims=None, use_val = False):
-    """ This function will be used in every type of move
-        Call the MCTS, get the action probabilities, take the argmax or use any other criterion
-    """
-    edge_index = boardToData(board).edge_index
-    mask, actions = maskAndMoves(board, board.gamePhase, edge_index)
-    
-    # Do the MCTS
-    policy, value, _ = self.MCTS.getActionProb(board, temp=temp, num_sims = num_sims, use_val = use_val)
-    
-    policy = policy * mask.squeeze().detach().numpy()
-    probs = policy / policy.sum()
-    
-    
-    # Use some criterion to choose the move
-    z = np.random.uniform()
-    if self.move_selection == "argmax" or (self.move_selection == "e_greedy" and z < self.eps_greedy):
-      ind = np.argmax(probs)
-    elif self.move_selection == "random_proportional" or (self.move_selection == "e_greedy" and z >= self.eps_greedy):
-      ind = np.random.choice(range(len(actions)), p = probs)
-    
-    # Return the selected move
-    return buildMove(board, actions[ind])
+  def run(self, board):
+      """ This function will be used in every type of move
+          Call the MCTS, get the action probabilities, take the argmax or use any other criterion
+      """      
+      
+      # Do the MCTS
+      self.puct = PUCT(self.apprentice, self.max_depth, self.sims_per_eval, self.num_MCTS_sims,
+                   self.wa, self.wb, self.cb)
+                   
+      probs, R, Q = self.puct.getActionProb(board, temp=self.temp, num_sims = None, use_val = self.use_val)
+      actions = self.puct.As[hash(board)]
+      # Use some criterion to choose the move
+      z = np.random.uniform()
+      if self.move_selection == "argmax" or (self.move_selection == "e_greedy" and z < self.eps_greedy):
+          ind = np.argmax(probs)
+      elif self.move_selection == "random_proportional" or (self.move_selection == "e_greedy" and z >= self.eps_greedy):
+          ind = np.random.choice(range(len(actions)), p = probs)
+      
+      # Return the selected move
+      return buildMove(board, actions[ind])
   
   def pickCountry(self, board) -> int:
-    """! Choose an empty country at the beginning of the game
-    """
-    move = self.playMove(board)
-    return move.source
+      move = self.run(board)
+      return move
     
   def placeInitialArmies(self, board, numberOfArmies:int):
-    """! Place armies in owned countries. No attack phase follows.
-    Use board.placeArmies(numberArmies:int, country:Country)
-    
-    :param numberOfArmies: The number of armies the agent must place on the
-    board
-    :type numberOfArmies: int
-    """
-    move = self.playMove(board)
-    # For the moment, all armies are placed in one country.
-    # We could use the distribution over the moves to place the armies in that fashion, specially if we use Katago's idea
-    # of forced playouts and policy target prunning
-    board.placeArmies(numberOfArmies, move.source)
-    return 
+      move = self.run(board)
+      return move
   
   
   def cardPhase(self, board, cards):
-    """! Call to exchange cards.
-    May return None, meaning no cash
-    Use :py:module:`pyRisk`.:py:module:`Deck` methods to check for sets and
-    get best sets
-    
-    :param cards: List with the player's cards
-    :type cards: list[:py:module:`pyRisk`.:py:class:`Card`]
-    :returns List of three cards to cash
-    :rtype list[:py:module:`pyRisk`.:py:class:`Card`]
-    """
-    if len(cards)<5 or not Deck.containsSet(cards): 
-      return None
-    c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
-    if not c is None:      
-      return c
+      if len(cards)<5 or not Deck.containsSet(cards): 
+        return None
+      c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
+      if not c is None:      
+        return c
   
   
-  def placeArmies(self, board, numberOfArmies:int):
-    """! Given a number of armies, place them on the board
-    Use board.placeArmies(numberArmies:int, country:Country) to place the
-    armies
-    
-    :param numberOfArmies: The number of armies the agent must place on the
-    board
-    :type numberOfArmies: int
-    """
-    move = self.playMove(board)
-    # For the moment, all armies are placed in one country.
-    # We could use the distribution over the moves to place the armies in that fashion, specially if we use Katago's idea
-    # of forced playouts and policy target prunning
-    board.placeArmies(numberOfArmies, move.source)
-    return 
+  def placeArmies(self, board, numberOfArmies:int):    
+      move = self.run(board)
+      return move
   
   
   def attackPhase(self, board):
-    """! Call to attack. 
-    Can attack till dead or make single rolls.
-    Use res = board.attack(source_code:int, target_code:int, tillDead:bool)
-    to do the attack
-    Every call to board.attack yields a result as follows:
-      - 7: Attacker conquered the target country. This will call to
-      moveArmiesIn(self, countryCodeAttacker:int, countryCodeDefender:int)
-      to determine the number of armies to move to the newly conquered
-      territory
-      - 13: Defender won. You are left with only one army and can therefore
-      not continue the attack
-      - 0: Neither the attacker nor the defender won. If you want to deduce
-      the armies you lost, you can demand the number of armies in your
-      country.
-      - -1: There was an error
-      
-    You can attack multiple times during the attack phase.
-    """
-    move = self.playMove(board)
-    res = 0
-    while not move.source is None and res != -1:
-      res = board.attack(move.source.code, move.target.code, bool(move.details))
-      move = self.playMove(board)
-    return 
+      move = self.run(board)
+      return move 
     
   def moveArmiesIn(self, board, countryCodeAttacker:int, countryCodeDefender:int) -> int:
-    """! Default for now
-    """
-    # Default is to move all but one army
-    return board.world.countries[countryCodeAttacker].armies-1
+      # Default for now
+      
+      # Default is to move all but one army
+      return board.world.countries[countryCodeAttacker].armies-1
 
-  def fortifyPhase(self, board):
-    """! Call to fortify.
-    Just before this call, board will update the moveable armies in each
-    territory to the number of armies.
-    You can fortify multiple times, always between your countries that are
-    linked and have moveable armies.
-    """
-    move = self.playMove(board)
-    res = 0
-    while not move.source is None and res != -1:
-      res = board.fortifyArmies(int(move.details), move.source.code, move.target.code)
-      move = self.playMove(board)
-    return 
+  def fortifyPhase(self, board):      
+      move = self.run(board)
+      return move
     
-'''
+
 
 
 '''
@@ -1084,7 +1027,7 @@ if __name__ == "__main__":
     
     board = copy.deepcopy(board_orig)    
     
-    if True:
+    if False:
     
         print("**** Test play")
         board.report()
@@ -1140,7 +1083,64 @@ if __name__ == "__main__":
         print(bestValue)   
         print(f"Length of the tree: {len(uct.Ns)}")
         
+        
+        
     # Now try the network, and the MCTS with the network (apprentice and expert)
+    if True:
+        path_model = "../data/models"
+        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs.json"
+        
+        # Create the net using the same parameters
+        inputs = read_json(EI_inputs_path)
+        model_args =  read_json(inputs["model_parameters"])
+        path_board = inputs["path_board"]
+
+        # ---------------- Model -------------------------
+
+        print("Creating board")
+
+        #%%% Create Board
+        world = World(path_board)
+
+
+        # Set players
+        pR1, pR2, pR3 = agent.RandomAgent('Red'), agent.RandomAgent('Blue'), agent.RandomAgent('Green')
+        players = [pR1, pR2, pR3]
+        # Set board
+        # TODO: Send to inputs
+        prefs = {'initialPhase': True, 'useCards':True,
+                'transferCards':True, 'immediateCash': True,
+                'continentIncrease': 0.05, 'pickInitialCountries':True,
+                'armiesPerTurnInitial':4,'console_debug':False}
+                
+        board_orig = Board(world, players)
+        board_orig.setPreferences(prefs)
+
+        num_nodes = board_orig.world.map_graph.number_of_nodes()
+        num_edges = board_orig.world.map_graph.number_of_edges()
+
+        print("Creating model")
+        net = GCN_risk(num_nodes, num_edges, 
+                         model_args['board_input_dim'], model_args['global_input_dim'],
+                         model_args['hidden_global_dim'], model_args['num_global_layers'],
+                         model_args['hidden_conv_dim'], model_args['num_conv_layers'],
+                         model_args['hidden_pick_dim'], model_args['num_pick_layers'], model_args['out_pick_dim'],
+                         model_args['hidden_place_dim'], model_args['num_place_layers'], model_args['out_place_dim'],
+                         model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
+                         model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
+                         model_args['hidden_value_dim'], model_args['num_value_layers'],
+                         model_args['dropout'])
+
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        net.to(device)
+        # Choose a model at random
+        model_name = np.random.choice(os.listdir(path_model))    
+        state_dict = load_dict(os.path.join(path_model, model_name), device)
+        net.load_state_dict(state_dict['model'])
+        
+        print("Model has been loaded")
+        print(net)
+        
     
 
 
