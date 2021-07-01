@@ -10,6 +10,7 @@ from move import Move
 import copy
 import itertools
 from misc import print_message_over
+import json
 
 from board import Board, Agent, RandomAgent
 from world import World
