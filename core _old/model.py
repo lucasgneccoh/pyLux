@@ -1,4 +1,5 @@
 from board import Board # Only used for the Board.fromDicts
+
 import itertools
 import os
 import json
