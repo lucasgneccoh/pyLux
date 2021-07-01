@@ -1120,14 +1120,14 @@ if __name__ == "__main__":
 
 
         # Set players
-        pR1, pR2, pR3 = agent.RandomAgent('Red'), agent.RandomAgent('Blue'), agent.RandomAgent('Green')
+        pR1, pR2, pR3 = RandomAgent('Red'), RandomAgent('Blue'), RandomAgent('Green')
         players = [pR1, pR2, pR3]
         # Set board
         # TODO: Send to inputs
         prefs = {'initialPhase': True, 'useCards':True,
                 'transferCards':True, 'immediateCash': True,
                 'continentIncrease': 0.05, 'pickInitialCountries':True,
-                'armiesPerTurnInitial':4,'console_debug':False}
+                'armiesPerTurnInitial':4,'console_debug':True}
                 
         board_orig = Board(world, players)
         board_orig.setPreferences(prefs)
