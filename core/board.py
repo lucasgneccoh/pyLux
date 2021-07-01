@@ -420,7 +420,11 @@ class Board(object):
       
     # PLACE ARMIES
     elif self.gamePhase in ['initialFortify', 'startTurn']:
-      if armies == 0: return [Move(None, None, None, self.gamePhase)]
+      if armies == 0:
+        print("Board:legalMoves: No armies to place??")
+        self.report()
+        self.showPlayers()
+        return [Move(None, None, None, self.gamePhase)]
       #return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), range(armies,-1,-1))]
       # Simplify: Place everything in one country
       return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), [0])]
@@ -467,7 +471,7 @@ class Board(object):
     # INITIAL PICK
     if self.gamePhase == 'initialPick':
       
-      if self.console_debug: print(f"PlayMove:initialPick: {move.source.id}")
+      if self.console_debug: print(f"Board {self.board_id} PlayMove:initialPick: {move.source.id}")
     
       # Make action
       res = self.pickCountry(move.source.code)
@@ -486,7 +490,8 @@ class Board(object):
     # INITIAL FORTIFY
     elif self.gamePhase == 'initialFortify':
       
-      if self.console_debug: print(f"PlayMove:initialFortify: {move.source.id}, {move.details}")
+      if self.console_debug: print(f"Board {self.board_id} PlayMove:initialFortify: {move.source.id}, {move.details}")
+      
       res = self.placeArmies(int(move.details), move.source.code)
       
       # Check for errors
@@ -504,7 +509,7 @@ class Board(object):
     # START TURN - PLACE ARMIES
     elif self.gamePhase == 'startTurn':   
       
-      if self.console_debug: print(f"PlayMove:startTurn: {move.source.id}, {move.details}")        
+      if self.console_debug: print(f"Board {self.board_id} PlayMove:startTurn: {move.source.id}, {move.details}")        
       
       res = self.placeArmies(int(move.details), move.source.code)
       
@@ -520,7 +525,7 @@ class Board(object):
     elif self.gamePhase == 'attack':
       if self.console_debug: 
         if not move.source is None: 
-          print(f"PlayMove:Attack: {move.source.id}, {move.target.id}, tillDead: {bool(move.details)}")
+          print(f"Board {self.board_id} PlayMove:Attack: {move.source.id}, {move.target.id}, tillDead: {bool(move.details)}")
         else:
           print("PlayMove:Attack: PASS")
       # Pass move, do not attack
@@ -540,7 +545,7 @@ class Board(object):
     elif self.gamePhase == 'fortify': 
       if self.console_debug: 
         if not move.source is None:
-          print(f"PlayMove:Fortify: {move.source.id}, {move.target.id}, {move.details}")
+          print(f"Board {self.board_id} PlayMove:Fortify: {move.source.id}, {move.target.id}, {move.details}")
         else:
           print("PlayMove:Fortify: PASS")
     
@@ -553,10 +558,10 @@ class Board(object):
       if pass_move:
         self.gamePhase = 'startTurn'
         self.endTurn()
-        if self.console_debug: print(f"PlayMove:Fortify: Ending turn. Active player {self.activePlayer.code}, First player {self.firstPlayerCode}")
+        if self.console_debug: print(f"Board {self.board_id} PlayMove:Fortify: Ending turn. Active player {self.activePlayer.code}, First player {self.firstPlayerCode}")
         if self.activePlayer.code == self.firstPlayerCode:
           # New round has begun
-          if self.console_debug: print(f"PlayMove:Fortify: New round")
+          if self.console_debug: print(f"Board {self.board_id} PlayMove:Fortify: New round")
           self.setupNewRound()
           self.prepareStart()
           
@@ -599,12 +604,22 @@ class Board(object):
       
       # Initial phase
       if self.gamePhase == 'initialPick':
+        if self.console_debug: print(f"Board:play: initialPick, player {p.name} to pick... ")
         move = p.pickCountry(self)
+        if self.console_debug: print(f"Board:play: initialPick: Picked {move}")
         return self.playMove(move)
       
       # Initial Fortify
       if self.gamePhase == 'initialFortify':
-        move = p.placeInitialArmies(self, p.income)
+        if self.console_debug: print(f"Board:play: initialFortify, player {p.name} to fortify... ")
+        # Check if player has initial armies left. If not, is the phase over or not?
+        if p.income + p.initialArmies == 0:
+          if self.console_debug: print(f"Board:play: initialFortify, player {p.name} has no armies left to place, ending turn")
+          self.endTurn()
+          return 0
+                       
+        move = p.placeInitialArmies(self, p.income)        
+        if self.console_debug: print(f"Board:play: initialFortify: Fortify {move}")
         return self.playMove(move)
         
       # Start turn: Give armies and place them
@@ -875,7 +890,11 @@ class Board(object):
     # Next player
     self.activePlayer = next(self.playerCycle)
     if self.console_debug: print(f"Board:endTurn: Ending turn: next player is ({self.activePlayer.code}) {self.activePlayer.name}")
+    
+    p = self.activePlayer
+    #if self.console_debug: print(f"Player info: income = {p.income}")
     self.prepareStart()
+    #if self.console_debug: print(f"Player info: income = {p.income}, game phase = {self.gamePhase}")
   
   def updatemoveable(self):
     '''! Sets the moveable armies of every country equal to the number of armies. Should be called after every "attack" phase and before "fortify" phase
@@ -905,17 +924,9 @@ class Board(object):
   
   
 #%% Simulation
-  def simulate(self, maxRounds = 60, safety=10e5, sim_console_debug = False):
-    '''! Use to facilitate the playouts for search algorithms. 
-    Should be called from a copy of the actual board, because it the board will be modified.    
-    '''
+
+  def readyForSimulation(self):
     activePlayerCode = self.activePlayer.code
-    # Simulate the game    
-    initRounds = self.roundCount
-    
-    cont = 0
-    self.console_debug = sim_console_debug
-    
     # Change all players to random    
     for i, p in self.players.items():
       self.players[i] = self.copyPlayer(i, newAgent=RandomAgent())
@@ -924,6 +935,21 @@ class Board(object):
     while self.activePlayer.code != activePlayerCode:
       self.activePlayer = next(self.playerCycle)
     
+  
+  
+  def simulate(self, maxRounds = 60, safety=10e5, sim_console_debug = False):
+    '''! Use to facilitate the playouts for search algorithms. 
+    Should be called from a copy of the actual board, because it the board will be modified.    
+    '''
+    
+    # Simulate the game    
+    initRounds = self.roundCount
+    
+    cont = 0
+    self.console_debug = sim_console_debug
+    
+    self.readyForSimulation()
+      
     while not self.gameOver and self.roundCount-initRounds < maxRounds and cont < safety:      
       self.play()
       cont += 1 # for safety 
@@ -1202,7 +1228,7 @@ class Board(object):
     
     new_board.setPreferences(self.prefs)
     # Extra copying
-    other_attrs = ['deck', 'cardSequence', 'nextCashArmies']
+    other_attrs = ['deck', 'cardSequence', 'nextCashArmies', 'console_debug']
     for a in other_attrs:
       setattr(new_board, a, copy.deepcopy(getattr(self, a)))
       

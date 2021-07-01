@@ -1,0 +1,237 @@
+{
+  "map_graph": {
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+      {
+        "id": "PER"
+      },
+      {
+        "id": "VEN"
+      },
+      {
+        "id": "BRA"
+      },
+      {
+        "id": "MEX"
+      },
+      {
+        "id": "GRE"
+      },
+      {
+        "id": "ICE"
+      },
+      {
+        "id": "SEU"
+      },
+      {
+        "id": "NAF"
+      },
+      {
+        "id": "EGY"
+      }
+    ],
+    "links": [
+      {
+        "source": "PER",
+        "target": "VEN"
+      },
+      {
+        "source": "PER",
+        "target": "BRA"
+      },
+      {
+        "source": "VEN",
+        "target": "PER"
+      },
+      {
+        "source": "VEN",
+        "target": "BRA"
+      },
+      {
+        "source": "VEN",
+        "target": "MEX"
+      },
+      {
+        "source": "BRA",
+        "target": "PER"
+      },
+      {
+        "source": "BRA",
+        "target": "VEN"
+      },
+      {
+        "source": "BRA",
+        "target": "NAF"
+      },
+      {
+        "source": "MEX",
+        "target": "VEN"
+      },
+      {
+        "source": "MEX",
+        "target": "GRE"
+      },
+      {
+        "source": "GRE",
+        "target": "MEX"
+      },
+      {
+        "source": "GRE",
+        "target": "ICE"
+      },
+      {
+        "source": "ICE",
+        "target": "GRE"
+      },
+      {
+        "source": "ICE",
+        "target": "SEU"
+      },
+      {
+        "source": "SEU",
+        "target": "ICE"
+      },
+      {
+        "source": "SEU",
+        "target": "NAF"
+      },
+      {
+        "source": "SEU",
+        "target": "EGY"
+      },
+      {
+        "source": "NAF",
+        "target": "SEU"
+      },
+      {
+        "source": "NAF",
+        "target": "BRA"
+      },
+      {
+        "source": "NAF",
+        "target": "EGY"
+      },
+      {
+        "source": "EGY",
+        "target": "SEU"
+      },
+      {
+        "source": "EGY",
+        "target": "NAF"
+      }
+    ]
+  },
+  "countries": [
+    {
+      "id": "VEN",
+      "name": "Venezuela",
+      "xy": "250,380",
+      "card_kind": 2
+    },
+    {
+      "id": "BRA",
+      "name": "Brazil",
+      "xy": "400,440",
+      "card_kind": 1
+    },
+    {
+      "id": "PER",
+      "name": "Peru",
+      "xy": "250,580",
+      "card_kind": 2
+    },
+    {
+      "id": "MEX",
+      "name": "Mexico",
+      "xy": "110,250",
+      "card_kind": 1
+    },
+    {
+      "id": "GRE",
+      "name": "Greenland - Nunavut",
+      "xy": "300, 10",
+      "card_kind": 3
+    },
+    {
+      "id": "ICE",
+      "name": "Iceland",
+      "xy": "480,80",
+      "card_kind": 3
+    },
+    {
+      "id": "SEU",
+      "name": "Southern Europe",
+      "xy": "600,200",
+      "card_kind": 2
+    },
+    {
+      "id": "NAF",
+      "name": "North Africa",
+      "xy": "640,350",
+      "card_kind": 2
+    },
+    {
+      "id": "EGY",
+      "name": "Egypt",
+      "xy": "810,320",
+      "card_kind": 1
+    }
+  ],
+  "continents": [
+    {
+      "name": "South America",
+      "bonus": 1,
+      "countries": [
+        "VEN",
+        "BRA",
+        "PER"
+      ],
+      "color": [
+        252,
+        59,
+        45
+      ]
+    },
+    {
+      "name": "North America",
+      "bonus": 3,
+      "countries": [
+        "MEX",
+        "GRE"
+      ],
+      "color": [
+        255,
+        176,
+        31
+      ]
+    },
+    {
+      "name": "Europe",
+      "bonus": 7,
+      "countries": [
+        "ICE",
+        "SEU"
+      ],
+      "color": [
+        23,
+        236,
+        255
+      ]
+    },
+    {
+      "name": "Africa",
+      "bonus": 3,
+      "countries": [
+        "NAF",
+        "EGY"
+      ],
+      "color": [
+        138,
+        70,
+        18
+      ]
+    }
+  ]
+}

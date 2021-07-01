@@ -162,7 +162,7 @@ def buildMove(state, move):
 class FlatMC(object):
     """ Flat MC
     """
-    def __init__(self, max_depth = 50, sims_per_eval = 1, num_MCTS_sims = 1000,
+    def __init__(self, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
                   cb = 0):
         
         # Ps is the policy in state s, Rsa is the reward, Qsa the estimated value (using the net for example)
@@ -199,6 +199,7 @@ class FlatMC(object):
             v += score_players(sim)                
         v /= self.sims_per_eval
         
+        #print("onLeaf: End")
         return v, v
         
     def treePolicy(self, state):
@@ -211,7 +212,7 @@ class FlatMC(object):
         return next(self.cycle)
         
     
-    def search(self, state, depth, use_val = False):
+    def search(self, state, depth):
         #print("\n\n-------- SEARCH --------")
         #print(f"depth: {depth}")
         # state.report()
@@ -252,10 +253,11 @@ class FlatMC(object):
         # Play action, continue search
         # TODO: For now, armies are placed on one country only to simplify the game
         #print(move)
+        
         state.playMove(move)
         
         # Once the search is done, update values for current (state, action) using the hashes s and a
-        v, net_v = self.search(state, depth+1, use_val)
+        v, net_v = self.search(state, depth+1)
         
         if isinstance(net_v, torch.Tensor):
             net_v = net_v.detach().numpy()
@@ -278,7 +280,7 @@ class FlatMC(object):
         return v, net_v
 
 
-    def getActionProb(self, player, state, temp=1, num_sims = None, use_val = False, verbose=False):
+    def getActionProb(self, player, state, temp=1, num_sims = None, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
         state
@@ -286,13 +288,18 @@ class FlatMC(object):
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
+        #state = copy.deepcopy(board)
+        #state.readyForSimulation()
+        #state.console_debug = False
+        
         if num_sims is None: num_sims = self.num_MCTS_sims
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
             if verbose: print_message_over(f'FlatMC:getActionProb:{i+1} / {num_sims}')            
-            sim = copy.deepcopy(state)
-            v, net_v= self.search(sim, 0, use_val)
+            sim = copy.deepcopy(state)            
+            #sim.console_debug = False
+            v, net_v= self.search(sim, 0)
             R += v
             if isinstance(net_v, np.ndarray):
                 Q += net_v
@@ -328,9 +335,9 @@ class FlatMC(object):
 
 
 class UCT(object):
-    """ Flat MC
+    """ UCT
     """
-    def __init__(self, max_depth = 50, sims_per_eval = 1, num_MCTS_sims = 1000,
+    def __init__(self, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
                   cb = np.sqrt(2)):
         
         # Ps is the policy in state s, Rsa is the reward, Qsa the estimated value (using the net for example)
@@ -395,7 +402,7 @@ class UCT(object):
         return action
         
     
-    def search(self, state, depth, use_val = False):
+    def search(self, state, depth):
         #print("\n\n-------- SEARCH --------")
         #print(f"depth: {depth}")
         # state.report()
@@ -439,7 +446,7 @@ class UCT(object):
         state.playMove(move)
         
         # Once the search is done, update values for current (state, action) using the hashes s and a
-        v, net_v = self.search(state, depth+1, use_val)
+        v, net_v = self.search(state, depth+1)
         
         if isinstance(net_v, torch.Tensor):
             net_v = net_v.detach().numpy()
@@ -462,21 +469,23 @@ class UCT(object):
         return v, net_v
 
 
-    def getActionProb(self, player, state, temp=1, num_sims = None, use_val = False, verbose=False):
+    def getActionProb(self, player, state, temp=1, num_sims = None, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
         state
         Returns:
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
-        """
+        """        
+        
         if num_sims is None: num_sims = self.num_MCTS_sims
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
             if verbose: print_message_over(f'UCT:getActionProb:{i+1} / {num_sims}')            
             sim = copy.deepcopy(state)
-            v, net_v= self.search(sim, 0, use_val)
+            sim.console_debug = False
+            v, net_v= self.search(sim, 0)
             R += v
             if isinstance(net_v, np.ndarray):
                 Q += net_v
@@ -509,10 +518,141 @@ class UCT(object):
                 
         return bestAction, bestValue
 
-'''
-class MCTSWithApprentice(object):
 
-    def __init__(self, apprentice, max_depth = 50, sims_per_eval = 1, num_MCTS_sims = 1000,
+class FlatMCPlayer(Agent):
+
+    def __init__(self, name='flatMC', max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
+                  cb = 0):        
+        self.name = name
+        self.human = False
+        self.console_debug = False  
+        self.max_depth = max_depth
+        self.sims_per_eval = sims_per_eval
+        self.num_MCTS_sims = num_MCTS_sims
+        self.cb = cb
+        self.flat = FlatMC(max_depth, sims_per_eval, num_MCTS_sims, cb)
+        
+ 
+    def run(self, board, num_sims=None): 
+        self.flat = FlatMC(self.max_depth, self.sims_per_eval, self.num_MCTS_sims, self.cb)
+        
+        state = copy.deepcopy(board)
+        state.readyForSimulation()
+        state.console_debug = False
+        
+        bestAction, bestValue = self.flat.getActionProb(self.code, state, temp=1, num_sims = num_sims, verbose=False)
+                
+        return bestAction
+      
+    
+    def pickCountry(self, board):
+        '''! Pick at random one of the empty countries
+        '''            
+        move = self.run(board) 
+        return move
+      
+    
+    def placeInitialArmies(self, board, numberOfArmies:int):
+        '''! Pick at random one of the empty countries
+        '''  
+        
+        return self.run(board)
+      
+      
+    def cardPhase(self, board, cards):
+        '''! Only cash when forced, then cash best possible set
+        '''
+        if len(cards)<5 or not Deck.containsSet(cards): 
+          return None
+        c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
+        if not c is None:      
+          return c
+    
+    def placeArmies(self, board, numberOfArmies:int):
+        '''! Place armies at random one by one, but on the countries with enemy
+        borders
+        '''
+        return self.run(board)
+    
+    def attackPhase(self, board):
+        '''! Attack a random number of times, from random countries, to random
+        targets.
+        The till_dead parameter is also set at random using an aggressiveness
+        parameter
+        '''  
+        return self.run(board)
+    
+    def fortifyPhase(self, board):
+        '''! For now, no fortification is made
+        '''
+        return self.run(board)
+        
+
+
+class UCTPlayer(Agent):
+
+    def __init__(self, name='UCT', max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
+                  cb = np.sqrt(2)):        
+        self.name = name
+        self.human = False
+        self.console_debug = False 
+        self.max_depth = max_depth
+        self.sims_per_eval = sims_per_eval
+        self.num_MCTS_sims = num_MCTS_sims
+        self.cb = cb
+        self.uct = UCT(max_depth, sims_per_eval, num_MCTS_sims, cb)
+        
+ 
+    def run(self, board, num_sims=None):   
+        self.uct = UCT(max_depth, sims_per_eval, num_MCTS_sims, cb)    
+        bestAction, bestValue = self.uct.getActionProb(self.code, board, temp=1, num_sims = num_sims, verbose=False)
+        return bestAction
+      
+    
+    def pickCountry(self, board):
+        '''! Pick at random one of the empty countries
+        '''    
+        return self.run(board)
+      
+    
+    def placeInitialArmies(self, board, numberOfArmies:int):
+        '''! Pick at random one of the empty countries
+        '''  
+        return self.run(board)
+      
+      
+    def cardPhase(self, board, cards):
+        '''! Only cash when forced, then cash best possible set
+        '''
+        if len(cards)<5 or not Deck.containsSet(cards): 
+          return None
+        c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
+        if not c is None:      
+          return c
+    
+    def placeArmies(self, board, numberOfArmies:int):
+        '''! Place armies at random one by one, but on the countries with enemy
+        borders
+        '''
+        return self.run(board)
+    
+    def attackPhase(self, board):
+        '''! Attack a random number of times, from random countries, to random
+        targets.
+        The till_dead parameter is also set at random using an aggressiveness
+        parameter
+        '''  
+        return self.run(board)
+    
+    def fortifyPhase(self, board):
+        '''! For now, no fortification is made
+        '''
+        return self.run(board)
+
+'''
+class PUCT(object):
+
+    def __init__(self, apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
                  wa = 10, wb = 10, cb = np.sqrt(2)):
         """ apprentice = None is regular MCTS
             apprentice = neural net -> Expert iteration with policy (and value) net
@@ -893,7 +1033,6 @@ class neuralMCTS(Agent):
       move = self.playMove(board)
     return 
     
-
 '''
 
 
@@ -921,7 +1060,7 @@ if __name__ == "__main__":
 
     # Load map
     #path = '../support/maps/classic_world_map.json'
-    path = '../support/maps/test_map.json'
+    path = '../support/maps/mini_test_map.json'
       
     world = World(path)
     
@@ -929,64 +1068,78 @@ if __name__ == "__main__":
     # Set players  
     pR1, pR2, pR3 = RandomAgent('Red'), RandomAgent('Green'), RandomAgent('Blue')
     
-    players = [pR1, pR2, pR3]
+    pFlat = FlatMCPlayer(name='flatMC', max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 700, cb = 0)
+    pUCT = UCTPlayer(name='UCT', max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000, cb = np.sqrt(2))
+    
+    players = [pR1, pFlat]
     # Set board
     prefs = {'initialPhase': True, 'useCards':True,
              'transferCards':True, 'immediateCash': True,
              'continentIncrease': 0.05, 'pickInitialCountries':True,
-             'armiesPerTurnInitial':4,'console_debug':False}  
+             'armiesPerTurnInitial':4,
+             'console_debug':True}  
              
     board_orig = Board(world, players)
     board_orig.setPreferences(prefs)
     
     board = copy.deepcopy(board_orig)    
     
-    print("**** Test play")
-    board.report()
-    print(board.countriesPandas())
+    if True:
     
-    for i in range(50):
-      board.play()
-      if board.gameOver: break
-    
-    while board.gamePhase != "attack":
-      board.play()
-      if board.gameOver: break
-       
-    print("\n\n")
-    print("**** Test FlatMC, UCT and MCTS\n")
-    board.report()
-    print(board.countriesPandas())
-    flat = FlatMC(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = 0)
-    uct = UCT(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = np.sqrt(2))
-    
-    p = board.activePlayer
-    
-    bestAction, bestValue = flat.getActionProb(p.code, board, temp=1, num_sims = None, use_val = False, verbose=False)
-    
-    print(f"Done flatMC: Player {p.code}")
-    actions = flat.As[hash(board)]
-    for i, a in enumerate(actions):
-        print(a, " -> ", flat.Rsa[(hash(board), hash(a))])
-    
-    print()
-    print(bestAction)
-    print(bestValue)  
-    print(f"Length of the tree: {len(flat.Ns)}")
+        print("**** Test play")
+        board.report()
+        print(board.countriesPandas())
+        
+        for i in range(50):
+          board.play()
+          if board.gameOver: break
+        
+        print("\n\n**** End of play")
+        board.report()
+        print(board.countriesPandas())
     
     
-    bestAction, bestValue = uct.getActionProb(p.code, board, temp=1, num_sims = None, use_val = False, verbose=False)
-    print("----------------------------")
-    print(f"Done UCT: Player {p.code}")
-    actions = uct.As[hash(board)]
-    for i, a in enumerate(actions):
-        print(a, " -> ", uct.Rsa[(hash(board), hash(a))])
-    
-    print()
-    print(bestAction)
-    print(bestValue)   
-    print(f"Length of the tree: {len(uct.Ns)}")
-    
+    if False:
+        print("\n\n")
+        print("**** Test FlatMC, UCT and MCTS\n")
+        
+        # Get to the desired phase
+        while board.gamePhase != "attack":
+            board.play()
+            if board.gameOver: break
+
+        board.report()
+        print(board.countriesPandas())
+        flat = FlatMC(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = 0)
+        uct = UCT(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = np.sqrt(2))
+        
+        p = board.activePlayer
+        
+        bestAction, bestValue = flat.getActionProb(p.code, board, temp=1, num_sims = None, verbose=False)
+        
+        print(f"Done flatMC: Player {p.code}")
+        actions = flat.As[hash(board)]
+        for i, a in enumerate(actions):
+            print(a, " -> ", flat.Rsa[(hash(board), hash(a))])
+        
+        print()
+        print(bestAction)
+        print(bestValue)  
+        print(f"Length of the tree: {len(flat.Ns)}")
+        
+        
+        bestAction, bestValue = uct.getActionProb(p.code, board, temp=1, num_sims = None, verbose=False)
+        print("----------------------------")
+        print(f"Done UCT: Player {p.code}")
+        actions = uct.As[hash(board)]
+        for i, a in enumerate(actions):
+            print(a, " -> ", uct.Rsa[(hash(board), hash(a))])
+        
+        print()
+        print(bestAction)
+        print(bestValue)   
+        print(f"Length of the tree: {len(uct.Ns)}")
+        
     # Now try the network, and the MCTS with the network (apprentice and expert)
     
 
