@@ -18,7 +18,7 @@ from world import World
 import torch
 
 # Needs torch_geometric
-from model import boardToData, buildGlobalFeature
+from model import boardToData, buildGlobalFeature, GCN_risk
 import torch_geometric
 
 
