@@ -656,7 +656,7 @@ class UCTPlayer(Agent):
 class PUCT(object):
 
     def __init__(self, apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0):
+                 wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False):
         """ apprentice = None is regular MCTS
             apprentice = neural net -> Expert iteration with policy (and value) net
             apprentice = MCTS -> Used for first iteration
@@ -670,6 +670,7 @@ class PUCT(object):
         self.sims_per_eval, self.num_MCTS_sims = sims_per_eval, num_MCTS_sims
         self.cb, self.wa, self.wb = cb, wa, wb
         self.use_val = use_val
+        self.console_debug = console_debug
     
     def onLeaf(self, state, depth):
         s = hash(state)
@@ -685,8 +686,8 @@ class PUCT(object):
             policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
                     
         
-        # print(f"OnLeaf: State {state.board_id} ({s})")
-        # print(f"OnLeaf: Found this actions to expand {moves}")
+        if self.console_debug: print(f"OnLeaf: State {state.board_id} ({s})")
+        if self.console_debug: print(f"OnLeaf: Found this actions to expand {moves}")
         
         
         policy = policy * mask
@@ -716,11 +717,11 @@ class PUCT(object):
         bestScore = -float('inf')
         
         
-        #print("treePolicy: Start")
-        #print("Valid:")
-        #print(self.Vs[s])
-        #print("Actions:")
-        #print(self.As[s])
+        if self.console_debug: print("treePolicy: Start")
+        if self.console_debug: print("Valid:")
+        if self.console_debug: print(self.Vs[s])
+        if self.console_debug: print("Actions:")
+        if self.console_debug: print(self.As[s])
                 
         for i, act in enumerate(self.As[s]):
             a = hash(act)
@@ -732,10 +733,10 @@ class PUCT(object):
                     val = self.wb * self.Qsa[(s,a)] * (self.use_val) 
                     pol = self.wa * self.Ps[s][i]/(self.Nsa[(s,a)]+1)
                     sc = uct + pol + val[p]
-                    print(f"treePolicy: score for action {act}:  {sc}")
+                    if self.console_debug: print(f"treePolicy: score for action {act}:  {sc}")
                 else:
                     # Unseen action, take it
-                    print(f"treePolicy: unseen action {act}")
+                    if self.console_debug: print(f"treePolicy: unseen action {act}")
                     action = act
                     break
                 if sc > bestScore:
@@ -769,7 +770,7 @@ class PUCT(object):
         # Not a leaf, keep going down. Use values for the current player
         action = self.treePolicy(state)
         
-        print(f"Best action found by tree policy: {action}")
+        if self.console_debug: print(f"Best action found by tree policy: {action}")
         
         if isinstance(action, int) and action == -1:
             print("**** No move?? *****")
@@ -778,12 +779,12 @@ class PUCT(object):
             print(self.Vs[s])
 
 
-        # print('best: ', action)
+        
         a = hash(action) # Best action in simplified way
         move = buildMove(state, action)
         # Play action, continue search
         # TODO: For now, armies are placed on one country only to simplify the game
-        # print(move)
+        if self.console_debug: print(move)
         state.playMove(move)
         
         # Once the search is done, update values for current (state, action) using the hashes s and a
@@ -919,7 +920,7 @@ class neuralMCTS(Agent):
   """! MCTS biased by a neural network  
   """  
   def __init__(self, apprentice = None, name = "neuralMCTS", max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = 0, move_selection = "argmax"):
+                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = 0, move_selection = "argmax", console_debug = False):
       """! Receive the apprentice. 
         None means normal MCTS, it can be a MCTSApprentice or a NetApprentice
         move_selection can be "argmax", "random_proportional" to choose it randomly using the probabilities
@@ -927,7 +928,7 @@ class neuralMCTS(Agent):
       """
       self.name = name    
       self.human = False
-      self.console_debug = False
+      self.console_debug = console_debug
       
       self.apprentice = apprentice
       self.max_depth = max_depth
@@ -953,7 +954,7 @@ class neuralMCTS(Agent):
       state.console_debug = False
       
       self.puct = PUCT(self.apprentice, self.max_depth, self.sims_per_eval, self.num_MCTS_sims,
-                   self.wa, self.wb, self.cb, use_val = self.use_val)
+                   self.wa, self.wb, self.cb, use_val = self.use_val, console_debug = self.console_debug)
                    
       
       probs, R, Q = self.puct.getActionProb(state, temp=self.temp, num_sims = None, use_val = self.use_val, verbose = state.console_debug)
