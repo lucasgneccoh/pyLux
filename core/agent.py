@@ -715,11 +715,12 @@ class PUCT(object):
         action = -1
         bestScore = -float('inf')
         
-        print("treePolicy: Start")
-        print("Valid:")
-        print(self.Vs[s])
-        print("Actions:")
-        print(self.As[s])
+        
+        #print("treePolicy: Start")
+        #print("Valid:")
+        #print(self.Vs[s])
+        #print("Actions:")
+        #print(self.As[s])
                 
         for i, act in enumerate(self.As[s]):
             a = hash(act)
