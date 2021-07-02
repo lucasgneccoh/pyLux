@@ -743,7 +743,7 @@ class PUCT(object):
         return action
         
     
-    def search(self, state, depth, use_val = False):
+    def search(self, state, depth):
         # print("\n\n-------- SEARCH --------")
         # print(f"depth: {depth}")
         # state.report()
@@ -786,7 +786,7 @@ class PUCT(object):
         state.playMove(move)
         
         # Once the search is done, update values for current (state, action) using the hashes s and a
-        v, net_v = self.search(state, depth+1, use_val)
+        v, net_v = self.search(state, depth+1)
         
         if isinstance(net_v, torch.Tensor):
             net_v = net_v.detach().numpy()
