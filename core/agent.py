@@ -945,6 +945,8 @@ class neuralMCTS(Agent):
       """      
       
       # Do the MCTS
+      
+      # First copy the state and remove player to avoid copying the puct object
       state = copy.deepcopy(board)
       state.readyForSimulation()
       
