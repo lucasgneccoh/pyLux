@@ -685,8 +685,8 @@ class PUCT(object):
             policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
                     
         
-        print(f"OnLeaf: State {state.board_id} ({s})")
-        print(f"OnLeaf: Found this actions to expand {moves}")
+        # print(f"OnLeaf: State {state.board_id} ({s})")
+        # print(f"OnLeaf: Found this actions to expand {moves}")
         
         
         policy = policy * mask
@@ -949,6 +949,7 @@ class neuralMCTS(Agent):
       # First copy the state and remove player to avoid copying the puct object
       state = copy.deepcopy(board)
       state.readyForSimulation()
+      state.console_debug = False
       
       self.puct = PUCT(self.apprentice, self.max_depth, self.sims_per_eval, self.num_MCTS_sims,
                    self.wa, self.wb, self.cb, use_val = self.use_val)
