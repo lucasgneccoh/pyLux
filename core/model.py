@@ -39,9 +39,9 @@ def load_checkpoint(load_path, model, optimizer, device):
 def save_dict(save_path, state_dict):
     torch.save(state_dict, save_path)
     
-def load_dict(load_path, device):
+def load_dict(load_path, device, encoding = 'utf-8'):
     with open(load_path, 'r') as f:
-        state_dict = torch.load(f, map_location=device)
+        state_dict = torch.load(f, map_location=device, encoding = encoding)
     return state_dict
 
 

@@ -1154,7 +1154,7 @@ if __name__ == "__main__":
         # Choose a model at random
         model_name = np.random.choice(os.listdir(path_model))    
         print(f"Chosen model is {model_name}")
-        state_dict = load_dict(os.path.join(path_model, model_name), 'cpu')
+        state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')
         print(state_dict)
         net.load_state_dict(state_dict['model'])
         
