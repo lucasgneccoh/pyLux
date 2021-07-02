@@ -656,7 +656,7 @@ class UCTPlayer(Agent):
 class PUCT(object):
 
     def __init__(self, apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2)):
+                 wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0):
         """ apprentice = None is regular MCTS
             apprentice = neural net -> Expert iteration with policy (and value) net
             apprentice = MCTS -> Used for first iteration
@@ -669,6 +669,7 @@ class PUCT(object):
         self.eps, self.max_depth = 1e-8, max_depth   
         self.sims_per_eval, self.num_MCTS_sims = sims_per_eval, num_MCTS_sims
         self.cb, self.wa, self.wb = cb, wa, wb
+        self.use_val = use_val
     
     def onLeaf(self, state, depth):
         s = hash(state)
@@ -727,7 +728,7 @@ class PUCT(object):
                 if (s,a) in self.Rsa:
                     # PUCT formula
                     uct = self.Rsa[(s,a)][p]+ self.cb * np.sqrt(np.log(self.Ns[s]) / max(self.Nsa[(s,a)], self.eps))
-                    val = self.wb * self.Qsa[(s,a)] * (use_val) 
+                    val = self.wb * self.Qsa[(s,a)] * (self.use_val) 
                     pol = self.wa * self.Ps[s][i]/(self.Nsa[(s,a)]+1)
                     sc = uct + pol + val[p]
                     print(f"treePolicy: score for action {act}:  {sc}")
@@ -917,7 +918,7 @@ class neuralMCTS(Agent):
   """! MCTS biased by a neural network  
   """  
   def __init__(self, apprentice = None, name = "neuralMCTS", max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False):
+                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = 0):
       """! Receive the apprentice. 
         None means normal MCTS, it can be a MCTSApprentice or a NetApprentice
         move_selection can be "argmax", "random_proportional" to choose it randomly using the probabilities
@@ -944,7 +945,7 @@ class neuralMCTS(Agent):
       
       # Do the MCTS
       self.puct = PUCT(self.apprentice, self.max_depth, self.sims_per_eval, self.num_MCTS_sims,
-                   self.wa, self.wb, self.cb)
+                   self.wa, self.wb, self.cb, use_val = self.use_val)
                    
       probs, R, Q = self.puct.getActionProb(board, temp=self.temp, num_sims = None, use_val = self.use_val)
       actions = self.puct.As[hash(board)]
