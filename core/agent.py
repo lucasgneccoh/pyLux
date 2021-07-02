@@ -683,6 +683,11 @@ class PUCT(object):
             # No bias
             policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
                     
+        
+        print(f"OnLeaf: State {state.board_id}")
+        print(f"OnLeaf: Found this actions to expand {moves}")
+        
+        
         policy = policy * mask
         self.Vs[s], self.As[s] = mask.squeeze(), moves
         self.Ps[s] = policy.squeeze()
