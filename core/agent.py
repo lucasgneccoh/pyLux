@@ -739,6 +739,7 @@ class PUCT(object):
                 if sc > bestScore:
                     bestScore = sc
                     action = act
+        return action
         
     
     def search(self, state, depth, use_val = False):
