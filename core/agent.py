@@ -1153,7 +1153,9 @@ if __name__ == "__main__":
         net.to(device)
         # Choose a model at random
         model_name = np.random.choice(os.listdir(path_model))    
+        print(f"Chosen model is {model_name}")
         state_dict = load_dict(os.path.join(path_model, model_name), device)
+        print(state_dict)
         net.load_state_dict(state_dict['model'])
         
         print("Model has been loaded")
