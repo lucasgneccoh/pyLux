@@ -821,7 +821,7 @@ class PUCT(object):
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
-            if verbose: progress(i+1, num_sims, f'MCTS:getActionProb:{num_sims}')
+            if verbose: print_message_over (f'MCTS:getActionProb:{i+1} / {num_sims}')
             sim = copy.deepcopy(state)
             v, net_v= self.search(sim, 0)
             R += v
