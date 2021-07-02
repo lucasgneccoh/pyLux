@@ -1214,7 +1214,7 @@ if __name__ == "__main__":
         board = copy.deepcopy(board_orig)
         
         # Test play
-        for i in range(10):
+        for i in range(50):
           board.play()
           if board.gameOver: break
   
