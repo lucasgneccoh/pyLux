@@ -823,7 +823,7 @@ class PUCT(object):
         for i in range(num_sims):
             if verbose: progress(i+1, num_sims, f'MCTS:getActionProb:{num_sims}')
             sim = copy.deepcopy(state)
-            v, net_v= self.search(sim, 0, use_val)
+            v, net_v= self.search(sim, 0)
             R += v
             if isinstance(net_v, np.ndarray):
                 Q += net_v
