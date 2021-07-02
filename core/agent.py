@@ -698,7 +698,7 @@ class PUCT(object):
         v = np.zeros(6)
         for _ in range(self.sims_per_eval):
             sim = copy.deepcopy(state)
-            sim.simulate()
+            sim.simulate(sim_console_debug = True) # CAMBIAR
             v += score_players(sim)                
         v /= self.sims_per_eval
 
@@ -1185,7 +1185,7 @@ if __name__ == "__main__":
         # Create player that uses neural net
         
         apprentice = NetApprentice(net)
-        neuralPlayer = neuralMCTS(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 50,
+        neuralPlayer = neuralMCTS(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 2,
                  wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False)
         
         
