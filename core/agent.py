@@ -918,11 +918,11 @@ class neuralMCTS(Agent):
   """! MCTS biased by a neural network  
   """  
   def __init__(self, apprentice = None, name = "neuralMCTS", max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = 0, move_selection = "e_greddy", eps_greedy = lambda i: 0.1):
+                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = 0, move_selection = "argmax"):
       """! Receive the apprentice. 
         None means normal MCTS, it can be a MCTSApprentice or a NetApprentice
         move_selection can be "argmax", "random_proportional" to choose it randomly using the probabilities
-        or "e_greddy" to use argmax eps_greedy % of the times, and random_proportional the other % of the times
+        
       """
       self.name = name    
       self.human = False
@@ -937,8 +937,7 @@ class neuralMCTS(Agent):
       self.cb = cb
       self.temp = temp
       self.use_val = use_val
-      self.move_selection = move_selection
-      self.eps_greedy = eps_greedy
+      self.move_selection = move_selection      
   
   def run(self, board):
       """ This function will be used in every type of move
@@ -953,10 +952,12 @@ class neuralMCTS(Agent):
       actions = self.puct.As[hash(board)]
       # Use some criterion to choose the move
       z = np.random.uniform()
-      if self.move_selection == "argmax" or (self.move_selection == "e_greedy" and z < self.eps_greedy):
+      if self.move_selection == "argmax":
           ind = np.argmax(probs)
-      elif self.move_selection == "random_proportional" or (self.move_selection == "e_greedy" and z >= self.eps_greedy):
+      elif self.move_selection == "random_proportional":
           ind = np.random.choice(range(len(actions)), p = probs)
+      else:
+          raise Exception("Invalid kind of move selection criterion")
       
       # Return the selected move
       return buildMove(board, actions[ind])
