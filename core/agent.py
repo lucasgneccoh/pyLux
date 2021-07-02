@@ -901,7 +901,7 @@ class NetApprentice(object):
 class neuralMCTS(Agent):
   """! MCTS biased by a neural network  
   """  
-  def __init__(self, apprentice, name = "neuralMCTS", max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
+  def __init__(self, apprentice = None, name = "neuralMCTS", max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
                  wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False):
       """! Receive the apprentice. 
         None means normal MCTS, it can be a MCTSApprentice or a NetApprentice
