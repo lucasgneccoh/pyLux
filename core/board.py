@@ -949,6 +949,10 @@ class Board(object):
     self.console_debug = sim_console_debug
     
     self.readyForSimulation()
+    
+    print("Before starting sim:")
+    self.showPlayers()
+    self.report()
       
     while not self.gameOver and self.roundCount-initRounds < maxRounds and cont < safety:      
       self.play()
