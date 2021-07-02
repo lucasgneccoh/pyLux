@@ -1185,6 +1185,7 @@ if __name__ == "__main__":
         # Create player that uses neural net
         
         apprentice = NetApprentice(net)
+        # CAMBIAR num_MCTS_sims
         neuralPlayer = neuralMCTS(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 2,
                  wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False)
         
