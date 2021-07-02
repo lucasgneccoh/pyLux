@@ -959,7 +959,8 @@ class neuralMCTS(Agent):
       else:
           raise Exception("Invalid kind of move selection criterion")
       
-      # Return the selected move
+      # Return the selected move, destroy tree
+      self.puct = None
       return buildMove(board, actions[ind])
   
   def pickCountry(self, board) -> int:
