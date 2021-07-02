@@ -1163,10 +1163,37 @@ if __name__ == "__main__":
             net.load_state_dict(state_dict['model'])        
             print("Model has been loaded")
             
-        print(net)
+        # Create player that uses neural net
         
-    
-
-
+        apprentice = NetApprentice(net)
+        neuralPlayer = neuralMCTS(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 150,
+                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False)
+        
+        
+        # Re-create board with neural player
+        players = [pR1, neuralPlayer]
+        # Set board
+        # TODO: Send to inputs
+        prefs = {'initialPhase': True, 'useCards':True,
+                'transferCards':True, 'immediateCash': True,
+                'continentIncrease': 0.05, 'pickInitialCountries':True,
+                'armiesPerTurnInitial':4,'console_debug':True}
+                
+        board_orig = Board(world, players)
+        board_orig.setPreferences(prefs)
+        board = copy.deepcopy(board_orig)
+        
+        # Test play
+        for i in range(2):
+          board.play()
+          if board.gameOver: break
+  
+        print("\n\n *** End of play")  
+        board.report()
+        print(board.countriesPandas())  
+        
+        
+        
+        
 
  
