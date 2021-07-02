@@ -720,6 +720,7 @@ class PUCT(object):
                     val = self.wb * self.Qsa[(s,a)] * (use_val) 
                     pol = self.wa * self.Ps[s][i]/(self.Nsa[(s,a)]+1)
                     sc = uct + pol + val[p]
+                    print(f"treePolicy: score for action {act}:  {sc}")
                 else:
                     # Unseen action, take it
                     action = act
@@ -753,6 +754,8 @@ class PUCT(object):
             
         # Not a leaf, keep going down. Use values for the current player
         action = self.treePolicy(state)
+        
+        print(f"Best action found by tree policy: {action}")
         
         if isinstance(action, int) and action == -1:
             print("**** No move?? *****")

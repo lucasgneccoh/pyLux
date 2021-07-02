@@ -950,9 +950,9 @@ class Board(object):
     
     self.readyForSimulation()
     
-    print("Before starting sim:")
-    self.showPlayers()
-    self.report()
+    #print("Before starting sim:")
+    #self.showPlayers()
+    #self.report()
       
     while not self.gameOver and self.roundCount-initRounds < maxRounds and cont < safety:      
       self.play()
