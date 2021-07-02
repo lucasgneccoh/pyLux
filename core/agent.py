@@ -945,10 +945,14 @@ class neuralMCTS(Agent):
       """      
       
       # Do the MCTS
+      state = copy.deepcopy(board)
+      state.readyForSimulation()
+      
       self.puct = PUCT(self.apprentice, self.max_depth, self.sims_per_eval, self.num_MCTS_sims,
                    self.wa, self.wb, self.cb, use_val = self.use_val)
                    
-      probs, R, Q = self.puct.getActionProb(board, temp=self.temp, num_sims = None, use_val = self.use_val)
+      
+      probs, R, Q = self.puct.getActionProb(state, temp=self.temp, num_sims = None, use_val = self.use_val)
       actions = self.puct.As[hash(board)]
       # Use some criterion to choose the move
       z = np.random.uniform()
