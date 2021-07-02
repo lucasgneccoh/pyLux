@@ -720,7 +720,7 @@ class PUCT(object):
         print(self.Vs[s])
         print("Actions:")
         print(self.As[s])
-        
+                
         for i, act in enumerate(self.As[s]):
             a = hash(act)
             # print(i, act)
@@ -918,7 +918,7 @@ class neuralMCTS(Agent):
   """! MCTS biased by a neural network  
   """  
   def __init__(self, apprentice = None, name = "neuralMCTS", max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = 0):
+                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = 0, move_selection = "e_greddy", eps_greedy = lambda i: 0.1):
       """! Receive the apprentice. 
         None means normal MCTS, it can be a MCTSApprentice or a NetApprentice
         move_selection can be "argmax", "random_proportional" to choose it randomly using the probabilities
@@ -937,6 +937,8 @@ class neuralMCTS(Agent):
       self.cb = cb
       self.temp = temp
       self.use_val = use_val
+      self.move_selection = move_selection
+      self.eps_greedy = eps_greedy
   
   def run(self, board):
       """ This function will be used in every type of move
@@ -1182,7 +1184,7 @@ if __name__ == "__main__":
         # Create player that uses neural net
         
         apprentice = NetApprentice(net)
-        neuralPlayer = neuralMCTS(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 150,
+        neuralPlayer = neuralMCTS(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 50,
                  wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False)
         
         
