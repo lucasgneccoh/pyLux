@@ -684,7 +684,7 @@ class PUCT(object):
             policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
                     
         
-        print(f"OnLeaf: State {state.board_id}")
+        print(f"OnLeaf: State {state.board_id} ({s})")
         print(f"OnLeaf: Found this actions to expand {moves}")
         
         
@@ -713,8 +713,13 @@ class PUCT(object):
         p = state.activePlayer.code
         action = -1
         bestScore = -float('inf')
-        # print("Valid:")
-        # print(self.Vs[s])
+        
+        print("treePolicy: Start")
+        print("Valid:")
+        print(self.Vs[s])
+        print("Actions:")
+        print(self.As[s])
+        
         for i, act in enumerate(self.As[s]):
             a = hash(act)
             # print(i, act)
@@ -728,6 +733,7 @@ class PUCT(object):
                     print(f"treePolicy: score for action {act}:  {sc}")
                 else:
                     # Unseen action, take it
+                    print(f"treePolicy: unseen action {act}")
                     action = act
                     break
                 if sc > bestScore:
