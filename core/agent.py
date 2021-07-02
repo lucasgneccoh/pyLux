@@ -698,7 +698,7 @@ class PUCT(object):
         v = np.zeros(6)
         for _ in range(self.sims_per_eval):
             sim = copy.deepcopy(state)
-            sim.simulate(sim_console_debug = True) # CAMBIAR
+            sim.simulate()
             v += score_players(sim)                
         v /= self.sims_per_eval
 
@@ -954,7 +954,7 @@ class neuralMCTS(Agent):
                    self.wa, self.wb, self.cb, use_val = self.use_val)
                    
       
-      probs, R, Q = self.puct.getActionProb(state, temp=self.temp, num_sims = None, use_val = self.use_val)
+      probs, R, Q = self.puct.getActionProb(state, temp=self.temp, num_sims = None, use_val = self.use_val, verbose = state.console_debug)
       actions = self.puct.As[hash(board)]
       # Use some criterion to choose the move
       z = np.random.uniform()
