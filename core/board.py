@@ -1228,7 +1228,7 @@ class Board(object):
     for i, p in new_board.players.items():
       for n in self.players[i].__dict__:
         if n != 'board':
-          print(f"Board: deepcopy: attr = {n}")
+          # print(f"Board: deepcopy: attr = {n}") # For debugging
           setattr(p, n, copy.deepcopy(getattr(self.players[i], n)))
     
     new_board.setPreferences(self.prefs)
