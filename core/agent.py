@@ -339,7 +339,7 @@ class FlatMC(object):
         s = hash(state)
         if not s in self.As:
             return None
-            
+        counts = []
         for i, act in enumerate(self.As[s]):
             a = hash(act)
             counts.append(self.Nsa[(s, a)] if (s, a) in self.Nsa else 0.0)
@@ -546,6 +546,7 @@ class UCT(object):
         if not s in self.As:
             return None
             
+        counts = []
         for i, act in enumerate(self.As[s]):
             a = hash(act)
             counts.append(self.Nsa[(s, a)] if (s, a) in self.Nsa else 0.0)
@@ -977,7 +978,8 @@ class PUCT(object):
         s = hash(state)
         if not s in self.As:
             return None
-            
+                   
+        counts = []
         for i, act in enumerate(self.As[s]):
             a = hash(act)
             counts.append(self.Nsa[(s, a)] if (s, a) in self.Nsa else 0.0)
