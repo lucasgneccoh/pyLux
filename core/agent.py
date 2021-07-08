@@ -754,7 +754,7 @@ class NetApprentice(object):
         batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
         mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
             
-        return moves[np.argmax(policy)]
+        return moves[np.argmax(policy.detach().numpy())]
 
 
 
