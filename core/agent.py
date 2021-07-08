@@ -383,7 +383,7 @@ class UCT(object):
                 
         policy, value = np.zeros(len(moves)), np.zeros(6) 
         # All moves are legal because we called board.legalMoves
-        self.Vs[s] = mask.detach().numpy()
+        self.Vs[s] = mask.squeeze().detach().numpy()
         self.As[s] = moves
         self.Ps[s] = policy
         self.Ns[s] = 1
