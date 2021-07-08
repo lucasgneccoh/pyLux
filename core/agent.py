@@ -1310,8 +1310,11 @@ if __name__ == "__main__":
         
         print("\n\nExpert results")
         print("Action and value: ", bestAction, bestValue)
-        print("R, Q: ", R, "\n", Q)
-        print("probs: ", probs)
+        print("R, Q: \n", R, "\n", Q)
+        print("probs: \n", probs)
+        print("Actions (As): \n", puct.As[hash(board)])
+        print("Policy (Ps): \n", puct.Ps[hash(board)])
+        print("Valid (Vs): \n", puct.Vs[hash(board)])
         
 
  
