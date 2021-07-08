@@ -1303,7 +1303,7 @@ if __name__ == "__main__":
         print(board.countriesPandas())
 
         board.console_debug = False
-        bestAction, bestValue, R, Q = puct.getBestAction(board, num_sims = 300, verbose=False)
+        bestAction, bestValue, R, Q = puct.getBestAction(board, player = board.activePlayer.code, num_sims = 300, verbose=False)
         probs = puct.getVisitCount(board, temp=1)
         
         print("\n\nExpert results")
