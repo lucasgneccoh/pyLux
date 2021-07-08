@@ -711,7 +711,7 @@ class MctsApprentice(object):
     def getPolicy(self, state):
         self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
         bestAction, bestValue, R, Q = self.apprentice.getBestAction(state, state.activePlayer.code)
-        probs = getVisitCount(state, temp = self.temp)
+        probs = self.apprentice.getVisitCount(state, temp = self.temp)
         return probs, R
         
 
