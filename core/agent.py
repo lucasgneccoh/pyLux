@@ -354,7 +354,7 @@ class FlatMC(object):
         counts = [x ** (1. / temp) for x in counts]
         counts_sum = float(sum(counts))
         probs = [x / counts_sum for x in counts]
-        return probs
+        return np.array(probs)
 
 class UCT(object):
     """ UCT
@@ -561,7 +561,7 @@ class UCT(object):
         counts = [x ** (1. / temp) for x in counts]
         counts_sum = float(sum(counts))
         probs = [x / counts_sum for x in counts]        
-        return probs
+        return np.array(probs)
         
 
 class FlatMCPlayer(Agent):
@@ -994,7 +994,7 @@ class PUCT(object):
         counts = [x ** (1. / temp) for x in counts]
         counts_sum = float(sum(counts))
         probs = [x / counts_sum for x in counts]
-        return probs
+        return np.array(probs)
 
 
 #%% Neural MCTS
