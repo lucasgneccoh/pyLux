@@ -376,7 +376,7 @@ class UCT(object):
         #print("onLeaf")
         s = hash(state)
 
-        self.root = s
+        
         # Expand 
         batch = torch_geometric.data.Batch.from_data_list([boardToData(state)])
         mask, moves = maskAndMoves(state, state.gamePhase, batch.edge_index)
@@ -714,11 +714,11 @@ class MctsApprentice(object):
     def getPolicy(self, state):
         self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
         bestAction, bestValue, R, Q = self.apprentice.getBestAction(state, state.activePlayer.code)
-        print("\n\n************* MctsApprentice: statistics of root node\n\n")
-        print(self.apprentice.As[hash(state)])
-        print(self.apprentice.Ns[hash(state)])
-        for a in self.apprentice.As[hash(state)]:
-            print(a, " -- ", self.apprentice.Nsa[(hash(state), hash(a))])
+        #print("\n\n************* MctsApprentice: statistics of root node\n\n")
+        #print(self.apprentice.As[hash(state)])
+        #print(self.apprentice.Ns[hash(state)])
+        #for i, a in enumerate(self.apprentice.As[hash(state)]):
+        #    if self.apprentice.Vs[hash(state)][i]>0: print(a, " -- ", self.apprentice.Nsa[(hash(state), hash(a))])
         
         probs = self.apprentice.getVisitCount(state, temp = self.temp)
         return probs, R
