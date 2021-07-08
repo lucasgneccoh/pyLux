@@ -754,8 +754,8 @@ class NetApprentice(object):
         policy, value = self.getPolicy(canon)
         batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
         mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
-            
-        return moves[np.argmax(policy.detach().numpy())]
+        ind = np.argmax(policy.detach().numpy())
+        return moves[ind], -1 
 
 
 
@@ -838,8 +838,8 @@ class PUCT(object):
                 if (s,a) in self.Rsa:
                     # PUCT formula
                     uct = self.Rsa[(s,a)][p]+ self.cb * np.sqrt(np.log(self.Ns[s]) / max(self.Nsa[(s,a)], self.eps))
-                    val = self.wb * self.Qsa[(s,a)] * (self.use_val) 
-                    pol = self.wa * self.Ps[s][i]/(self.Nsa[(s,a)]+1)
+                    val = [0]*6 if self.apprentice is None else self.wb * self.Qsa[(s,a)] * (self.use_val) 
+                    pol = 0 if self.apprentice is None else self.wa * self.Ps[s][i]/(self.Nsa[(s,a)]+1)
                     sc = uct + pol + val[p]
                     if self.console_debug: print(f"treePolicy: score for action {act}:  {sc}")
                 else:

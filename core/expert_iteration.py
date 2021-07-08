@@ -78,7 +78,7 @@ def play_episode(root, max_depth, apprentice):
         # Get possible moves, and apprentice policy
         mask, actions = maskAndMoves(state, state.gamePhase, edge_index)
         try:
-            policy, value = apprentice.play(state)
+            policy, value = apprentice.getPolicy(state)
         except Exception as e:
             state.report()
             print(state.activePlayer.is_alive)
@@ -145,10 +145,13 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
     return states_to_save
 
 
-def tag_with_expert_move(state, expert):
+def tag_with_expert_move(state, expert, temp=1):
     # Tag one state with the expert move
-    # TODO: expert can be done in parallel?
-    policy_exp, value_exp, _ = expert.getActionProb(state, temp=1, num_sims = None, use_val = False)
+    # TODO: expert can be done in parallel?    
+    
+    _, _, value_exp, Q_value_exp = expert.getBestAction(state, player = state.activePlayer.code, num_sims = None, verbose=False)
+    policy_exp = expert.getVisitCount(board, temp=temp)
+    
     if isinstance(policy_exp, torch.Tensor):
         policy_exp = policy_exp.detach().numpy()
     if isinstance(value_exp, torch.Tensor):
@@ -246,7 +249,9 @@ def TPT_Loss(output, target):
     # TODO: Add regularisation
     return -(target*torch.log(output)).sum()
 
-
+def build_expert_mcts(apprentice):
+    return agent.PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
+                 wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False)
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
@@ -312,16 +317,13 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
     criterion = TPT_Loss
-
-
-
     move_types = ['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify']
                                     
                                     
                                     
     print("Defining apprentice")
     # Define initial apprentice
-    apprentice = MctsApprentice(num_MCTS_sims = initial_apprentice_mcts_sims, temp=1, max_depth=max_depth)
+    apprentice = agent.MctsApprentice(num_MCTS_sims = initial_apprentice_mcts_sims, temp=1, max_depth=max_depth)
     # apprentice = NetApprentice(net)
 
 
@@ -438,4 +440,4 @@ if __name__ == '__main__':
 
         print("Building expert")
         # build expert with trained net
-        expert = build_expert_mcts(NetApprentice(net))
+        expert = build_expert_mcts(agent.NetApprentice(net))
