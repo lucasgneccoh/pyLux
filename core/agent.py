@@ -335,7 +335,7 @@ class FlatMC(object):
         return bestAction, bestValue, R, Q
             
 
-    def getVisitCount(self, state):
+    def getVisitCount(self, state, temp=1):
         s = hash(state)
         if not s in self.As:
             return None
@@ -492,6 +492,7 @@ class UCT(object):
 
 
     def getBestAction(self, player, state, num_sims = None, verbose=False):
+    def getBestAction(self, state, player, num_sims = None, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
         state
@@ -541,7 +542,7 @@ class UCT(object):
         return bestAction, bestValue, R, Q
 
 
-    def getVisitCount(self, state):
+    def getVisitCount(self, state, temp=1):
         s = hash(state)
         if not s in self.As:
             return None
@@ -584,7 +585,7 @@ class FlatMCPlayer(Agent):
         state.readyForSimulation()
         state.console_debug = False
         
-        bestAction, bestValue, _, _ = self.flat.getBestAction(self.code, state, temp=1, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, _, _ = self.flat.getBestAction(state, self.code, temp=1, num_sims = num_sims, verbose=False)
                 
         return bestAction
       
@@ -648,7 +649,7 @@ class UCTPlayer(Agent):
  
     def run(self, board, num_sims=None):   
         self.uct = UCT(max_depth, sims_per_eval, num_MCTS_sims, cb)    
-        bestAction, bestValue, _, _ = self.uct.getBestAction(self.code, board, temp=1, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, _, _ = self.uct.getBestAction(board, self.code, temp=1, num_sims = num_sims, verbose=False)
         return bestAction
       
     
@@ -918,7 +919,7 @@ class PUCT(object):
         return v, net_v
 
 
-    def getBestAction(self, state, num_sims = None, verbose=False):
+    def getBestAction(self, state, player, num_sims = None, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
         state
@@ -1040,7 +1041,7 @@ class PUCTPlayer(Agent):
                    self.wa, self.wb, self.cb, use_val = self.use_val, console_debug = self.console_debug)
                    
       
-      bestAction, bestValue = self.puct.getBestAction(state, temp=self.temp, num_sims = None, use_val = self.use_val, verbose = state.console_debug)
+      bestAction, bestValue = self.puct.getBestAction(state, player = self.code, temp=self.temp, num_sims = None, use_val = self.use_val, verbose = state.console_debug)
       probs = self.puct.getVisitCount(state)
       actions = self.puct.As[hash(board)]
       # Use some criterion to choose the move
@@ -1302,7 +1303,7 @@ if __name__ == "__main__":
         board.report()
         print(board.countriesPandas())
 
-
+        board.console_debug = False
         bestAction, bestValue, R, Q = puct.getBestAction(board, num_sims = 300, verbose=False)
         probs = puct.getVisitCount(board, temp=1)
         
