@@ -161,7 +161,6 @@ def buildMove(state, move):
         return Move(s, s, 0, phase)
 
 
-
 class FlatMC(object):
     """ Flat MC
     """
@@ -283,7 +282,7 @@ class FlatMC(object):
         return v, net_v
 
 
-    def getActionProb(self, player, state, temp=1, num_sims = None, verbose=False):
+    def getBestAction(self, player, state, num_sims = None, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
         state
@@ -299,7 +298,7 @@ class FlatMC(object):
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
-            if verbose: print_message_over(f'FlatMC:getActionProb:{i+1} / {num_sims}')            
+            if verbose: print_message_over(f'FlatMC:getBestAction:{i+1} / {num_sims}')            
             sim = copy.deepcopy(state)            
             #sim.console_debug = False
             v, net_v= self.search(sim, 0)
@@ -333,9 +332,29 @@ class FlatMC(object):
             else:
                 pass
                 
-        return bestAction, bestValue
+        return bestAction, bestValue, R, Q
             
 
+    def getVisitCount(self, state):
+        s = hash(state)
+        if not s in self.As:
+            return None
+            
+        for i, act in enumerate(self.As[s]):
+            a = hash(act)
+            counts.append(self.Nsa[(s, a)] if (s, a) in self.Nsa else 0.0)
+
+        if temp == 0:
+            bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
+            bestA = np.random.choice(bestAs)
+            probs = [0] * len(counts)
+            probs[bestA] = 1
+            return probs
+
+        counts = [x ** (1. / temp) for x in counts]
+        counts_sum = float(sum(counts))
+        probs = [x / counts_sum for x in counts]
+        return probs
 
 class UCT(object):
     """ UCT
@@ -472,7 +491,7 @@ class UCT(object):
         return v, net_v
 
 
-    def getActionProb(self, player, state, temp=1, num_sims = None, verbose=False):
+    def getBestAction(self, player, state, num_sims = None, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
         state
@@ -485,7 +504,7 @@ class UCT(object):
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
-            if verbose: print_message_over(f'UCT:getActionProb:{i+1} / {num_sims}')            
+            if verbose: print_message_over(f'UCT:getBestAction:{i+1} / {num_sims}')            
             sim = copy.deepcopy(state)
             sim.console_debug = False
             v, net_v= self.search(sim, 0)
@@ -500,7 +519,7 @@ class UCT(object):
         Q /= num_sims
 
         s = hash(state)
-        counts = []
+        
 
         if not s in self.As:
             # This is happening, but I dont understand why
@@ -519,8 +538,30 @@ class UCT(object):
             else:
                 pass
                 
-        return bestAction, bestValue
+        return bestAction, bestValue, R, Q
 
+
+    def getVisitCount(self, state):
+        s = hash(state)
+        if not s in self.As:
+            return None
+            
+        for i, act in enumerate(self.As[s]):
+            a = hash(act)
+            counts.append(self.Nsa[(s, a)] if (s, a) in self.Nsa else 0.0)
+
+        if temp == 0:
+            bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
+            bestA = np.random.choice(bestAs)
+            probs = [0] * len(counts)
+            probs[bestA] = 1
+            return probs
+
+        counts = [x ** (1. / temp) for x in counts]
+        counts_sum = float(sum(counts))
+        probs = [x / counts_sum for x in counts]        
+        return probs
+        
 
 class FlatMCPlayer(Agent):
 
@@ -543,7 +584,7 @@ class FlatMCPlayer(Agent):
         state.readyForSimulation()
         state.console_debug = False
         
-        bestAction, bestValue = self.flat.getActionProb(self.code, state, temp=1, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, _, _ = self.flat.getBestAction(self.code, state, temp=1, num_sims = num_sims, verbose=False)
                 
         return bestAction
       
@@ -591,7 +632,6 @@ class FlatMCPlayer(Agent):
         return self.run(board)
         
 
-
 class UCTPlayer(Agent):
 
     def __init__(self, name='UCT', max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
@@ -608,7 +648,7 @@ class UCTPlayer(Agent):
  
     def run(self, board, num_sims=None):   
         self.uct = UCT(max_depth, sims_per_eval, num_MCTS_sims, cb)    
-        bestAction, bestValue = self.uct.getActionProb(self.code, board, temp=1, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, _, _ = self.uct.getBestAction(self.code, board, temp=1, num_sims = num_sims, verbose=False)
         return bestAction
       
     
@@ -653,7 +693,74 @@ class UCTPlayer(Agent):
         return self.run(board)
 
 
+    
+class MctsApprentice(object):
+    def __init__(self, num_MCTS_sims = 1000, temp=1, max_depth=100): 
+        self.max_depth = max_depth
+        self.num_MCTS_sims = num_MCTS_sims
+        self.apprentice = UCT(num_MCTS_sims=num_MCTS_sims, max_depth=max_depth)
+        self.temp = temp
+        
+    def play(self, state):
+        # Restart tree
+        self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
+        bestAction, bestValue, _, _ = self.apprentice.getBestAction(state, temp=self.temp)
+        return bestAction, bestValue
+    
+    def getPolicy(self, state):
+        self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
+        bestAction, bestValue, R, Q = self.apprentice.getBestAction(state, temp=self.temp)
+        probs = getVisitCount(state)
+        return probs, R
+        
+
+
+class NetApprentice(object):
+
+    def __init__(self, net):
+        self.apprentice = net
+        
+    def getPolicy(self, canon):     
+        # state must be already in canonical form. The correction must be done outside
+        batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
+        mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
+        
+        if not self.apprentice is None:
+            # Get information relevant for global features
+            _, _, _, players, misc = canon.toDicts()
+            # Build global features
+            global_x = buildGlobalFeature(players, misc).unsqueeze(0)
+            
+            pick, place, attack, fortify, value = self.apprentice.forward(batch, global_x)            
+            
+            if canon.gamePhase == 'initialPick':
+                policy = pick
+            elif canon.gamePhase in ['initialFortify', 'startTurn']:
+                policy = place
+            elif canon.gamePhase == 'attack':
+                policy = attack
+            elif canon.gamePhase == 'fortify':
+                policy = fortify
+        else:
+            
+            policy = torch.ones_like(mask) / max(mask.shape)
+            
+        policy = policy * mask
+        value = value.squeeze()        
+        return policy, value
+        
+    def play(self, canon, play_mode = "argmax"):
+        policy, value = self.getPolicy(canon)
+        batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
+        mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
+            
+        return moves[np.argmax(policy)]
+
+
+
 class PUCT(object):
+
+    # TODO: Add the minimum number of visits and the prunning on the getBestAction (Katago) 
 
     def __init__(self, apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
                  wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False):
@@ -811,7 +918,7 @@ class PUCT(object):
         return v, net_v
 
 
-    def getActionProb(self, state, temp=1, num_sims = None, use_val = False, verbose=False):
+    def getBestAction(self, state, temp=1, num_sims = None, use_val = False, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
         state
@@ -823,7 +930,7 @@ class PUCT(object):
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
-            if verbose: print_message_over (f'MCTS:getActionProb:{i+1} / {num_sims}')
+            if verbose: print_message_over (f'MCTS:getBestAction:{i+1} / {num_sims}')
             sim = copy.deepcopy(state)
             v, net_v= self.search(sim, 0)
             R += v
@@ -846,6 +953,31 @@ class PUCT(object):
             raise Exception("Looking for state that has not been seen??")
 
 
+        
+        if not s in self.As:
+            # This is happening, but I dont understand why
+            state.report()
+            print(self.As)
+            raise Exception("Looking for state that has not been seen??")
+
+        bestAction = None
+        bestValue = -float('inf')
+        for i, act in enumerate(self.As[s]):
+            a = hash(act)
+            if (s,a) in self.Rsa:
+                if self.Rsa[(s,a)][player] >= bestValue:
+                    bestValue = self.Rsa[(s,a)][player]
+                    bestAction = act
+            else:
+                pass
+                
+        return bestAction, bestValue, R, Q
+        
+    def getVisitCount(self, state):
+        s = hash(state)
+        if not s in self.As:
+            return None
+            
         for i, act in enumerate(self.As[s]):
             a = hash(act)
             counts.append(self.Nsa[(s, a)] if (s, a) in self.Nsa else 0.0)
@@ -859,64 +991,15 @@ class PUCT(object):
 
         counts = [x ** (1. / temp) for x in counts]
         counts_sum = float(sum(counts))
-        probs = torch.FloatTensor([x / counts_sum for x in counts]).view(1,-1)
-        return probs, R, Q
+        probs = [x / counts_sum for x in counts]
+        return probs
 
 
 #%% Neural MCTS
     
-    
-class MctsApprentice(object):
-    def __init__(self, num_MCTS_sims = 1000, temp=1, max_depth=100): 
-        self.max_depth = max_depth
-        self.num_MCTS_sims = num_MCTS_sims
-        self.apprentice = UCT(num_MCTS_sims=num_MCTS_sims, max_depth=max_depth)
-        self.temp = temp
-        
-    def play(self, state):
-        # Restart tree
-        self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
-        prob, R, Q = self.apprentice.getActionProb(state, temp=self.temp)
-        return prob, R
 
 
-class NetApprentice(object):
-
-    def __init__(self, net):
-        self.apprentice = net
-        
-    def play(self, canon):     
-        # state must be already in canonical form. The correction must be done outside
-        batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
-        mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
-        
-        if not self.apprentice is None:
-            # Get information relevant for global features
-            _, _, _, players, misc = canon.toDicts()
-            # Build global features
-            global_x = buildGlobalFeature(players, misc).unsqueeze(0)
-            
-            pick, place, attack, fortify, value = self.apprentice.forward(batch, global_x)            
-            
-            if canon.gamePhase == 'initialPick':
-                policy = pick
-            elif canon.gamePhase in ['initialFortify', 'startTurn']:
-                policy = place
-            elif canon.gamePhase == 'attack':
-                policy = attack
-            elif canon.gamePhase == 'fortify':
-                policy = fortify
-        else:
-            
-            policy = torch.ones_like(mask) / max(mask.shape)
-            
-        policy = policy * mask
-        value = value.squeeze()        
-        return policy, value
-
-
-
-class neuralMCTS(Agent):
+class PUCTPlayer(Agent):
   """! MCTS biased by a neural network  
   """  
   def __init__(self, apprentice = None, name = "neuralMCTS", max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
@@ -957,7 +1040,8 @@ class neuralMCTS(Agent):
                    self.wa, self.wb, self.cb, use_val = self.use_val, console_debug = self.console_debug)
                    
       
-      probs, R, Q = self.puct.getActionProb(state, temp=self.temp, num_sims = None, use_val = self.use_val, verbose = state.console_debug)
+      bestAction, bestValue = self.puct.getBestAction(state, temp=self.temp, num_sims = None, use_val = self.use_val, verbose = state.console_debug)
+      probs = self.puct.getVisitCount(state)
       actions = self.puct.As[hash(board)]
       # Use some criterion to choose the move
       z = np.random.uniform()
@@ -1105,7 +1189,7 @@ if __name__ == "__main__":
         
         p = board.activePlayer
         
-        bestAction, bestValue = flat.getActionProb(p.code, board, temp=1, num_sims = None, verbose=False)
+        bestAction, bestValue = flat.getBestAction(p.code, board, temp=1, num_sims = None, verbose=False)
         
         print(f"Done flatMC: Player {p.code}")
         actions = flat.As[hash(board)]
@@ -1118,7 +1202,7 @@ if __name__ == "__main__":
         print(f"Length of the tree: {len(flat.Ns)}")
         
         
-        bestAction, bestValue = uct.getActionProb(p.code, board, temp=1, num_sims = None, verbose=False)
+        bestAction, bestValue = uct.getBestAction(p.code, board, temp=1, num_sims = None, verbose=False)
         print("----------------------------")
         print(f"Done UCT: Player {p.code}")
         actions = uct.As[hash(board)]
@@ -1131,6 +1215,8 @@ if __name__ == "__main__":
         print(f"Length of the tree: {len(uct.Ns)}")
         
         
+        
+    
         
     # Now try the network, and the MCTS with the network (apprentice and expert)
     if True:
@@ -1152,7 +1238,7 @@ if __name__ == "__main__":
 
         # Set players
         pR1, pR2, pR3 = RandomAgent('Red'), RandomAgent('Blue'), RandomAgent('Green')
-        players = [pR1, pR2, pR3]
+        players = [pR1, pR2]
         # Set board
         # TODO: Send to inputs
         prefs = {'initialPhase': True, 'useCards':True,
@@ -1196,34 +1282,33 @@ if __name__ == "__main__":
         
         apprentice = NetApprentice(net)
         
-        neuralPlayer = neuralMCTS(apprentice = apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 200,
+        puct = PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
+                 wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False)
+                 
+        neuralPlayer = PUCTPlayer(apprentice = apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 200,
                  wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False)
         
+        # Play some random moves, then use puct or player puct to tag the move (Expert move)
         
-        # Re-create board with neural player
-        players = [pR1, neuralPlayer]
-        # Set board
-        # TODO: Send to inputs
-        prefs = {'initialPhase': True, 'useCards':True,
-                'transferCards':True, 'immediateCash': True,
-                'continentIncrease': 0.05, 'pickInitialCountries':True,
-                'armiesPerTurnInitial':4,'console_debug':True}
-                
-        board_orig = Board(world, players)
-        board_orig.setPreferences(prefs)
         board = copy.deepcopy(board_orig)
         
         # Test play
-        for i in range(50):
+        for i in range(40):
           board.play()
           if board.gameOver: break
   
         print("\n\n *** End of play")  
         board.report()
-        print(board.countriesPandas())  
+        print(board.countriesPandas())
+
+
+        bestAction, bestValue, R, Q = puct.getBestAction(board, temp=1, num_sims = 300, use_val = False, verbose=False)
+        probs = puct.getVisitCount(board)
         
-        
-        
+        print("\n\nExpert results")
+        print("Action and value: ", bestAction, bestValue)
+        print("R, Q: ", R, "\n", Q)
+        print("probs: ", probs)
         
 
  

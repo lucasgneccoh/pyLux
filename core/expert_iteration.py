@@ -2,7 +2,6 @@ from board import Board
 from world import World, Country, Continent
 from move import Move
 import agent
-from agent import MCTS, MctsApprentice, NetApprentice, maskAndMoves, buildMove
 from model import boardToData, GCN_risk, RiskDataset, saveBoardObs, train_model
 
 import os
@@ -47,15 +46,9 @@ def read_json(path):
     data = json.load(f)
   return data
     
-
 def print_message_over(message):
     sys.stdout.write('\r{0}'.format(message))
     sys.stdout.flush()
-
-def build_expert_mcts(apprentice, num_MCTS_sims = 10000, sims_per_eval = 5, max_depth = 50):
-    return MCTS(root=None, apprentice=apprentice, max_depth = max_depth, 
-                sims_per_eval = sims_per_eval, num_MCTS_sims = num_MCTS_sims,
-                wa = 10, wb = 10, cb = np.sqrt(2))
 
 def isint(n):
     try:
@@ -389,6 +382,7 @@ if __name__ == '__main__':
                 for s in a[1]:
                     states_to_save.append(s) # parmap returns this [(i, x)]
         
+        
         # Tag the states   
         # for s in states_to_save:
         #     print("*** ", s.gamePhase)
@@ -397,6 +391,8 @@ if __name__ == '__main__':
         f = lambda state: tag_with_expert_move(state, expert)
         aux = parmap(f, states_to_save, nprocs=num_cpu)
         tagged = [a[1] for a in aux]        
+        
+        
         
         # Save the states
         print("\tSave the states")
@@ -416,9 +412,13 @@ if __name__ == '__main__':
         f = lambda tupl:  simple_save_state(os.path.join(path_data, tupl[1], 'raw'), tupl[0], tupl[2], tupl[3], tupl[4])
         aux = parmap(f, tagged, nprocs=num_cpu)        
         
-        print("Training network")
+        
+        
+        
+        
         
         # Train network on dataset
+        print("Training network")
         shuffle(move_types)
         for j, move_type in enumerate(move_types):
             print(f"\t{j}:  {move_type}")
@@ -433,6 +433,8 @@ if __name__ == '__main__':
             train_model(net, optimizer, scheduler, criterion, device,
                         epochs = 10, train_loader = loader, val_loader = None, eval_every = 3,
                         load_path = None, save_path = save_path)
+
+
 
         print("Building expert")
         # build expert with trained net
