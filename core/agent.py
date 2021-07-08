@@ -539,8 +539,9 @@ class UCT(object):
                     bestAction = act
             else:
                 pass
-                
-        return buildMove(state, bestAction), bestValue, R, Q
+        
+        
+        return bestAction, bestValue, R, Q
 
 
     def getVisitCount(self, state, temp=1):
