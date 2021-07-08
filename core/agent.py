@@ -423,7 +423,7 @@ class UCT(object):
                 if sc > bestScore:
                     bestScore = sc
                     action = act
-        return buildMove(state, action)
+        return action
         
     
     def search(self, state, depth):
