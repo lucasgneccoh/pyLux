@@ -90,6 +90,9 @@ def play_episode(root, max_depth, apprentice):
         
         probs = policy * mask             
         
+        print("##################")
+        print(probs)
+        print(probs.shape)
         probs =  probs / probs.sum()
 
         # Random selection? e-greedy?
