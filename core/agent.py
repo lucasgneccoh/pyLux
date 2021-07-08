@@ -799,7 +799,7 @@ class PUCT(object):
         
         
         policy = policy * mask
-        self.Vs[s], self.As[s] = mask.squeeze(), moves
+        self.Vs[s], self.As[s] = mask.squeeze().detach().numpy(), moves
         self.Ps[s] = policy.squeeze().detach().numpy()
         self.Ns[s] = 1
 
@@ -1304,12 +1304,17 @@ if __name__ == "__main__":
         board.report()
         print(board.countriesPandas())
 
-        board.console_debug = False
-        bestAction, bestValue, R, Q = puct.getBestAction(board, player = board.activePlayer.code, num_sims = 300, verbose=False)
-        probs = puct.getVisitCount(board, temp=1)
         
         print("\nReceived args:\n")
         print(sys.argv)
+        
+        num_sims = int(sys.argv[1])
+        temp = int(sys.argv[2])
+        
+        print("\n\n Playing PUCT")
+        board.console_debug = False
+        bestAction, bestValue, R, Q = puct.getBestAction(board, player = board.activePlayer.code, num_sims = num_sims, verbose=False)
+        probs = puct.getVisitCount(board, temp=temp)
         
         
         print("\n\nExpert results")
