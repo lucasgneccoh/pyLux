@@ -96,7 +96,7 @@ def play_episode(root, max_depth, apprentice):
 
         # Random selection? e-greedy?
         ind = np.random.choice(range(len(actions)), p = probs)
-        move = buildMove(state, actions[ind])
+        move = agent.buildMove(state, actions[ind])
         
         episode.append(copy.deepcopy(state))
 
