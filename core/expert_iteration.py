@@ -76,7 +76,7 @@ def play_episode(root, max_depth, apprentice):
             continue
 
         # Get possible moves, and apprentice policy
-        mask, actions = maskAndMoves(state, state.gamePhase, edge_index)
+        mask, actions = agent.maskAndMoves(state, state.gamePhase, edge_index)
         try:
             policy, value = apprentice.getPolicy(state)
         except Exception as e:
