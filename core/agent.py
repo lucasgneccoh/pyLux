@@ -918,7 +918,7 @@ class PUCT(object):
         return v, net_v
 
 
-    def getBestAction(self, state, temp=1, num_sims = None, use_val = False, verbose=False):
+    def getBestAction(self, state, num_sims = None, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
         state
@@ -973,7 +973,7 @@ class PUCT(object):
                 
         return bestAction, bestValue, R, Q
         
-    def getVisitCount(self, state):
+    def getVisitCount(self, state, temp=1):
         s = hash(state)
         if not s in self.As:
             return None
@@ -1302,8 +1302,8 @@ if __name__ == "__main__":
         print(board.countriesPandas())
 
 
-        bestAction, bestValue, R, Q = puct.getBestAction(board, temp=1, num_sims = 300, use_val = False, verbose=False)
-        probs = puct.getVisitCount(board)
+        bestAction, bestValue, R, Q = puct.getBestAction(board, num_sims = 300, verbose=False)
+        probs = puct.getVisitCount(board, temp=1)
         
         print("\n\nExpert results")
         print("Action and value: ", bestAction, bestValue)
