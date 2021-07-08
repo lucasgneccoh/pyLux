@@ -714,6 +714,12 @@ class MctsApprentice(object):
     def getPolicy(self, state):
         self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
         bestAction, bestValue, R, Q = self.apprentice.getBestAction(state, state.activePlayer.code)
+        print("\n\n************* MctsApprentice: statistics of root node\n\n")
+        print(self.apprentice.As[hash(state)])
+        print(self.apprentice.Ns[hash(state)])
+        for a in self.apprentice.As[hash(state)]:
+            print(a, " -- ", self.apprentice.Nsa[(hash(state), hash(a))]
+        
         probs = self.apprentice.getVisitCount(state, temp = self.temp)
         return probs, R
         
