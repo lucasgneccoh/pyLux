@@ -787,7 +787,7 @@ class PUCT(object):
         mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
         
         if not self.apprentice is None:
-            policy, value = self.apprentice.play(canon)
+            policy, value = self.apprentice.getPolicy(canon)
         else:
             # No bias
             policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
