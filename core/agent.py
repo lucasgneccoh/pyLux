@@ -491,7 +491,6 @@ class UCT(object):
         return v, net_v
 
 
-    def getBestAction(self, player, state, num_sims = None, verbose=False):
     def getBestAction(self, state, player, num_sims = None, verbose=False):
         """
         This function performs num_MCTS_sims simulations of MCTS starting from
