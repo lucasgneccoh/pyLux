@@ -1308,6 +1308,10 @@ if __name__ == "__main__":
         bestAction, bestValue, R, Q = puct.getBestAction(board, player = board.activePlayer.code, num_sims = 300, verbose=False)
         probs = puct.getVisitCount(board, temp=1)
         
+        print("\nReceived args:\n")
+        print(sys.argv)
+        
+        
         print("\n\nExpert results")
         print("Action and value: ", bestAction, bestValue)
         print("R, Q: \n", R, "\n", Q)
