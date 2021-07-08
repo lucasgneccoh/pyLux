@@ -800,7 +800,7 @@ class PUCT(object):
         
         policy = policy * mask
         self.Vs[s], self.As[s] = mask.squeeze(), moves
-        self.Ps[s] = policy.squeeze()
+        self.Ps[s] = policy.squeeze().detach().numpy()
         self.Ns[s] = 1
 
         # Return an evaluation
