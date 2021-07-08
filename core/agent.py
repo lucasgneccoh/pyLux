@@ -705,12 +705,12 @@ class MctsApprentice(object):
     def play(self, state):
         # Restart tree
         self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
-        bestAction, bestValue, _, _ = self.apprentice.getBestAction(state, temp=self.temp)
+        bestAction, bestValue, _, _ = self.apprentice.getBestAction(state, state.activePlayer.code)
         return bestAction, bestValue
     
     def getPolicy(self, state):
         self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
-        bestAction, bestValue, R, Q = self.apprentice.getBestAction(state)
+        bestAction, bestValue, R, Q = self.apprentice.getBestAction(state, state.activePlayer.code)
         probs = getVisitCount(state, temp = self.temp)
         return probs, R
         
