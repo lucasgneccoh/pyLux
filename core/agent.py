@@ -718,7 +718,7 @@ class MctsApprentice(object):
         print(self.apprentice.As[hash(state)])
         print(self.apprentice.Ns[hash(state)])
         for a in self.apprentice.As[hash(state)]:
-            print(a, " -- ", self.apprentice.Nsa[(hash(state), hash(a))]
+            print(a, " -- ", self.apprentice.Nsa[(hash(state), hash(a))])
         
         probs = self.apprentice.getVisitCount(state, temp = self.temp)
         return probs, R
