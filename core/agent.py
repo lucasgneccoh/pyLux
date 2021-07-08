@@ -378,10 +378,12 @@ class UCT(object):
 
         self.root = s
         # Expand 
-        moves = state.legalMoves()
+        batch = torch_geometric.data.Batch.from_data_list([boardToData(state)])
+        mask, moves = maskAndMoves(state, state.gamePhase, batch.edge_index)
+                
         policy, value = np.zeros(len(moves)), np.zeros(6) 
         # All moves are legal because we called board.legalMoves
-        self.Vs[s] = np.ones(len(moves))
+        self.Vs[s] = mask.detach().numpy()
         self.As[s] = moves
         self.Ps[s] = policy
         self.Ns[s] = 1
@@ -421,7 +423,7 @@ class UCT(object):
                 if sc > bestScore:
                     bestScore = sc
                     action = act
-        return action
+        return buildMove(state, action)
         
     
     def search(self, state, depth):
@@ -538,7 +540,7 @@ class UCT(object):
             else:
                 pass
                 
-        return bestAction, bestValue, R, Q
+        return buildMove(state, bestAction), bestValue, R, Q
 
 
     def getVisitCount(self, state, temp=1):
@@ -814,8 +816,8 @@ class PUCT(object):
         # Fix order of value returned by net
         value = value.squeeze()
         # Apprentice already does this
-        # cor_value = torch.FloatTensor([value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
-        cor_value = value
+        cor_value = np.array([value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
+        
         return v, cor_value
         
     def treePolicy(self, state):
@@ -889,7 +891,8 @@ class PUCT(object):
 
         
         a = hash(action) # Best action in simplified way
-        move = buildMove(state, action)
+        # move = buildMove(state, action)
+        move = action
         # Play action, continue search
         # TODO: For now, armies are placed on one country only to simplify the game
         if self.console_debug: print(move)
