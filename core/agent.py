@@ -748,7 +748,7 @@ class NetApprentice(object):
             
         policy = policy * mask
         value = value.squeeze()        
-        return policy, value
+        return policy.detach().numpy(), value.detach().numpy()
         
     def play(self, canon, play_mode = "argmax"):
         policy, value = self.getPolicy(canon)

@@ -84,10 +84,12 @@ def play_episode(root, max_depth, apprentice):
             print(state.activePlayer.is_alive)
             print(state.activePlayer.num_countries)
             raise e
-        if isinstance(policy, np.ndarray):
+        
+        if isinstance(mask, torch.Tensor):
             mask = mask.detach().numpy()
-        policy = policy * mask
-        probs = policy.squeeze().detach().numpy()
+        
+        probs = policy * mask             
+        
         probs =  probs / probs.sum()
 
         # Random selection? e-greedy?
