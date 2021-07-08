@@ -1233,6 +1233,7 @@ if __name__ == "__main__":
         print("Creating board")
 
         #%%% Create Board
+        
         world = World(path_board)
 
 
