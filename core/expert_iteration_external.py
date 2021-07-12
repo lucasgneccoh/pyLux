@@ -106,7 +106,7 @@ if __name__ == '__main__':
             # Each iteration launches num_cpu tasks
             for k in range(num_cpu):
                 move_type = next(types_cycle)
-                subprocess.run([f"taskset -c {k}", python_command, f"{self_play_tag}.py", f"--inputs {self_play_input_json}", f"--move_type {move_type}", f"--verbose {verbose}"])
+                subprocess.run(["taskset", f"-c {k}", python_command, f"{self_play_tag}.py", f"--inputs {self_play_input_json}", f"--move_type {move_type}", f"--verbose {verbose}"])
             
         
         
