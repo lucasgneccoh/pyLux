@@ -184,10 +184,11 @@ def save_states(path, states, policies, values):
         saveBoardObs(full_path, 'board_{}.json'.format(num),
                         board, board.gamePhase, policy_exp.ravel().tolist(), value_exp.ravel().tolist())
 
-def simple_save_state(path, name, state, policy, value):
+def simple_save_state(path, name, state, policy, value, verbose=False):
     board, _ = state.toCanonical(state.activePlayer.code)
     saveBoardObs(path, name,
                         board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
+    if verbose: print(f"\t\tSimple save: Saved board {os.path.join(path, name)}")
     return True
 
 def whole_process(args):
@@ -431,7 +432,7 @@ if __name__ == '__main__':
             tagged[k] = new
             aux_dict[phase] += 1
         
-        f = lambda tupl:  simple_save_state(os.path.join(path_data, tupl[1], 'raw'), tupl[0], tupl[2], tupl[3], tupl[4])
+        f = lambda tupl:  simple_save_state(os.path.join(path_data, tupl[1], 'raw'), tupl[0], tupl[2], tupl[3], tupl[4], verbose=verbose)
         aux = parmap(f, tagged, nprocs=num_cpu)        
         
         
