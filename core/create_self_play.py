@@ -165,12 +165,12 @@ def simple_save_state(root_path, state, policy, value, verbose=False):
         saveBoardObs(root_path, name,
                             board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
         if verbose: 
-            print(f"\t\tSimple save: Saved board {state.board_id} {os.path.join(path, name)}")
+            print(f"\t\tSimple save: Saved board {state.board_id} {os.path.join(root_path, name)}")
             sys.stdout.flush()
         return True
     except Exception as e:
         print(e)
-        return False
+        raise e
 
 def build_expert_mcts(apprentice, max_depth=200, sims_per_eval=1, num_MCTS_sims=1000,
                       wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0):
@@ -292,9 +292,7 @@ if __name__ == '__main__':
     
     # Tag the states and save them
     start_inner = time.perf_counter()
-    if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Tag the states ({len(states_to_save)} states to tag)")  
-    start = time.perf_counter()    
-    
+    if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Tag the states ({len(states_to_save)} states to tag)")      
     for st in states_to_save:
         st_tagged, policy_exp, value_exp = tag_with_expert_move(st, expert, temp=expert_params["temp"], verbose=verbose)
         res = simple_save_state(path_data, st_tagged, policy_exp, value_exp, verbose=verbose)
