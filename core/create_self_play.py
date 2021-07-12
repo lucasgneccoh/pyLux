@@ -198,6 +198,7 @@ if __name__ == '__main__':
     board_params = inputs["board_params"]
     path_board = board_params["path_board"]
     
+    move_types = ["initialPick", "initialFortify", "startTurn", "attack", "fortify"]
     # ---------------------------------------------------------------
 
     if verbose: print("create_self_play: Creating board")
