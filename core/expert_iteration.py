@@ -142,7 +142,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
     edge_index = boardToData(root).edge_index    
 
     # ******************* PLAY EPISODE ***************************
-    episode = play_episode(root, max_depth, apprentice move_type = move_type, verbose = verbose)
+    episode = play_episode(root, max_depth, apprentice, move_type = move_type, verbose = verbose)
         
     # ******************* SELECT STATES ***************************
     # Take some states from episode    
