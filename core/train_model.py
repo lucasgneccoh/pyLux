@@ -48,7 +48,7 @@ if __name__ == '__main__':
     start = time.perf_counter()
     
     args = parseInputs()
-    inputs = read_json(args.inputs)
+    inputs = misc.read_json(args.inputs)
     verbose = bool(args.verbose)
     iteration = args.iteration
     checkpoint = args.checkpoint
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     path_data = inputs["path_data"]
     path_model = inputs["path_model"]
     batch_size = inputs["batch_size"]
-    model_args =  read_json(inputs["model_parameters"])
+    model_args =  misc.read_json(inputs["model_parameters"])
 
     board_params = inputs["board_params"]
     path_board = board_params["path_board"]    
