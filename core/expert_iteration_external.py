@@ -118,9 +118,10 @@ if __name__ == '__main__':
         self_play_input_json = os.path.join(params_path, self_play_tag) + ".json"
         misc.write_json(input_dict, self_play_input_json)
 
-        print(f"Running {num_iter} iterations, each of {num_cpu} tasks")
+        misc.print_and_flush(f"Running {num_iter} iterations, each of {num_cpu} tasks")
         for j in range(num_iter):
             # Each iteration launches num_cpu tasks
+            misc.print_and_flush(f"\ Inner iter {j} of {num_iter}")
             processes = []
             for k in range(num_cpu):
                 move_type = next(types_cycle)
