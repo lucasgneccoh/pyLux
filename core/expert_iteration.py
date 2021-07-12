@@ -58,7 +58,7 @@ def isint(n):
         return False
      
 
-def play_episode(root, max_depth, apprentice):
+def play_episode(root, max_depth, apprentice, verbose=False):
     episode = []
     state = copy.deepcopy(root)
     edge_index = boardToData(root).edge_index
@@ -96,8 +96,10 @@ def play_episode(root, max_depth, apprentice):
         probs =  probs / probs.sum()
 
         # Random selection? e-greedy?
+        if verbose: print(f"\t\tPlay episode: probs = {probs}")
         ind = np.random.choice(range(len(actions)), p = probs)
         move = agent.buildMove(state, actions[ind])
+        if verbose: print(f"\t\tPlay episode: move = {move}")
         
         episode.append(copy.deepcopy(state))
 
@@ -135,7 +137,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
     edge_index = boardToData(root).edge_index    
 
     # ******************* PLAY EPISODE ***************************
-    episode = play_episode(root, max_depth, apprentice)
+    episode = play_episode(root, max_depth, apprentice, verbose)
         
     # ******************* SELECT STATES ***************************
     # Take some states from episode    
