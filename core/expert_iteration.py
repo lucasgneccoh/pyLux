@@ -158,7 +158,10 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
     except Exception as e:
         raise e
     
-    if verbose: print(f"\t\tSelf-play done: move_type = {move_type}, {len(states_to_save)} states to save")
+    if verbose: 
+        print(f"\t\tSelf-play done: move_type = {move_type}, {len(states_to_save)} states to save")
+        sys.stdout.flush()
+        
     return states_to_save
 
 
@@ -175,7 +178,9 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
     if isinstance(value_exp, torch.Tensor):
         value_exp = value_exp.detach().numpy()
     
-    if verbose: print(f"\t\tTag with expert: Tagged board {state.board_id} ({state.gamePhase}). {round(time.perf_counter() - start,2)} sec")
+    if verbose: 
+        print(f"\t\tTag with expert: Tagged board {state.board_id} ({state.gamePhase}). {round(time.perf_counter() - start,2)} sec")
+        sys.stdout.flush()
     
     return state, policy_exp, value_exp
     
@@ -193,7 +198,9 @@ def simple_save_state(path, name, state, policy, value, verbose=False):
     board, _ = state.toCanonical(state.activePlayer.code)
     saveBoardObs(path, name,
                         board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
-    if verbose: print(f"\t\tSimple save: Saved board {state.board_id} {os.path.join(path, name)}")
+    if verbose: 
+        print(f"\t\tSimple save: Saved board {state.board_id} {os.path.join(path, name)}")
+        sys.stdout.flush()
     return True
 
 def whole_process(args):
