@@ -101,11 +101,13 @@ def play_episode(root, max_depth, apprentice, move_type = "all", verbose=False):
         ind = np.random.choice(range(len(actions)), p = probs)
         move = agent.buildMove(state, actions[ind])
         
-        if verbose: print(f"\t\tPlay episode: turn {i}, move = {move}")
+        saved = (move_type=="all" or move_type==state.gamePhase)
+        if verbose:             
+            print(f"\tPlay episode: turn {i}, move = {move}, saved = {saved}")
         
-        if move_type=="all" or move_type==state.gamePhase:
+        if saved:
             episode.append(copy.deepcopy(state))
-
+            
         # Play the move to continue
         state.playMove(move)
         
@@ -337,7 +339,7 @@ if __name__ == '__main__':
     print("Defining apprentice")
     # Define initial apprentice
     apprentice = agent.MctsApprentice(num_MCTS_sims = initial_apprentice_mcts_sims, temp=1, max_depth=max_depth)
-    # apprentice = NetApprentice(net)
+    # apprentice = agent.NetApprentice(net) # Test the net apprentice # CAMBIAR
 
 
     print("Defining expert")
