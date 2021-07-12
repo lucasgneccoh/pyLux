@@ -137,7 +137,7 @@ if __name__ == '__main__':
             for p, t in zip(processes, timers):
                 try:
                     t.start()
-                    p.wait()
+                    stdout, stderr = p.communicate()
                 except Exception as e:
                     raise(e)
                 
