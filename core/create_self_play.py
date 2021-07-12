@@ -182,8 +182,7 @@ def build_expert_mcts(apprentice, max_depth=200, sims_per_eval=1, num_MCTS_sims=
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
-    misc.print_and_flush(f"create_self_play ({num_task}): Start")
-    start = time.perf_counter()
+    
     
     args = parseInputs()
     inputs = misc.read_json(args.inputs)
@@ -191,6 +190,8 @@ if __name__ == '__main__':
     verbose = args.verbose
     num_task = args.num_task
     
+    misc.print_and_flush(f"create_self_play ({num_task}): Start")
+    start = time.perf_counter()
     
     saved_states_per_episode = inputs["saved_states_per_episode"]
     max_episode_depth = inputs["max_episode_depth"]
@@ -206,9 +207,7 @@ if __name__ == '__main__':
     path_board = board_params["path_board"]
     
     move_types = ["initialPick", "initialFortify", "startTurn", "attack", "fortify"]
-    # ---------------------------------------------------------------
-
-    if verbose: misc.print_and_flush("create_self_play: Creating board")
+    # ---------------------------------------------------------------    
 
     #%%% Create Board
     world = World(path_board)
