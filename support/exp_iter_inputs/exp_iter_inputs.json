@@ -2,8 +2,8 @@
   "python_command": "python3",
   "params_path": "../support/exp_iter_inputs",
   "iterations": 5,
-  "num_samples": 32,
-  "num_cpu": 4,  
+  "num_samples": 8,
+  "num_cpu": 1,  
   "saved_states_per_episode": 4,  
   "max_episode_depth": 100,
   "apprentice_params": {
