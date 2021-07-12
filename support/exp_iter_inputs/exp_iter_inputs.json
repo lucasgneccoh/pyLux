@@ -10,13 +10,13 @@
       "type": "mcts",
       "model_name": "",
       "max_depth": 100,
-      "num_MCTS_sims": 200,
+      "num_MCTS_sims": 50,
       "temp": 1,
       "sims_per_eval": 2
   },
   "expert_params": {
       "max_depth": 100,
-      "num_MCTS_sims": 500,
+      "num_MCTS_sims": 60,
       "sims_per_eval": 2,
       "wa": 10,
       "wb": 10,

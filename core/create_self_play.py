@@ -179,6 +179,7 @@ def build_expert_mcts(apprentice, max_depth=200, sims_per_eval=1, num_MCTS_sims=
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
+    start = time.perf_counter()
     
     args = parseInputs()
     inputs = misc.read_json(args.inputs)
@@ -277,23 +278,28 @@ if __name__ == '__main__':
                                     
 
     #### START
+    start_inner = time.perf_counter()
     
     state = copy.deepcopy(board_orig)    
 
     # Play episode, select states to save
     if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Self-play")
-    start = time.perf_counter()        
+    
     states_to_save = create_self_play_data(move_type, path_data, state, apprentice, max_depth = max_episode_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose)
 
-    if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Time taken: {round(time.perf_counter() - start,2)}")
+    if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Play episode: Time taken: {round(time.perf_counter() - start_inner,2)}")
     
     
     # Tag the states and save them
+    start_inner = time.perf_counter()
     if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Tag the states ({len(states_to_save)} states to tag)")  
-    start = time.perf_counter()
+    start = time.perf_counter()    
     
     for st in states_to_save:
         st_tagged, policy_exp, value_exp = tag_with_expert_move(st, expert, temp=expert_params["temp"], verbose=verbose)
         res = simple_save_state(path_data, st_tagged, policy_exp, value_exp, verbose=verbose)
-    if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Time taken -> {round(time.perf_counter() - start,2)}")
+    if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Tag and save: Time taken -> {round(time.perf_counter() - start_inner,2)}")
+    
+        
+    if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Total time taken -> {round(time.perf_counter() - start,2)}")
     
