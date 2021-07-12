@@ -36,6 +36,7 @@ def parseInputs():
   parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/create_self_play.json")
   parser.add_argument("--move_type", help="Type of move to consider", default = "all")
   parser.add_argument("--verbose", help="Print on the console?", default = 0)
+  parser.add_argument("--num_task", help="Number of the task for debugging and tracking", default = 0)
   args = parser.parse_args()
   return args
        
@@ -183,6 +184,7 @@ if __name__ == '__main__':
     inputs = misc.read_json(args.inputs)
     move_type = args.move_type
     verbose = args.verbose
+    num_task = args.num_task
     
     
     saved_states_per_episode = inputs["saved_states_per_episode"]
@@ -221,7 +223,7 @@ if __name__ == '__main__':
     num_edges = board_orig.world.map_graph.number_of_edges()
 
     if apprentice_params["type"] == "net":
-        if verbose: print("create_self_play: Creating model")
+        if verbose: print(f"create_self_play ({num_task}): Creating model")
         net = GCN_risk(num_nodes, num_edges, 
                          model_args['board_input_dim'], model_args['global_input_dim'],
                          model_args['hidden_global_dim'], model_args['num_global_layers'],
@@ -240,26 +242,26 @@ if __name__ == '__main__':
         if model_name: # If it is not the empty string
             try:
         
-                if verbose: print(f"create_self_play: Chosen model is {model_name}")
+                if verbose: print(f"create_self_play ({num_task}): Chosen model is {model_name}")
                 state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')                
                 net.load_state_dict(state_dict['model'])        
-                if verbose: print("create_self_play: Model has been loaded")
+                if verbose: print(f"create_self_play ({num_task}): Model has been loaded")
             except Exception as e:
                 print(e)
                 
                                     
-        if verbose: print("create_self_play: Defining net apprentice")
+        if verbose: print(f"create_self_play ({num_task}): Defining net apprentice")
         # Define initial apprentice        
         apprentice = agent.NetApprentice(net)
     else:
-        if verbose: print("create_self_play: Defining MCTS apprentice")
+        if verbose: print(f"create_self_play ({num_task}): Defining MCTS apprentice")
         apprentice = agent.MctsApprentice(num_MCTS_sims = apprentice_params["num_MCTS_sims"],
                                           temp = apprentice_params["temp"], 
                                           max_depth = apprentice_params["max_depth"],
                                           sims_per_eval = apprentice_params["sims_per_eval"])
 
 
-    if verbose: print("create_self_play: Defining expert")
+    if verbose: print(f"create_self_play ({num_task}): Defining expert")
     # build expert
     expert = build_expert_mcts(apprentice, max_depth=expert_params["max_depth"],
                     sims_per_eval=expert_params["sims_per_eval"], num_MCTS_sims=expert_params["num_MCTS_sims"],
@@ -267,7 +269,7 @@ if __name__ == '__main__':
                     cb = expert_params["cb"], use_val = expert_params["use_val"])
     
                          
-    if verbose: print("create_self_play: Creating data folders")
+    if verbose: print(f"create_self_play ({num_task}): Creating data folders")
     # Create folders to store data
     for folder in move_types:
         os.makedirs(os.path.join(path_data, folder, 'raw'), exist_ok = True)
@@ -279,19 +281,19 @@ if __name__ == '__main__':
     state = copy.deepcopy(board_orig)    
 
     # Play episode, select states to save
-    if verbose: print("create_self_play: Self-play")
+    if verbose: print(f"create_self_play ({num_task}): Self-play")
     start = time.perf_counter()        
     states_to_save = create_self_play_data(move_type, path_data, state, apprentice, max_depth = max_episode_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose)
 
-    if verbose: print(f"create_self_play: Time taken: {round(time.perf_counter() - start,2)}")
+    if verbose: print(f"create_self_play ({num_task}): Time taken: {round(time.perf_counter() - start,2)}")
     
     
     # Tag the states and save them
-    if verbose: print(f"create_self_play: Tag the states ({len(states_to_save)} states to tag)")  
+    if verbose: print(f"create_self_play ({num_task}): Tag the states ({len(states_to_save)} states to tag)")  
     start = time.perf_counter()
     
     for st in states_to_save:
         st_tagged, policy_exp, value_exp = tag_with_expert_move(st, expert, temp=expert_params["temp"], verbose=verbose)
         res = simple_save_state(path_data, st_tagged, policy_exp, value_exp, verbose=verbose)
-    if verbose: print(f"create_self_play: Time taken: {round(time.perf_counter() - start,2)}")
+    if verbose: print(f"create_self_play  ({num_task}): Time taken -> {round(time.perf_counter() - start,2)}")
     
