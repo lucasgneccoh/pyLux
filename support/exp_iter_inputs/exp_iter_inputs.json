@@ -11,7 +11,7 @@
       "model_name": "",
       "max_depth": 100,
       "num_MCTS_sims": 200,
-      "temp": 1
+      "temp": 1,
       "sims_per_eval": 2
   },
   "expert_params": {
