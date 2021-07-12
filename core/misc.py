@@ -6,6 +6,7 @@ from move import Move
 import copy
 import sys
 import os
+import json
 
 
 def iter_all_strings():
