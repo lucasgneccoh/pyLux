@@ -422,8 +422,7 @@ if __name__ == '__main__':
         
         # Play the games
         print("\tPlay the games")        
-                
-        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose)
+                        
         # num_samples = iterations * num_cpu * saved_states_per_episode
         num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
         states_to_save = []
@@ -448,7 +447,7 @@ if __name__ == '__main__':
                         states_to_save.append(s) # parmap returns this [(i, x)]
                 """
                 with Pool(processes=num_cpu) as pool:
-                    res = pool.map(f, args_list)
+                    res = pool.map(aux_par_create_selp_play, args_list)
                     print(len(res))
                     print(res)
                 break
