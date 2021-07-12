@@ -141,6 +141,10 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
 
     """
     
+    if verbose: 
+        print(f"\t\tSelf-play starting: move_type = {move_type}, {len(states_to_save)} states to save")
+        sys.stdout.flush()
+    
     edge_index = boardToData(root).edge_index    
 
     # ******************* PLAY EPISODE ***************************
@@ -159,7 +163,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
         raise e
     
     if verbose: 
-        print(f"\t\tSelf-play done: move_type = {move_type}, {len(states_to_save)} states to save")
+        print(f"\t\tSelf-play done")
         sys.stdout.flush()
         
     return states_to_save
@@ -490,11 +494,8 @@ if __name__ == '__main__':
 
         print(f"Time taken: {round(time.perf_counter() - start,2)}")
         
-        
-        
-        
-        
-        
+    
+    
         # Train network on dataset
         print("Training network")
         shuffle(move_types)
