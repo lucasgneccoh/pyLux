@@ -40,7 +40,7 @@
       "console_debug" : false
   },
   "self_play_tag": "create_self_play",
-  "train_apprentice_tag": "train_apprentice",
+  "train_apprentice_tag": "train_model",
   "epochs": 15,
   "eval_every": 99
 }

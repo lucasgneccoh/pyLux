@@ -182,6 +182,7 @@ def build_expert_mcts(apprentice, max_depth=200, sims_per_eval=1, num_MCTS_sims=
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
+    misc.print_and_flush(f"create_self_play ({num_task}): Start")
     start = time.perf_counter()
     
     args = parseInputs()
@@ -302,5 +303,5 @@ if __name__ == '__main__':
     if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Tag and save: Time taken -> {round(time.perf_counter() - start_inner,2)}")
     
         
-    if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Total time taken -> {round(time.perf_counter() - start,2)}")
+    misc.print_and_flush(f"create_self_play  ({num_task}): Total time taken -> {round(time.perf_counter() - start,2)}")
     

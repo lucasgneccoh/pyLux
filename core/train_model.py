@@ -44,7 +44,9 @@ def parseInputs():
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
-    print("Parsing args")
+    misc.print_and_flush(f"train_model: Start")
+    start = time.perf_counter()
+    
     args = parseInputs()
     inputs = read_json(args.inputs)
     verbose = bool(args.verbose)
@@ -67,8 +69,6 @@ if __name__ == '__main__':
     # ---------------- Load model -------------------------
     
     move_types = ['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify']
-    
-    print("Creating board to get board attributes")
 
     #%%% Create Board
     world = World(path_board)
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     num_nodes = board_orig.world.map_graph.number_of_nodes()
     num_edges = board_orig.world.map_graph.number_of_edges()
 
-    print("Creating model")
+    if verbose: print_and_flush("Creating model")
     net = GCN_risk(num_nodes, num_edges, 
                      model_args['board_input_dim'], model_args['global_input_dim'],
                      model_args['hidden_global_dim'], model_args['num_global_layers'],
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         
         
     # Train network on dataset
-    print("Training network")
+    if verbose: print_and_flush("Training network")
     shuffle(move_types)
     for j, move_type in enumerate(move_types):
         if verbose: misc.print_and_flush(f"\tTraining {j}:  {move_type}")
@@ -137,5 +137,5 @@ if __name__ == '__main__':
         
         load_path = None # The model is already in memory
 
-    if verbose: misc.print_and_flush(f"Time taken: {round(time.perf_counter() - start,2)}")
+    misc.print_and_flush(f"train_model: Total time taken -> {round(time.perf_counter() - start,2)}")
         
