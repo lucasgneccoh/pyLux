@@ -33,8 +33,8 @@ def write_json(data, path):
             json.dump(data, f)
         return True
     except Exception as e:
-        print(e)
-        return False
+        raise e
+        
         
 def remove_file(path):
     try:
@@ -44,8 +44,7 @@ def remove_file(path):
         else:
             return False
     except Exception as e:
-        print(e)
-        return False
+        raise e
      
 
     
