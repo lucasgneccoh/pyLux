@@ -103,7 +103,8 @@ def play_episode(root, max_depth, apprentice, move_type = "all", verbose=False):
         
         saved = (move_type=="all" or move_type==state.gamePhase)
         if verbose:             
-            print(f"\t\tPlay episode: turn {i}, move = {move}, saved = {saved}")
+            # print(f"\t\tPlay episode: turn {i}, move = {move}, saved = {saved}")
+            pass
         
         if saved:
             episode.append(copy.deepcopy(state))
@@ -143,7 +144,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
 
     # ******************* PLAY EPISODE ***************************
     episode = play_episode(root, max_depth, apprentice, move_type = move_type, verbose = verbose)
-        
+    if verbose: print(f"\t\tPlay episode: Done, {len(episodes)} states in episode")
     # ******************* SELECT STATES ***************************
     # Take some states from episode    
     try:
@@ -152,7 +153,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
         if not options:
             # TODO: What to do in this case? For now just take some random states to avoid wasting the episode
             options = episode
-        states_to_save = np.random.choice(options, min(saved_states_per_episode, len(options)))
+        states_to_save = np.random.choice(options, min(saved_states_per_episode, len(options)), replace=False)
     except Exception as e:
         raise e
         
@@ -170,8 +171,9 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
         policy_exp = policy_exp.detach().numpy()
     if isinstance(value_exp, torch.Tensor):
         value_exp = value_exp.detach().numpy()
-    if verbose:             
-        print(f"\t\tTag with expert: Tagged board {state.board_id}")
+    
+    if verbose: print(f"\t\tTag with expert: Tagged board {state.board_id}")
+    
     return state, policy_exp, value_exp
     
 def save_states(path, states, policies, values):
@@ -399,7 +401,7 @@ if __name__ == '__main__':
         num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
         states_to_save = []
         for j in range(num_iter):
-            print(f"\t\tIter {i+1} of {num_iter}. Number of processes: {num_cpu}")
+            print(f"\t\tIter {j+1} of {num_iter}. Number of processes: {num_cpu}")
             aux = parmap(f, types, nprocs=num_cpu) 
             for a in aux:
                 for s in a[1]:
