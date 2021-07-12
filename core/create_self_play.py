@@ -3,6 +3,7 @@ from world import World, Country, Continent
 from move import Move
 import agent
 from model import boardToData, GCN_risk, RiskDataset, saveBoardObs, train_model
+import misc
 
 import os
 import itertools
@@ -179,7 +180,7 @@ if __name__ == '__main__':
     # ---------------- Start -------------------------
     
     args = parseInputs()
-    inputs = read_json(args.inputs)
+    inputs = misc.read_json(args.inputs)
     move_type = args.move_type
     verbose = args.verbose
     
@@ -192,7 +193,7 @@ if __name__ == '__main__':
 
     path_data = inputs["path_data"]
     path_model = inputs["path_model"]
-    model_args =  read_json(inputs["model_parameters"])
+    model_args =  misc.read_json(inputs["model_parameters"])
 
     board_params = inputs["board_params"]
     path_board = board_params["path_board"]
