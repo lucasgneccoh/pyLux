@@ -428,9 +428,21 @@ if __name__ == '__main__':
         #     print("*** ", s.gamePhase)
           
         print(f"\tTag the states ({len(states_to_save)} states to tag)")  
+        
+        # Parallel
+        """
         f = lambda state: tag_with_expert_move(state, expert, verbose=verbose)
         aux = parmap(f, states_to_save, nprocs=num_cpu)
         tagged = [a[1] for a in aux]        
+        """
+        
+        # Sequential (parallel is only working for the first iteration)
+        tagged = []
+        for st in states_to_save:
+            t = tag_with_expert_move(st, expert, verbose=verbose)
+            tagged.append(t)
+          
+        
         
         
         
