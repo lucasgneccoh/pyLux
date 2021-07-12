@@ -24,7 +24,20 @@ def parseInputs():
   args = parser.parse_args()
   return args 
 
-
+def get_last_model(path_model):
+  best_i, best_j = -99, -99
+  last_model = ""
+  for name in os.listdir(path_model):
+      try:
+          split = name.split("_")
+          i, j = int(split[1]), int(split[2])
+          if i>best_i or (i==best_i and j>best_j):
+              last_model = name
+              best_i, best_j = i, j
+      except Exception as e:
+          pass
+  return last_model
+          
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
@@ -56,6 +69,9 @@ if __name__ == '__main__':
     train_apprentice_tag = inputs["train_apprentice_tag"]
     
     python_command = inputs["python_command"]
+    
+    epochs = inputs["epochs"]
+    eval_every = inputs["eval_every"]
     
     print("done")
     
@@ -100,7 +116,7 @@ if __name__ == '__main__':
           "max_episode_depth": inputs["max_episode_depth"]          
         }
         self_play_input_json = os.path.join(params_path, self_play_tag) + ".json"
-        misc.write_json(input_dict, os.path.join(params_path, self_play_tag) + ".json")
+        misc.write_json(input_dict, self_play_input_json)
 
         print(f"Running {num_iter} iterations, each of {num_cpu} tasks")
         for j in range(num_iter):
@@ -118,29 +134,30 @@ if __name__ == '__main__':
         
           
         print(f"Time taken: {round(time.perf_counter() - start,2)}")
-        
-        break
     
         ##### 2. Train network on dataset
-        
+        start = time.perf_counter()
         print("Training network")
-        shuffle(move_types)
-        for j, move_type in enumerate(move_types):
-            print(f"\t{j}:  {move_type}")
-            save_path = f"{path_model}/model_{i}_{j}_{move_type}.tar" # TODO: add something to the name
-            root_path = f'{path_data}/{move_type}'
-            
-            if len(os.listdir(os.path.join(root_path, 'raw')))<batch_size: continue
-            
-            risk_dataset = RiskDataset(root = root_path)
-            # TODO: add validation data
-            loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
-            if verbose: print(f"\tTrain on {root_path}, model = {save_path}")
-            train_model(net, optimizer, scheduler, criterion, device,
-                        epochs = 10, train_loader = loader, val_loader = None, eval_every = 3,
-                        load_path = None, save_path = save_path)
-
-
+        
+        # Create the input file
+        input_dict = {
+          "path_data": path_data,
+          "path_model": path_model,
+          "batch_size": batch_size, 
+          "model_parameters": inputs["model_parameters"],
+          "board_params": board_params,
+          "epochs": epochs,
+          "eval_every": eval_every
+        }
+        train_input_json = os.path.join(params_path, train_apprentice_tag) + ".json"
+        misc.write_json(input_dict, train_input_json)
+        
+        checkpoint = apprentice_params["model_name"]
+        if not checkpoint:
+            get_last_model(path_model)
+        subprocess.run([python_command, f"{tag_apprentice_tag}.py", "--inputs", train_input_json, "--iteration", str(i), "--verbose", str(verbose), "--checkpoint", get_last_model(path_model)])
+        
+        
         print(f"Time taken: {round(time.perf_counter() - start,2)}")
         
         ##### 3. Update paths so that new apprentice and expert are used on the next iteration

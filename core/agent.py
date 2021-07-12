@@ -1298,7 +1298,7 @@ if __name__ == "__main__":
             print(f"Chosen model is {model_name}")
             state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')
             print(state_dict)
-            net.load_state_dict(state_dict['model'])        
+            net.load_state_dict(state_dict['model'])
             print("Model has been loaded")
             
         # Create player that uses neural net

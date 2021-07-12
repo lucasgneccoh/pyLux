@@ -391,7 +391,11 @@ class GCN_risk(torch.nn.Module):
         #########################################        
         return pick, place, attack, fortify, value
         
-        
+
+def TPT_Loss(output, target):
+    # TODO: Add regularisation
+    return -(target*torch.log(output)).sum()
+     
 def train_model(model, optimizer, scheduler, criterion, device, epochs,
                 train_loader, val_loader = None, eval_every = 1,
                 load_path = None, save_path = None):
