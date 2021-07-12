@@ -103,7 +103,7 @@ def play_episode(root, max_depth, apprentice, move_type = "all", verbose=False):
         
         saved = (move_type=="all" or move_type==state.gamePhase)
         if verbose:             
-            print(f"\tPlay episode: turn {i}, move = {move}, saved = {saved}")
+            print(f"\t\tPlay episode: turn {i}, move = {move}, saved = {saved}")
         
         if saved:
             episode.append(copy.deepcopy(state))
@@ -159,17 +159,19 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
     return states_to_save
 
 
-def tag_with_expert_move(state, expert, temp=1):
+def tag_with_expert_move(state, expert, temp=1, verbose=False):
     # Tag one state with the expert move
     # TODO: expert can be done in parallel?    
     
     _, _, value_exp, Q_value_exp = expert.getBestAction(state, player = state.activePlayer.code, num_sims = None, verbose=False)
-    policy_exp = expert.getVisitCount(board, temp=temp)
+    policy_exp = expert.getVisitCount(state, temp=temp)
     
     if isinstance(policy_exp, torch.Tensor):
         policy_exp = policy_exp.detach().numpy()
     if isinstance(value_exp, torch.Tensor):
-        value_exp = value_exp.detach().numpy()    
+        value_exp = value_exp.detach().numpy()
+    if verbose:             
+        print(f"\t\tTag with expert: Tagged board {state.board_id}")
     return state, policy_exp, value_exp
     
 def save_states(path, states, policies, values):
@@ -391,7 +393,7 @@ if __name__ == '__main__':
         cycle = itertools.cycle(move_types)
         for _ in range(num_cpu):
           types.append(next(cycle))
-        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = True) # CAMBIAR       
+        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose) # CAMBIAR       
         # num_samples = iterations * num_cpu * saved_states_per_episode
         num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
         states_to_save = []
@@ -408,7 +410,7 @@ if __name__ == '__main__':
         #     print("*** ", s.gamePhase)
           
         print("\tTag the states")
-        f = lambda state: tag_with_expert_move(state, expert)
+        f = lambda state: tag_with_expert_move(state, expert, verbose=verbose)
         aux = parmap(f, states_to_save, nprocs=num_cpu)
         tagged = [a[1] for a in aux]        
         
