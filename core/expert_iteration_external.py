@@ -156,7 +156,7 @@ if __name__ == '__main__':
         checkpoint = apprentice_params["model_name"]
         if not checkpoint:
             get_last_model(path_model)
-        subprocess.run([python_command, f"{tag_apprentice_tag}.py", "--inputs", train_input_json, "--iteration", str(i), "--verbose", str(verbose), "--checkpoint", get_last_model(path_model)])
+        subprocess.run([python_command, f"{train_apprentice_tag}.py", "--inputs", train_input_json, "--iteration", str(i), "--verbose", str(verbose), "--checkpoint", get_last_model(path_model)])
         
         
         print(f"Time taken: {round(time.perf_counter() - start,2)}")
