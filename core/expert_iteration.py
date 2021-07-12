@@ -188,7 +188,7 @@ def simple_save_state(path, name, state, policy, value, verbose=False):
     board, _ = state.toCanonical(state.activePlayer.code)
     saveBoardObs(path, name,
                         board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
-    if verbose: print(f"\t\tSimple save: Saved board {os.path.join(path, name)}")
+    if verbose: print(f"\t\tSimple save: Saved board {state.board_id} {os.path.join(path, name)}")
     return True
 
 def whole_process(args):
@@ -453,6 +453,7 @@ if __name__ == '__main__':
             risk_dataset = RiskDataset(root = root_path)
             # TODO: add validation data
             loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
+            if verbose: print(f"\tTrain on {root_path}, model = {save_path}")
             train_model(net, optimizer, scheduler, criterion, device,
                         epochs = 10, train_loader = loader, val_loader = None, eval_every = 3,
                         load_path = None, save_path = save_path)
