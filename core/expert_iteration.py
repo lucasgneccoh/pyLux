@@ -393,6 +393,7 @@ if __name__ == '__main__':
         """
         
         print("Parallel self-play")
+        start = time.perf_counter()
         
         """
         # Method 1
@@ -435,13 +436,14 @@ if __name__ == '__main__':
                     
                     states_to_save.extend(aux)
         
+        print(f"Time taken: {round(time.perf_counter() - start,2)}")
         
         # Tag the states   
         # for s in states_to_save:
         #     print("*** ", s.gamePhase)
           
         print(f"\tTag the states ({len(states_to_save)} states to tag)")  
-        
+        start = time.perf_counter()
         # Parallel
         if parallel:
             f = lambda state: tag_with_expert_move(state, expert, verbose=verbose)
@@ -455,12 +457,14 @@ if __name__ == '__main__':
                 t = tag_with_expert_move(st, expert, verbose=verbose)
                 tagged.append(t)
           
+        print(f"Time taken: {round(time.perf_counter() - start,2)}")
         
         
         
         
         # Save the states
         print("\tSave the states")
+        start = time.perf_counter()
         # simple_save_state(path, name, state, policy, value)
         
         # Get the initial number for each move type
@@ -475,7 +479,9 @@ if __name__ == '__main__':
             aux_dict[phase] += 1
         
         f = lambda tupl:  simple_save_state(os.path.join(path_data, tupl[1], 'raw'), tupl[0], tupl[2], tupl[3], tupl[4], verbose=verbose)
-        aux = parmap(f, tagged, nprocs=num_cpu)        
+        aux = parmap(f, tagged, nprocs=num_cpu)   
+
+        print(f"Time taken: {round(time.perf_counter() - start,2)}")
         
         
         
@@ -501,8 +507,10 @@ if __name__ == '__main__':
                         load_path = None, save_path = save_path)
 
 
-
+        print(f"Time taken: {round(time.perf_counter() - start,2)}")
+        
         print("Building expert")
         # build expert with trained net
         apprentice = agent.NetApprentice(net)
         expert = build_expert_mcts(apprentice)
+        expert.num_MCTS_sims = expert_mcts_sims
