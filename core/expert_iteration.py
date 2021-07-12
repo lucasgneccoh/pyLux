@@ -59,7 +59,7 @@ def isint(n):
         return False
      
 
-def play_episode(root, max_depth, apprentice, verbose=False):
+def play_episode(root, max_depth, apprentice, move_type = "all", verbose=False):
     episode = []
     state = copy.deepcopy(root)
     edge_index = boardToData(root).edge_index
@@ -103,7 +103,8 @@ def play_episode(root, max_depth, apprentice, verbose=False):
         
         if verbose: print(f"\t\tPlay episode: turn {i}, move = {move}")
         
-        episode.append(copy.deepcopy(state))
+        if move_type=="all" or move_type==state.gamePhase:
+            episode.append(copy.deepcopy(state))
 
         # Play the move to continue
         state.playMove(move)
@@ -139,7 +140,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
     edge_index = boardToData(root).edge_index    
 
     # ******************* PLAY EPISODE ***************************
-    episode = play_episode(root, max_depth, apprentice, verbose)
+    episode = play_episode(root, max_depth, apprentice move_type = move_type, verbose = verbose)
         
     # ******************* SELECT STATES ***************************
     # Take some states from episode    
