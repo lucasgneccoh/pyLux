@@ -101,12 +101,12 @@ if __name__ == '__main__':
         self_play_input_json = os.path.join(params_path, self_play_tag, 'json')
         misc.write_json(input_dict, os.path.join(params_path, self_play_tag))
 
-        
+        print(f"Running {num_iter} iterations, each of {num_cpu} tasks")
         for j in range(num_iter):
             # Each iteration launches num_cpu tasks
             for k in range(num_cpu):
                 move_type = next(types_cycle)
-                subprocess.run(["taskset", f"-c {k}", python_command, f"{self_play_tag}.py", f"--inputs {self_play_input_json}", f"--move_type {move_type}", f"--verbose {verbose}"])
+                subprocess.run(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs", self_play_input_json, "--move_type", move_type, "--verbose", str(verbose)])
             
         
         
