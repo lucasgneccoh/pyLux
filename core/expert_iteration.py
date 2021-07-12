@@ -339,6 +339,7 @@ if __name__ == '__main__':
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
     criterion = TPT_Loss
     move_types = ['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify']
+    types_cycle = itertools.cycle(move_types)
                                     
                                     
                                     
@@ -392,9 +393,8 @@ if __name__ == '__main__':
         """
         
         # Play the games
-        print("\tPlay the games")
-        types = []
-        cycle = itertools.cycle(move_types)        
+        print("\tPlay the games")        
+                
         f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose) # CAMBIAR       
         # num_samples = iterations * num_cpu * saved_states_per_episode
         num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
@@ -403,7 +403,7 @@ if __name__ == '__main__':
         for j in range(num_iter):
             types=[]
             for _ in range(num_cpu):
-                types.append(next(cycle))
+                types.append(next(types_cycle))
             print(f"\t\tIter {j+1} of {num_iter}. Number of processes: {num_cpu}")
             aux = parmap(f, types, nprocs=num_cpu) 
             for a in aux:
@@ -467,4 +467,5 @@ if __name__ == '__main__':
 
         print("Building expert")
         # build expert with trained net
-        expert = build_expert_mcts(agent.NetApprentice(net))
+        apprentice = agent.NetApprentice(net)
+        expert = build_expert_mcts(apprentice)
