@@ -1,5 +1,5 @@
 {
-  "path_board": "../support/maps/test_map.json",
+  "params_path": "../support/exp_iter_inputs"  
   "iterations": 5,
   "num_samples": 32,
   "num_cpu": 4,
@@ -10,5 +10,16 @@
   "path_data": "../data",
   "path_model": "../data/models",
   "batch_size": 4,
-  "model_parameters": "../support/model_parameters/model_default_parameters.json"
+  "model_parameters": "../support/model_parameters/model_default_parameters.json",
+  "board_params": {
+      "path_board": "../support/maps/test_map.json",
+      "initialPhase": true,
+      "useCards": true,
+      "transferCards": true, 
+      "immediateCash": true,
+      "continentIncrease": 0.05,
+      "pickInitialCountries": true,
+      "armiesPerTurnInitial": 4,
+      "console_debug" : false
+  }
 }

@@ -28,18 +28,15 @@ from torch_geometric import utils
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
-import multiprocessing
-from multiprocessing import Pool, cpu_count
-
-from random import shuffle
-
 import time
 
 def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
-  parser.add_argument("--verbose", help="Print on the console?", type=int, default = 0)
-  parser.add_argument("--parallel", help="Do on parallel", type=int, default = 1)
+  parser.add_argument("--move_type", help="Game phase to save", default = "all")
+  parser.add_argument("--num_samples", help="Number of states to save from the played episode", type=int, default = 1)
+  #parser.add_argument("--verbose", help="Print on the console?", type=int, default = 0)  
+  #parser.add_argument("--parallel", help="Do on parallel", type=int, default = 1)
   args = parser.parse_args()
   return args
   
@@ -190,15 +187,6 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
     
     return state, policy_exp, value_exp
     
-def save_states(path, states, policies, values):
-    for state, policy_exp, value_exp in zip(states, policies, values):
-        # Save the board, value and target
-        board, _ = state.toCanonical(state.activePlayer.code)
-        phase = board.gamePhase
-        full_path = os.path.join(path, phase, 'raw')
-        num = len(os.listdir(full_path))+1
-        saveBoardObs(full_path, 'board_{}.json'.format(num),
-                        board, board.gamePhase, policy_exp.ravel().tolist(), value_exp.ravel().tolist())
 
 def simple_save_state(path, name, state, policy, value, verbose=False):
     board, _ = state.toCanonical(state.activePlayer.code)
@@ -209,92 +197,16 @@ def simple_save_state(path, name, state, policy, value, verbose=False):
         sys.stdout.flush()
     return True
 
-def whole_process(args):
-    path, root = args['path'], args['root']    
-    apprentice, expert = args['apprentice'], args['expert']
-    max_depth = args['max_depth']
-    saved_states_per_episode, verbose = args['saved_states_per_episode'], args['verbose']
-    # This is one process. Another function will do it in parallel
-    move_type = args['move_type']
-    states_to_save = create_self_play_data(move_type, path, root, apprentice, max_depth, saved_states_per_episode, verbose)
-    policies, values = [], []
-    for state in states_to_save:
-        _, policy_exp, value_exp = tag_with_expert_move(state, expert)
-        policies.append(policy_exp)
-        values.append(value_exp)
-    
-    save_states(path, states_to_save, policies, values)
-    return move_type
-
-
-    
-def par_self_play(num_samples, path, root, apprentice, expert, num_cpu, max_depth = 100, saved_states_per_episode=1, verbose = False):
-    # On the second iteration, this throws an Error 24 Too many open files
-    cpus = cpu_count()
-    args = dict(zip(["path", "root", "apprentice", "expert", "max_depth", "saved_states_per_episode", "verbose"], [path, root, apprentice, expert, max_depth, saved_states_per_episode, verbose]))
-    num_proc = min(cpus, num_cpu)
-    num_iter = max(num_samples // (num_proc*saved_states_per_episode), 1)
-    move_types = itertools.cycle(['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify'])
-    args_list = []
-    for a in range(num_proc):
-        copy_a = copy.deepcopy(args)
-        copy_a['move_type'] = next(move_types)
-        args_list.append(copy_a)    
-    
-    print("\tStarting pool calls")
-    for i in range(num_iter):
-        print(f"\t\tStarting with iteration {i+1} of {num_iter}")
-        with Pool(num_proc) as pool:
-            print(pool.map(whole_process, args_list))          
-            pool.close()
-            pool.terminate()
-        print(f"\t\tDone with iteration {i+1} of {num_iter}")
-    
-    
-    
-def par_fun(f, q_in, q_out):
-    while True:
-        i, x = q_in.get()
-        if i is None:
-            break
-        q_out.put((i, f(x)))
-
-
-def parmap(f, X, nprocs=multiprocessing.cpu_count()):
-    q_in = multiprocessing.Queue(1)
-    q_out = multiprocessing.Queue()
-
-    proc = [multiprocessing.Process(target=par_fun, args=(f, q_in, q_out))
-            for _ in range(nprocs)]
-    for p in proc:
-        p.daemon = True
-        p.start()
-
-    sent = [q_in.put((i, x)) for i, x in enumerate(X)]
-    [q_in.put((None, None)) for _ in range(nprocs)]
-    res = [q_out.get() for _ in range(len(sent))]
-
-    [p.join() for p in proc]
-
-    return [(i, x) for i, x in res]
-
-
-
-def TPT_Loss(output, target):
-    # TODO: Add regularisation
-    return -(target*torch.log(output)).sum()
-
-def build_expert_mcts(apprentice):
-    return agent.PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False)
+def build_expert_mcts(apprentice, max_depth=200, sims_per_eval=1, num_MCTS_sims=1000,
+                      wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0):
+    return agent.PUCT(apprentice, max_depth = max_depth, sims_per_eval = sims_per_eval, num_MCTS_sims = num_MCTS_sims,
+                 wa = wa, wb = wb, cb = cb, use_val = use_val, console_debug = False)
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
     print("Parsing args")
     args = parseInputs()
     inputs = read_json(args.inputs)
-    verbose = bool(args.verbose)
-    parallel = bool(args.parallel)
     
     print("ARGS:")
     print(f"verbose: {verbose}")
@@ -315,8 +227,7 @@ if __name__ == '__main__':
     batch_size = inputs["batch_size"]
     model_args =  read_json(inputs["model_parameters"])
 
-    board_params = inputs["board_params"]
-    path_board = board_params["path_board"]
+    path_board = inputs["path_board"]
 
     # ---------------- Model -------------------------
 
@@ -331,7 +242,10 @@ if __name__ == '__main__':
     players = [pR1, pR2, pR3]
     # Set board
     # TODO: Send to inputs
-    prefs = board_params
+    prefs = {'initialPhase': True, 'useCards':True,
+            'transferCards':True, 'immediateCash': True,
+            'continentIncrease': 0.05, 'pickInitialCountries':True,
+            'armiesPerTurnInitial':4,'console_debug':False}
             
     board_orig = Board(world, players)
     board_orig.setPreferences(prefs)
@@ -353,14 +267,7 @@ if __name__ == '__main__':
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     net.to(device)
-
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
-    criterion = TPT_Loss
-    move_types = ['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify']
-    types_cycle = itertools.cycle(move_types)
-                                    
-                                    
+                                
                                     
     print("Defining apprentice")
     # Define initial apprentice
@@ -433,19 +340,10 @@ if __name__ == '__main__':
             
             # Parallel
             if parallel:
-                if verbose: print(f"\t\Parallel self play")
-                """
                 aux = parmap(f, types, nprocs=num_cpu) 
                 for a in aux:
                     for s in a[1]:
                         states_to_save.append(s) # parmap returns this [(i, x)]
-                """
-                with Pool(processes=num_cpu) as pool:
-                    res = pool.map(f, types)
-                    print(len(res))
-                    print(res)
-                break
-
             else:
             
                 # Sequential (parallel is only working for the first iteration)
