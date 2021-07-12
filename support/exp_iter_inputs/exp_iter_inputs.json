@@ -1,7 +1,7 @@
 {
   "path_board": "../support/maps/test_map.json",
   "iterations": 5,
-  "num_samples": 16,
+  "num_samples": 32,
   "num_cpu": 4,
   "max_depth": 100,
   "saved_states_per_episode": 4,
