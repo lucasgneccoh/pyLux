@@ -35,7 +35,7 @@ def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/create_self_play.json")
   parser.add_argument("--move_type", help="Type of move to consider", default = "all")
-  parser.add_argument("--verbose", help="Print on the console?", default = 0)
+  parser.add_argument("--verbose", help="Print on the console?", type=int, default = 0)
   parser.add_argument("--num_task", help="Number of the task for debugging and tracking", default = 0)
   args = parser.parse_args()
   return args
