@@ -175,7 +175,7 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
     if isinstance(value_exp, torch.Tensor):
         value_exp = value_exp.detach().numpy()
     
-    if verbose: print(f"\t\tTag with expert: Tagged board {state.board_id} ({state.gamePhase}). {time.perf_counter() - start} sec")
+    if verbose: print(f"\t\tTag with expert: Tagged board {state.board_id} ({state.gamePhase}). {round(time.perf_counter() - start,2)} sec")
     
     return state, policy_exp, value_exp
     
