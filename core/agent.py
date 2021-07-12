@@ -897,12 +897,19 @@ class PUCT(object):
 
 
         
-        a = hash(action) # Best action in simplified way
-        # move = buildMove(state, action)
-        move = action
+        a = hash(action) # Best action in simplified way        
+        
         # Play action, continue search
         # TODO: For now, armies are placed on one country only to simplify the game
+        
+        
+        if not isinstance(action, Move):
+          move = buildMove(state, action)
+        else:
+          move = action
+        
         if self.console_debug: print(move)
+        
         state.playMove(move)
         
         # Once the search is done, update values for current (state, action) using the hashes s and a

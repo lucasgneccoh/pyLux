@@ -1,0 +1,14 @@
+{"battles":{    
+    "test_peaceful": [
+    {"agent": "PeacefulAgent"},
+    {"agent": "PUCTPlayer"}
+    ],
+    "test_random": [
+    {"agent": "RandomAgent"},
+    {
+    "agent": "PUCTPlayer", 
+    "model_parameters": "../support/model_parameters/model_default_parameters.json",
+    "model_path": "../data/models"}
+    ]
+   }
+}

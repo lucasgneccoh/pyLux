@@ -1,36 +1,187 @@
-#%% TESTING
+
+from board import Board
+from world import World, Country, Continent
+from move import Move
+import agent
+from model import load_checkpoint, GCN_risk
+
+import os
+import itertools
+import numpy as np
+import copy
+import sys
+import json
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+
+import torch_geometric 
+from torch_geometric.data import DataLoader as G_DataLoader
+from torch_geometric.data import Data
+from torch_geometric.nn import GCNConv
+from torch_geometric.data import Dataset as G_Dataset
+from torch_geometric.data import download_url
+import torch_geometric.transforms as T
+from torch_geometric import utils
+
+import pandas as pd
+
+def append_each_field(master, new):
+    for k, v in new.items():
+        if k in master:
+            master[k].append(v)
+        else:
+            master[k] = [v]
+    return master
+
+def read_json(path):
+    with open(path, 'r') as f:
+      data = json.load(f)
+    return data
+  
 if __name__ == '__main__':
 
-  console_debug = True
-  
-  # Load map
-  path = '../support/maps/classic_world_map.json'
-  path = '../support/maps/test_map.json'
+    ##### DEFINE INPUTS HERE
+    battle_name = "test_peaceful"
+    console_debug = True
+    path = '../support/maps/mini_test_map.json'
+    model_parameters_json = "../support/model_parameters/model_default_parameters.json"      
     
-  world = World(path)
-  
+    # Inputs for players
+    load_model = False 
+    max_depth = 300
+    sims_per_eval = 2
+    num_MCTS_sims = 500
+    
+    # For the game
+    num_rounds = 1
+    max_turns_per_game = 300
+    prefs = {'initialPhase': True, 'useCards':True,
+             'transferCards':True, 'immediateCash': True,
+             'continentIncrease': 0.05, 'pickInitialCountries':True,
+             'armiesPerTurnInitial':4,
+             'console_debug':True}  
+    
+    
+    
+    
+      
+      
+      
+      
+      
+      
+    world = World(path)
+    
 
-  # Set players
-  aggressiveness = 0.7
-  # TODO: Set the MCTS-neural net players
-  pH, pR1, pR2 = agent.Human('PocketNavy'), agent.RandomAgent('Red',aggressiveness), agent.RandomAgent('Green',aggressiveness)
-  pMC = agent.FlatMC('MC', agent.RandomAgent, budget=300)
-  pMC2 = agent.FlatMC('MC', agent.RandomAgent, budget=300)
-  pP = agent.PeacefulAgent()
-  pA = agent.RandomAggressiveAgent('RandomAgressive')
- 
-  players = [pR1, pA]
-  # Set board
-  prefs = {'initialPhase': False, 'useCards':True,
-           'transferCards':True, 'immediateCash': True,
-           'continentIncrease': 0.05, 'pickInitialCountries':True,
-           'armiesPerTurnInitial':4,'console_debug':False}  
-  board_orig = Board(world, players)
-  board_orig.setPreferences(prefs)
-  board_orig.showPlayers()
-  
-  # Battle here. Create agent first, then set number of matches and play the games
-  
-  
+    ###### Set players  
+    # Baselines
+    pRandom = RandomAgent('Random')
+    pPeaceful = PeacefulAgent('Peaceful')
+
+
+    # Stronger baselines
+    
+    pFlat = FlatMCPlayer(name='flatMC', max_depth = max_depth, sims_per_eval = sims_per_eval, num_MCTS_sims = num_MCTS_sims, cb = 0)
+    
+    pUCT = UCTPlayer(name='UCT', max_depth = max_depth, sims_per_eval = sims_per_eval, num_MCTS_sims = num_MCTS_sims, cb = np.sqrt(2))
+    
+    
+    # PUCT Player
+    # Create a board just to obtain information needed to create PUCT player
+    board_orig = Board(world, [pRandom, pPeaceful])
+    board_orig.setPreferences(prefs)
+    
+    num_nodes = board_orig.world.map_graph.number_of_nodes()
+    num_edges = board_orig.world.map_graph.number_of_edges()
+
+
+    # Define model args
+    model_args =  read_json(model_parameters_json)
+    
+
+    print("Creating model")
+    net = GCN_risk(num_nodes, num_edges, 
+                     model_args['board_input_dim'], model_args['global_input_dim'],
+                     model_args['hidden_global_dim'], model_args['num_global_layers'],
+                     model_args['hidden_conv_dim'], model_args['num_conv_layers'],
+                     model_args['hidden_pick_dim'], model_args['num_pick_layers'], model_args['out_pick_dim'],
+                     model_args['hidden_place_dim'], model_args['num_place_layers'], model_args['out_place_dim'],
+                     model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
+                     model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
+                     model_args['hidden_value_dim'], model_args['num_value_layers'],
+                     model_args['dropout'])
+
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    net.to(device)
+    
+    
+    
+    if load_model:
+        # Choose a model at random
+        model_name = np.random.choice(os.listdir(path_model))    
+        print(f"Chosen model is {model_name}")
+        state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')
+        print(state_dict)
+        net.load_state_dict(state_dict['model'])        
+        print("Model has been loaded")
+        
+    # Create player that uses neural net
+    
+    apprentice = NetApprentice(net)
+             
+    pPUCT = PUCTPlayer(apprentice = apprentice, max_depth = max_depth, sims_per_eval = sims_per_eval,
+                      num_MCTS_sims = num_MCTS_sims,
+                      wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False)
+    
+    
+    
+        
+    
+    # Battle here. Create agent first, then set number of matches and play the games
+    players = [pPeaceful, pPUCT]
+    results = {}
+    for round in range(num_rounds):
+    
+        # First game        
+        p0, p1 = players[0], players[1]
+        board = Board(world, [p0, p1])
+        board.setPreferences(prefs)
+        
+        # Play
+        for turn in range(max_turns_per_game):
+            board.play()
+            if board.gameOver: break
+        
+        # Get results        
+        res = {"p0": p0.name, "p1": p1.name, "gameOver": board.gameOver,
+              "p0_countries": p0.num_countries, "p0_armies": board.getPlayerArmies(0), "p0_alive": p0.is_alive,
+              "p1_countries": p1.num_countries, "p1_armies": board.getPlayerArmies(1), "p1_alive": p1.is_alive}
+        results = append_each_field(results, res)
+
+        # Second game
+        p0, p1 = players[1], players[0]
+        board = Board(world, [p0, p1])
+        board.setPreferences(prefs)
+        
+        # Play
+        for turn in range(max_turns_per_game):
+            board.play()
+            if board.gameOver: break
+        
+        # Get results        
+        res = {"p0": p0.name, "p1": p1.name, "gameOver": board.gameOver,
+              "p0_countries": p0.num_countries, "p0_armies": board.getPlayerArmies(0), "p0_alive": p0.is_alive,
+              "p1_countries": p1.num_countries, "p1_armies": board.getPlayerArmies(1), "p1_alive": p1.is_alive}
+        results = append_each_field(results, res)
+        
+    # Write csv with the results
+    csv = pd.DataFrame(data = results)
+    csv.to_csv(f"../support/battles/{battle_name}.csv")
+    print("Battle done")
+    
     
 
