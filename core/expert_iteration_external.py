@@ -30,6 +30,7 @@ if __name__ == '__main__':
     print("Parsing args...", sep = " ")
     args = parseInputs()
     inputs = misc.read_json(args.inputs)
+    verbose = args.verbose
 
     # Get the parameters for the Expert Iteration process
     iterations = inputs["iterations"]
