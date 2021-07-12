@@ -415,7 +415,7 @@ if __name__ == '__main__':
         # for s in states_to_save:
         #     print("*** ", s.gamePhase)
           
-        print("\tTag the states")
+        print(f"\tTag the states ({len(states_to_save)} states to tag)")
         f = lambda state: tag_with_expert_move(state, expert, verbose=verbose)
         aux = parmap(f, states_to_save, nprocs=num_cpu)
         tagged = [a[1] for a in aux]        
