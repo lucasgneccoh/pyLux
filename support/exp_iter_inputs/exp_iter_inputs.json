@@ -1,5 +1,5 @@
 {
-  "params_path": "../support/exp_iter_inputs"  
+  "params_path": "../support/exp_iter_inputs",
   "iterations": 5,
   "num_samples": 32,
   "num_cpu": 4,
