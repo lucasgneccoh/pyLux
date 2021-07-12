@@ -165,10 +165,10 @@ def simple_save_state(root_path, state, policy, value, verbose=False):
         while os.path.exists(os.path.join(full_path, name)):
             num += 1
             name = f"board_{num}.json"
-        saveBoardObs(root_path, name,
+        saveBoardObs(full_path, name,
                             board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
         if verbose: 
-            print(f"\t\tSimple save: Saved board {state.board_id} {os.path.join(root_path, name)}")
+            print(f"\t\tSimple save: Saved board {state.board_id} {os.path.join(full_path, name)}")
             sys.stdout.flush()
         return True
     except Exception as e:
