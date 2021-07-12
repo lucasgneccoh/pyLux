@@ -160,8 +160,11 @@ def simple_save_state(root_path, state, policy, value, verbose=False):
         board, _ = state.toCanonical(state.activePlayer.code)
         phase = board.gamePhase
         full_path = os.path.join(root_path, phase, 'raw')
-        num = len(os.listdir(full_path))+1
-        name = f"board_{num}"
+        num = len(os.listdir(full_path))+1        
+        name = f"board_{num}.json"
+        while os.path.exists(os.path.join(full_path, name)):
+            num += 1
+            name = f"board_{num}.json"
         saveBoardObs(root_path, name,
                             board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
         if verbose: 
