@@ -186,7 +186,7 @@ if __name__ == '__main__':
     
     
     saved_states_per_episode = inputs["saved_states_per_episode"]
-    max_episode_depth = inputd["max_episode_depth"]
+    max_episode_depth = inputs["max_episode_depth"]
     apprentice_params = inputs["apprentice_params"]
     expert_params = inputs["expert_params"]
     
