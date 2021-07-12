@@ -1,12 +1,29 @@
 {
+  "python_command": "python3",
   "params_path": "../support/exp_iter_inputs",
   "iterations": 5,
   "num_samples": 32,
-  "num_cpu": 4,
-  "max_depth": 100,
-  "saved_states_per_episode": 4,
-  "initial_apprentice_mcts_sims": 100,
-  "expert_mcts_sims": 50,
+  "num_cpu": 4,  
+  "saved_states_per_episode": 4,  
+  "max_episode_depth": 100,
+  "apprentice_params": {
+      "type": "mcts",
+      "model_name": "",
+      "max_depth": 100,
+      "num_MCTS_sims": 200,
+      "temp": 1
+      "sims_per_eval": 2
+  },
+  "expert_params": {
+      "max_depth": 100,
+      "num_MCTS_sims": 500,
+      "sims_per_eval": 2
+      "wa": 10,
+      "wb": 10,
+      "cb": 1.414,
+      "use_val": 0,
+      "temp": 1
+  },
   "path_data": "../data",
   "path_model": "../data/models",
   "batch_size": 4,
@@ -21,5 +38,7 @@
       "pickInitialCountries": true,
       "armiesPerTurnInitial": 4,
       "console_debug" : false
-  }
+  },
+  "self_play_tag": "create_self_play",
+  "train_apprentice_tag": "train_apprentice"
 }

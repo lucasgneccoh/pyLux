@@ -6,6 +6,8 @@ import copy
 import sys
 import json
 import time
+import subprocess
+
 import misc
 
 """
@@ -24,107 +26,59 @@ def parseInputs():
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
-    print("Parsing args")
+    print("Parsing args...", sep = " ")
     args = parseInputs()
-    inputs = read_json(args.inputs)
-    verbose = bool(args.verbose)
-    parallel = bool(args.parallel)
-    
-    print("ARGS:")
-    print(f"verbose: {verbose}")
-    print(f"parallel: {parallel}")
-    
+    inputs = misc.read_json(args.inputs)
 
-
+    # Get the parameters for the Expert Iteration process
     iterations = inputs["iterations"]
     num_samples = inputs["num_samples"]
     num_cpu = inputs["num_cpu"]
     saved_states_per_episode = inputs["saved_states_per_episode"]
-    max_depth = inputs["max_depth"]
-    initial_apprentice_mcts_sims = inputs["initial_apprentice_mcts_sims"]
-    expert_mcts_sims = inputs["expert_mcts_sims"]
+    max_episode_depth = inputs["max_episode_depth"]
+    
+    apprentice_params = inputs["apprentice_params"]
+    expert_params = inputs["expert_params"]
 
     params_path = inputs["params_path"]
     path_data = inputs["path_data"]
     path_model = inputs["path_model"]
     batch_size = inputs["batch_size"]
-    model_args =  read_json(inputs["model_parameters"])
+    model_args =  misc.read_json(inputs["model_parameters"])
 
-    path_board = inputs["path_board"]
-
-    # ---------------- Model -------------------------
-
-    print("Creating board")
-
-    #%%% Create Board
-    world = World(path_board)
-
-
-    # Set players
-    pR1, pR2, pR3 = agent.RandomAgent('Red'), agent.RandomAgent('Blue'), agent.RandomAgent('Green')
-    players = [pR1, pR2, pR3]
-    # Set board
-    # TODO: Send to inputs
-    prefs = {'initialPhase': True, 'useCards':True,
-            'transferCards':True, 'immediateCash': True,
-            'continentIncrease': 0.05, 'pickInitialCountries':True,
-            'armiesPerTurnInitial':4,'console_debug':False}
-            
-    board_orig = Board(world, players)
-    board_orig.setPreferences(prefs)
-
-    num_nodes = board_orig.world.map_graph.number_of_nodes()
-    num_edges = board_orig.world.map_graph.number_of_edges()
-
-    print("Creating model")
-    net = GCN_risk(num_nodes, num_edges, 
-                     model_args['board_input_dim'], model_args['global_input_dim'],
-                     model_args['hidden_global_dim'], model_args['num_global_layers'],
-                     model_args['hidden_conv_dim'], model_args['num_conv_layers'],
-                     model_args['hidden_pick_dim'], model_args['num_pick_layers'], model_args['out_pick_dim'],
-                     model_args['hidden_place_dim'], model_args['num_place_layers'], model_args['out_place_dim'],
-                     model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
-                     model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
-                     model_args['hidden_value_dim'], model_args['num_value_layers'],
-                     model_args['dropout'])
-
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    net.to(device)
-
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
-    criterion = TPT_Loss
-    move_types = ['initialPick', 'initialFortify', 'startTurn', 'attack', 'fortify']
-    types_cycle = itertools.cycle(move_types)
-                                    
-                                    
-                                    
-    print("Defining apprentice")
-    # Define initial apprentice
-    apprentice = agent.MctsApprentice(num_MCTS_sims = initial_apprentice_mcts_sims, temp=1, max_depth=max_depth)
-    apprentice = agent.NetApprentice(net) # Test the net apprentice, it is way faster # CAMBIAR
-
-
-    print("Defining expert")
-    # build expert
-    expert = build_expert_mcts(None) # Start with only MCTS with no inner apprentice
+    board_params = inputs["board_params"]
+    path_board = board_params["path_board"]
     
-    expert = build_expert_mcts(agent.NetApprentice(net)) # Test the network # CAMBIAR
+    self_play_tag = inputs["self_play_tag"]
+    train_apprentice_tag = inputs["train_apprentice_tag"]
     
-    expert.num_MCTS_sims = expert_mcts_sims
+    python_command = inputs["python_command"]
+    
+    print("done")
+    
+    
+    move_types = ["initialPick", "initialFortify", "startTurn", "attack", "fortify"]
                          
-    print("Creating data folders")
+    print("Creating data folders", sep = " ")
     # Create folders to store data
     for folder in move_types:
         os.makedirs(os.path.join(path_data, folder, 'raw'), exist_ok = True)
     os.makedirs(path_model, exist_ok = True)
                                     
-
-    state = copy.deepcopy(board_orig)
-    state.initialPhase = True
-    state.pickInitialCountries = True
-    # state.play() # random init
+    print("done")
+    
+    print("\n\n")
+    
+    # Calculate number of tasks of self-play
+    # Here, we launch num_cpu tasks, so it all comes down to calculate the number of iterations
+    # num_samples = num_iter * num_cpu * saved_states_per_episode
+    # --> num_iter = int(num_samples / (num_cpu * saved_states_per_episode))
+    num_iter = int(num_samples / (num_cpu * saved_states_per_episode))
+    
+    types_cycle = itertools.cycle(["initialPick", "initialFortify", "startTurn", "attack", "fortify"])
+    
     for i in range(iterations):
+    
         print(f"Starting iteration {i+1}")
        
         state = copy.deepcopy(board_orig)
@@ -132,113 +86,51 @@ if __name__ == '__main__':
         state.pickInitialCountries = True
         
         
-        # Samples from self play
-        # Use expert to calculate targets
-        """
-        create_self_play_data(path_data, state, num_samples, num_samples*i,
-                              apprentice, expert, max_depth = max_depth,
-                              saved_states_per_episode = saved_states_per_episode, verbose=True)
-        """
+        ##### 1. Self play
         
-        print("Parallel self-play")
+        print("Parallel self-play and tagging")
         start = time.perf_counter()
         
-        """
-        # Method 1
-        par_self_play(num_samples, path_data, state, 
-                      apprentice, expert, num_cpu, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode,
-                      verbose = True)        
-        """
-        
-        """
-        # Method 2. do it manually
-        """
-        
-        # Play the games
-        print("\tPlay the games")        
-                
-        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose)
-        # num_samples = iterations * num_cpu * saved_states_per_episode
-        num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
-        states_to_save = []
+        # Create json file with inputs for the self play tasks
+        input_dict = {
+          "saved_states_per_episode": saved_states_per_episode,          
+          "apprentice_params": apprentice_params,          
+          "expert_params": expert_params,          
+          "path_data": path_data,
+          "path_model": path_model,
+          "model_parameters": inputs["model_parameters"]
+          "board_params": board_params
+          "max_episode_depth": inputs["max_episode_depth"]
+          
+        }
+        self_play_input_json = os.path.join(params_path, self_play_tag, 'json')
+        misc.write_json(input_dict, os.path.join(params_path, self_play_tag))
+
         
         for j in range(num_iter):
-            types=[]
-            for _ in range(num_cpu):
-                types.append(next(types_cycle))
-            print(f"\t\tIter {j+1} of {num_iter}. Number of processes: {num_cpu}")
+            # Each iteration launches num_cpu tasks
+            for k in range(num_cpu):
+                move_type = next(types_cycle)
+                subprocess.run["python_command", f"{self_play_tag}.py", f"--inputs {self_play_input_json}", f"--move_type {move_type}", f"--verbose {verbose}"]
             
-            # Parallel
-            if parallel:
-                aux = parmap(f, types, nprocs=num_cpu) 
-                for a in aux:
-                    for s in a[1]:
-                        states_to_save.append(s) # parmap returns this [(i, x)]
-            else:
-            
-                # Sequential (parallel is only working for the first iteration)
-                for t in types:
-                    if verbose: print(f"\t\tSequential self play: {t}")
-                    aux = create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth,
-                                          saved_states_per_episode= saved_states_per_episode, verbose = verbose)
-                    
-                    states_to_save.extend(aux)
         
-        print(f"Time taken: {round(time.perf_counter() - start,2)}")
         
-        # Tag the states   
-        # for s in states_to_save:
-        #     print("*** ", s.gamePhase)
-          
-        print(f"\tTag the states ({len(states_to_save)} states to tag)")  
-        start = time.perf_counter()
-        # Parallel
-        if parallel:
-            f = lambda state: tag_with_expert_move(state, expert, verbose=verbose)
-            aux = parmap(f, states_to_save, nprocs=num_cpu)
-            tagged = [a[1] for a in aux]        
-
-        else:
-            # Sequential (parallel is only working for the first iteration)
-            tagged = []
-            for st in states_to_save:
-                t = tag_with_expert_move(st, expert, verbose=verbose)
-                tagged.append(t)
+        # For each task, execute the system call usin taskset
+        #   Each task must create the episode, select states to save, tag them and save them
+        #     This includes loading the current model
+        
           
         print(f"Time taken: {round(time.perf_counter() - start,2)}")
         
-        
-        
-        
-        # Save the states
-        print("\tSave the states")
-        start = time.perf_counter()
-        # simple_save_state(path, name, state, policy, value)
-        
-        # Get the initial number for each move type
-        aux_dict = dict(zip(move_types, [len(os.listdir(os.path.join(path_data, t, 'raw')))+1 for t in move_types]))
-        
-        # Create the input for the parmap including the names of the files, the states and the targets        
-        for k in range(len(tagged)):
-            state, pol, val = tagged[k]
-            phase = state.gamePhase
-            new = ('board_{}.json'.format(aux_dict[phase]), phase, state, pol, val)
-            tagged[k] = new
-            aux_dict[phase] += 1
-        
-        f = lambda tupl:  simple_save_state(os.path.join(path_data, tupl[1], 'raw'), tupl[0], tupl[2], tupl[3], tupl[4], verbose=verbose)
-        aux = parmap(f, tagged, nprocs=num_cpu)   
-
-        print(f"Time taken: {round(time.perf_counter() - start,2)}")
-        
+        break
     
-    
-        # Train network on dataset
+        ##### 2. Train network on dataset
+        
         print("Training network")
         shuffle(move_types)
         for j, move_type in enumerate(move_types):
             print(f"\t{j}:  {move_type}")
-            save_path = f"{path_model}/model_{i}_{j}_{move_type}.tar"
+            save_path = f"{path_model}/model_{i}_{j}_{move_type}.tar" # TODO: add something to the name
             root_path = f'{path_data}/{move_type}'
             
             if len(os.listdir(os.path.join(root_path, 'raw')))<batch_size: continue
@@ -254,8 +146,4 @@ if __name__ == '__main__':
 
         print(f"Time taken: {round(time.perf_counter() - start,2)}")
         
-        print("Building expert")
-        # build expert with trained net
-        apprentice = agent.NetApprentice(net)
-        expert = build_expert_mcts(apprentice)
-        expert.num_MCTS_sims = expert_mcts_sims
+        ##### 3. Update paths so that new apprentice and expert are used on the next iteration
