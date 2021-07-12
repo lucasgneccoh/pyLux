@@ -7,6 +7,7 @@ import sys
 import json
 import time
 import subprocess
+from subprocess import Popen
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import misc
@@ -104,15 +105,16 @@ if __name__ == '__main__':
         print(f"Running {num_iter} iterations, each of {num_cpu} tasks")
         for j in range(num_iter):
             # Each iteration launches num_cpu tasks
+            processes = []
             for k in range(num_cpu):
                 move_type = next(types_cycle)
-                subprocess.run(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs", self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)])
+                #subprocess.run(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs", self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)])
+                processes.append(Popen([["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs",             self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)]))
             
+            for p in processes:
+                p.wait()
         
         
-        # For each task, execute the system call usin taskset
-        #   Each task must create the episode, select states to save, tag them and save them
-        #     This includes loading the current model
         
           
         print(f"Time taken: {round(time.perf_counter() - start,2)}")
