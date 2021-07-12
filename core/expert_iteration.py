@@ -144,7 +144,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
 
     # ******************* PLAY EPISODE ***************************
     episode = play_episode(root, max_depth, apprentice, move_type = move_type, verbose = verbose)
-    if verbose: print(f"\t\tPlay episode: Done, {len(episodes)} states in episode")
+    
     # ******************* SELECT STATES ***************************
     # Take some states from episode    
     try:
@@ -156,7 +156,8 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
         states_to_save = np.random.choice(options, min(saved_states_per_episode, len(options)), replace=False)
     except Exception as e:
         raise e
-        
+    
+    if verbose: print(f"\t\tSelf-play done: move_type = {move_type}, {states_to_save} states to save")
     return states_to_save
 
 
