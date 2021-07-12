@@ -17,7 +17,7 @@
   "expert_params": {
       "max_depth": 100,
       "num_MCTS_sims": 500,
-      "sims_per_eval": 2
+      "sims_per_eval": 2,
       "wa": 10,
       "wb": 10,
       "cb": 1.414,
