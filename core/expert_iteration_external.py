@@ -125,24 +125,15 @@ if __name__ == '__main__':
             # Each iteration launches num_cpu tasks
             misc.print_and_flush(f"\ Inner iter {j} of {num_iter}")
             processes = []
-            timers = []
+            
             for k in range(num_cpu):
                 move_type = next(types_cycle)
                 #subprocess.run(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs", self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)])
                 processes.append(Popen(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs",             self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)]))
             
             for p in processes:
-                timers.append(Timer(max_seconds_process, p.kill))
+                p.wait(timeout = max_seconds_process)
             
-            for p, t in zip(processes, timers):
-                try:
-                    t.start()
-                    stdout, stderr = p.communicate()
-                except Exception as e:
-                    raise(e)
-                
-                finally:
-                    t.cancel()
         
         
         
