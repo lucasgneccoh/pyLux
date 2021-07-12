@@ -699,15 +699,16 @@ class UCTPlayer(Agent):
 
     
 class MctsApprentice(object):
-    def __init__(self, num_MCTS_sims = 1000, temp=1, max_depth=100): 
+    def __init__(self, num_MCTS_sims = 1000, sims_per_eval = 1, temp=1, max_depth=100): 
         self.max_depth = max_depth
-        self.num_MCTS_sims = num_MCTS_sims
-        self.apprentice = UCT(num_MCTS_sims=num_MCTS_sims, max_depth=max_depth)
+        self.num_MCTS_sims = num_MCTS_sims        
         self.temp = temp
+        self.sims_per_eval = sims_per_eval
+        self.apprentice = UCT(num_MCTS_sims=num_MCTS_sims, max_depth=max_depth, sims_per_eval = sims_per_eval)
         
     def play(self, state):
         # Restart tree
-        self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth)
+        self.apprentice = UCT(num_MCTS_sims=self.num_MCTS_sims, max_depth=self.max_depth, sims_per_eval = self.sims_per_eval)
         bestAction, bestValue, _, _ = self.apprentice.getBestAction(state, state.activePlayer.code)
         return bestAction, bestValue
     
