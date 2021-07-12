@@ -6,7 +6,7 @@
   "max_depth": 100,
   "saved_states_per_episode": 4,
   "initial_apprentice_mcts_sims": 100,
-  "expert_mcts_sims": 100,
+  "expert_mcts_sims": 60,
   "path_data": "../data",
   "path_model": "../data/models",
   "batch_size": 4,
