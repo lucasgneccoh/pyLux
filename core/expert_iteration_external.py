@@ -80,13 +80,7 @@ if __name__ == '__main__':
     
     for i in range(iterations):
     
-        print(f"Starting iteration {i+1}")
-       
-        state = copy.deepcopy(board_orig)
-        state.initialPhase = True
-        state.pickInitialCountries = True
-        
-        
+        print(f"Starting iteration {i+1}")                
         ##### 1. Self play
         
         print("Parallel self-play and tagging")
