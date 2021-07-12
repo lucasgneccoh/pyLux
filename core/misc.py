@@ -18,6 +18,10 @@ def print_message_over(message):
     sys.stdout.write('\r{0}'.format(message))
     sys.stdout.flush()
     
+def print_and_flush(message):
+    sys.stdout.write(message)
+    sys.stdout.flush()
+    
 def read_json(path):
     with open(path, 'r') as f:
         data = json.load(f)
