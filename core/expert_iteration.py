@@ -39,6 +39,7 @@ def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
   parser.add_argument("--verbose", help="Print on the console?", default = "False")
+  parser.add_argument("--parallel", help="Do on parallel", default = "True")
   args = parser.parse_args()
   return args
   
@@ -279,6 +280,7 @@ if __name__ == '__main__':
     args = parseInputs()
     inputs = read_json(args.inputs)
     verbose = bool(args.verbose)
+    paralell = bool(args.paralell)
 
 
     iterations = inputs["iterations"]
@@ -412,20 +414,20 @@ if __name__ == '__main__':
             print(f"\t\tIter {j+1} of {num_iter}. Number of processes: {num_cpu}")
             
             # Parallel
-            """
-            aux = parmap(f, types, nprocs=num_cpu) 
-            for a in aux:
-                for s in a[1]:
-                    states_to_save.append(s) # parmap returns this [(i, x)]
-            """
+            if paralell:
+                aux = parmap(f, types, nprocs=num_cpu) 
+                for a in aux:
+                    for s in a[1]:
+                        states_to_save.append(s) # parmap returns this [(i, x)]
+            else:
             
-            # Sequential (parallel is only working for the first iteration)
-            for t in types:
-                if verbose: print(f"\t\tSequential self play: {t}")
-                aux = create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth,
-                                      saved_states_per_episode= saved_states_per_episode, verbose = verbose)
-                
-                states_to_save.extend(aux)
+                # Sequential (parallel is only working for the first iteration)
+                for t in types:
+                    if verbose: print(f"\t\tSequential self play: {t}")
+                    aux = create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth,
+                                          saved_states_per_episode= saved_states_per_episode, verbose = verbose)
+                    
+                    states_to_save.extend(aux)
         
         
         # Tag the states   
@@ -435,17 +437,17 @@ if __name__ == '__main__':
         print(f"\tTag the states ({len(states_to_save)} states to tag)")  
         
         # Parallel
-        """
-        f = lambda state: tag_with_expert_move(state, expert, verbose=verbose)
-        aux = parmap(f, states_to_save, nprocs=num_cpu)
-        tagged = [a[1] for a in aux]        
-        """
-        
-        # Sequential (parallel is only working for the first iteration)
-        tagged = []
-        for st in states_to_save:
-            t = tag_with_expert_move(st, expert, verbose=verbose)
-            tagged.append(t)
+        if paralell:
+            f = lambda state: tag_with_expert_move(state, expert, verbose=verbose)
+            aux = parmap(f, states_to_save, nprocs=num_cpu)
+            tagged = [a[1] for a in aux]        
+
+        else:
+            # Sequential (parallel is only working for the first iteration)
+            tagged = []
+            for st in states_to_save:
+                t = tag_with_expert_move(st, expert, verbose=verbose)
+                tagged.append(t)
           
         
         
