@@ -99,7 +99,7 @@ if __name__ == '__main__':
           "max_episode_depth": inputs["max_episode_depth"]          
         }
         self_play_input_json = os.path.join(params_path, self_play_tag) + ".json"
-        misc.write_json(input_dict, os.path.join(params_path, self_play_tag))
+        misc.write_json(input_dict, os.path.join(params_path, self_play_tag) + ".json")
 
         print(f"Running {num_iter} iterations, each of {num_cpu} tasks")
         for j in range(num_iter):
