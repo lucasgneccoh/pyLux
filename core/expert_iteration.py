@@ -395,7 +395,7 @@ if __name__ == '__main__':
         # Play the games
         print("\tPlay the games")        
                 
-        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose) # CAMBIAR       
+        f = lambda t: create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose)
         # num_samples = iterations * num_cpu * saved_states_per_episode
         num_iter = max (num_samples // (num_cpu * saved_states_per_episode), 1)
         states_to_save = []
@@ -405,10 +405,22 @@ if __name__ == '__main__':
             for _ in range(num_cpu):
                 types.append(next(types_cycle))
             print(f"\t\tIter {j+1} of {num_iter}. Number of processes: {num_cpu}")
+            
+            # Parallel
+            """
             aux = parmap(f, types, nprocs=num_cpu) 
             for a in aux:
                 for s in a[1]:
                     states_to_save.append(s) # parmap returns this [(i, x)]
+            """
+            
+            # Sequential (parallel is only working for the first iteration)
+            for t in types:
+                if verbose: print(f"\t\tSequential self play: {t}")
+                aux = create_self_play_data(t, path_data, state, apprentice, max_depth = max_depth,
+                                      saved_states_per_episode= saved_states_per_episode, verbose = verbose)
+                
+                states_to_save.extend(aux)
         
         
         # Tag the states   
