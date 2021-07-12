@@ -86,7 +86,7 @@ if __name__ == '__main__':
                                     
     print("done")
     
-    print("\n\n")
+    
     
     # Calculate number of tasks of self-play
     # Here, we launch num_cpu tasks, so it all comes down to calculate the number of iterations
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     
     for i in range(iterations):
     
-        print(f"Starting iteration {i+1}")                
+        print(f"\n********* Starting iteration {i+1} *********") 
         ##### 1. Self play
         
         print("Parallel self-play and tagging")
