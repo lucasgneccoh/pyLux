@@ -280,7 +280,7 @@ if __name__ == '__main__':
     args = parseInputs()
     inputs = read_json(args.inputs)
     verbose = bool(args.verbose)
-    paralell = bool(args.paralell)
+    parallel = bool(args.parallel)
 
 
     iterations = inputs["iterations"]
@@ -414,7 +414,7 @@ if __name__ == '__main__':
             print(f"\t\tIter {j+1} of {num_iter}. Number of processes: {num_cpu}")
             
             # Parallel
-            if paralell:
+            if parallel:
                 aux = parmap(f, types, nprocs=num_cpu) 
                 for a in aux:
                     for s in a[1]:
@@ -437,7 +437,7 @@ if __name__ == '__main__':
         print(f"\tTag the states ({len(states_to_save)} states to tag)")  
         
         # Parallel
-        if paralell:
+        if parallel:
             f = lambda state: tag_with_expert_move(state, expert, verbose=verbose)
             aux = parmap(f, states_to_save, nprocs=num_cpu)
             tagged = [a[1] for a in aux]        
