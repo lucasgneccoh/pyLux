@@ -342,6 +342,9 @@ if __name__ == '__main__':
     print("Defining expert")
     # build expert
     expert = build_expert_mcts(None) # Start with only MCTS with no inner apprentice
+    
+    expert = build_expert_mcts(agent.NetApprentice(net)) # Test the network # CAMBIAR
+    
     expert.num_MCTS_sims = expert_mcts_sims
                          
     print("Creating data folders")
