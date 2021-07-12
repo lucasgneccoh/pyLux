@@ -806,7 +806,9 @@ class PUCT(object):
         if self.console_debug: print(f"OnLeaf: State {state.board_id} ({s})")
         if self.console_debug: print(f"OnLeaf: Found this actions to expand {moves}")
         
-        
+        if not isinstance(policy, torch.Tensor):
+            policy = torch.Tensor(policy)
+            
         policy = policy * mask
         self.Vs[s], self.As[s] = mask.squeeze().detach().numpy(), moves
         self.Ps[s] = policy.squeeze().detach().numpy()
