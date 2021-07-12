@@ -166,6 +166,7 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
     # Tag one state with the expert move
     # TODO: expert can be done in parallel?    
     
+    start = time.perf_counter()
     _, _, value_exp, Q_value_exp = expert.getBestAction(state, player = state.activePlayer.code, num_sims = None, verbose=False)
     policy_exp = expert.getVisitCount(state, temp=temp)
     
@@ -174,7 +175,7 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
     if isinstance(value_exp, torch.Tensor):
         value_exp = value_exp.detach().numpy()
     
-    if verbose: print(f"\t\tTag with expert: Tagged board {state.board_id}")
+    if verbose: print(f"\t\tTag with expert: Tagged board {state.board_id} ({state.gamePhase}). {time.perf_counter() - start} sec")
     
     return state, policy_exp, value_exp
     
