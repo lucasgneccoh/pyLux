@@ -98,10 +98,9 @@ if __name__ == '__main__':
           "expert_params": expert_params,          
           "path_data": path_data,
           "path_model": path_model,
-          "model_parameters": inputs["model_parameters"]
-          "board_params": board_params
-          "max_episode_depth": inputs["max_episode_depth"]
-          
+          "model_parameters": inputs["model_parameters"],
+          "board_params": board_params,
+          "max_episode_depth": inputs["max_episode_depth"]          
         }
         self_play_input_json = os.path.join(params_path, self_play_tag, 'json')
         misc.write_json(input_dict, os.path.join(params_path, self_play_tag))
@@ -111,7 +110,7 @@ if __name__ == '__main__':
             # Each iteration launches num_cpu tasks
             for k in range(num_cpu):
                 move_type = next(types_cycle)
-                subprocess.run["python_command", f"{self_play_tag}.py", f"--inputs {self_play_input_json}", f"--move_type {move_type}", f"--verbose {verbose}"]
+                subprocess.run[f"taskset -c {k}", python_command, f"{self_play_tag}.py", f"--inputs {self_play_input_json}", f"--move_type {move_type}", f"--verbose {verbose}"]
             
         
         
