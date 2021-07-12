@@ -2,21 +2,21 @@
   "python_command": "python3",
   "params_path": "../support/exp_iter_inputs",
   "iterations": 10,
-  "num_samples": 1000,
-  "num_cpu": 100,  
+  "num_samples": 32,
+  "num_cpu": 16,  
   "saved_states_per_episode": 2,  
-  "max_episode_depth": 100,
+  "max_episode_depth": 200,
   "apprentice_params": {
       "type": "mcts",
       "model_name": "",
       "max_depth": 200,
-      "num_MCTS_sims": 1000,
+      "num_MCTS_sims": 50,
       "temp": 1,
-      "sims_per_eval": 2
+      "sims_per_eval": 1
   },
   "expert_params": {
       "max_depth": 200,
-      "num_MCTS_sims": 10000,
+      "num_MCTS_sims": 100,
       "sims_per_eval": 1,
       "wa": 10,
       "wb": 10,
