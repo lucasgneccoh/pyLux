@@ -145,15 +145,17 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
         print(f"\t\tSelf-play starting")
         sys.stdout.flush()
     
-    edge_index = boardToData(root).edge_index    
-
-    # ******************* PLAY EPISODE ***************************
-    episode = play_episode(root, max_depth, apprentice, move_type = move_type, verbose = verbose)
     
-    # ******************* SELECT STATES ***************************
-    # Take some states from episode    
     try:
         # Define here how many states to select, and how
+        edge_index = boardToData(root).edge_index    
+
+        # ******************* PLAY EPISODE ***************************
+        episode = play_episode(root, max_depth, apprentice, move_type = move_type, verbose = verbose)
+        
+        # ******************* SELECT STATES ***************************
+        # Take some states from episode    
+        
         options = [s for s in episode if s.gamePhase == move_type]
         if not options:
             # TODO: What to do in this case? For now just take some random states to avoid wasting the episode
