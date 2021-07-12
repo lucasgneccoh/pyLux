@@ -38,8 +38,8 @@ import time
 def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
-  parser.add_argument("--verbose", help="Print on the console?", default = "False")
-  parser.add_argument("--parallel", help="Do on parallel", default = "True")
+  parser.add_argument("--verbose", help="Print on the console?", type=int, default = 0)
+  parser.add_argument("--parallel", help="Do on parallel", type=int, default = 1)
   args = parser.parse_args()
   return args
   
