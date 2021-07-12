@@ -38,6 +38,7 @@ import time
 def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
+  parser.add_argument("--verbose", help="Print on the console?", default = "False")
   args = parser.parse_args()
   return args
   
@@ -96,10 +97,11 @@ def play_episode(root, max_depth, apprentice, verbose=False):
         probs =  probs / probs.sum()
 
         # Random selection? e-greedy?
-        if verbose: print(f"\t\tPlay episode: probs = {probs}")
+        
         ind = np.random.choice(range(len(actions)), p = probs)
         move = agent.buildMove(state, actions[ind])
-        if verbose: print(f"\t\tPlay episode: move = {move}")
+        
+        if verbose: print(f"\t\tPlay episode: turn {i}, move = {move}")
         
         episode.append(copy.deepcopy(state))
 
@@ -267,6 +269,7 @@ if __name__ == '__main__':
     print("Parsing args")
     args = parseInputs()
     inputs = read_json(args.inputs)
+    verbose = bool(args.verbose)
 
 
     iterations = inputs["iterations"]
