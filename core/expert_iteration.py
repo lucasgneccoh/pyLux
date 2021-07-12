@@ -288,6 +288,9 @@ def build_expert_mcts(apprentice):
     return agent.PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
                  wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False)
 
+def aux_par_create_selp_play(args):
+    return create_self_play_data(args.move_type, args.path_data, args.state, args.apprentice, max_depth = args.max_depth, saved_states_per_episode=args.saved_states_per_episode, verbose = args.verbose)
+
 if __name__ == '__main__':
     # ---------------- Start -------------------------
     print("Parsing args")
@@ -426,9 +429,13 @@ if __name__ == '__main__':
         states_to_save = []
         
         for j in range(num_iter):
-            types=[]
+            args_list=[]
             for _ in range(num_cpu):
-                types.append(next(types_cycle))
+                args_list.append({"move_type":next(types_cycle), "path_data":path_data, "state":state,
+                "apprentice":apprentice, "max_depth":max_depth, 
+                "saved_states_per_episode":saved_states_per_episode, 
+                "verbose":verbose })
+            
             print(f"\t\tIter {j+1} of {num_iter}. Number of processes: {num_cpu}")
             
             # Parallel
@@ -441,7 +448,7 @@ if __name__ == '__main__':
                         states_to_save.append(s) # parmap returns this [(i, x)]
                 """
                 with Pool(processes=num_cpu) as pool:
-                    res = pool.map(f, types)
+                    res = pool.map(f, args_list)
                     print(len(res))
                     print(res)
                 break
