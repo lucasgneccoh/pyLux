@@ -281,6 +281,11 @@ if __name__ == '__main__':
     inputs = read_json(args.inputs)
     verbose = bool(args.verbose)
     parallel = bool(args.parallel)
+    
+    print("ARGS:")
+    print(f"verbose: {verbose}")
+    print(f"parallel: {parallel}")
+    
 
 
     iterations = inputs["iterations"]
