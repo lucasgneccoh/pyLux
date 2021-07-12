@@ -339,7 +339,7 @@ if __name__ == '__main__':
     print("Defining apprentice")
     # Define initial apprentice
     apprentice = agent.MctsApprentice(num_MCTS_sims = initial_apprentice_mcts_sims, temp=1, max_depth=max_depth)
-    # apprentice = agent.NetApprentice(net) # Test the net apprentice # CAMBIAR
+    apprentice = agent.NetApprentice(net) # Test the net apprentice # CAMBIAR
 
 
     print("Defining expert")
