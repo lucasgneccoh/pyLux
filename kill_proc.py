@@ -39,7 +39,7 @@ while col and filt:
 
 
 # Filter the table
-for col, filt in zip(cols, filts)
+for col, filt in zip(cols, filts):
     # Get column index
     ind = get_col_index(table.columns, col)
     if ind is None: 
