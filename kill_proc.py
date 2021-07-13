@@ -14,6 +14,8 @@ def parseInputs():
 args = parseInputs()
 
 # Read the file
-table = pd.read_fwf(args.proc)
+table = pd.read_fwf(args.proc, infer_nrows=1)
 
 print(table)
+
+cont = input("Is this table correct? Check for columns. There must be at least one column named PID, and optional columns include USER and CMD
