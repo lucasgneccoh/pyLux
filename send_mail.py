@@ -17,11 +17,10 @@ pwd = os.getcwd()
 
 body = args.body if "body" in args else "This mail was sent using Linux and python"
 subj = f' -s "{args.subject}"' if "subject" in args else ""
-attach = ' ' + ' '.join([f'-A {os.path.join(pwd,s)}' for s in args.attach]) if "attach" in args else ""
+# files must be in the pwd
+attach = ' ' + ' '.join([f'-A {s}' for s in args.attach]) if "attach" in args else ""
 
 command = f'echo "{body}" | mail{subj}{attach} {args.to}'
-
-print(command)
 
 tmp_file_name = "tmp_file_mail.sh"
 
