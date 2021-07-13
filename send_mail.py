@@ -4,10 +4,9 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import subprocess
 
 def parseInputs():
-    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--file", help="File containing the body of the message")
-    parser.add_argument("--message", help="If body the body of the message is not on a file, then write the message here")
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)        
     parser.add_argument("--subject", help="Subject of the message")
+    parser.add_argument("--attach", help="Files to attach", nargs="*")
     parser.add_argument("--to", help="Destinataries of the message", required = True)
     args = parser.parse_args()
     return args 
@@ -15,23 +14,20 @@ def parseInputs():
 args = parseInputs()
 pwd = os.getcwd()
 
-if "file" in args:
-    cmd = "cat"
+if "attach" in args:    
     # Assuming the entered path is realtive to the current wd
     msg = os.path.join(pwd, args.file)
-else:
-    if "message" in args:
-        cmd = "echo"
-        msg = args.message
-    else:
-        print("Arguments 'file' or 'message' must be given")
-        sys.exit(1)
 
+
+body = "This mail was sent using Linux and python"
 subj = f' -s "{args.subject}"' if "subject" in args else ""
+attach = ' '.join([f'-a {os.path.join(pwd,s)}' for s in args.attach]) if "attach" in args else ""
 
+print("attach: ", attach)
     
+sys.exit(1)
 
-command = f'{cmd} {msg} | mail{subj} {args.to}'
+command = f'{cmd} {msg} | mail{subj}{attach} {args.to}'
 
 tmp_file_name = "tmp_file_mail.sh"
 
