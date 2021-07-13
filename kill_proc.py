@@ -31,7 +31,7 @@ if cont.lower() != "y":
 col, filt = "***", "***"
 cols, filts = [], []
 while col and filt:
-    print("Enter information for filtering. Leave empty to quit")
+    print("\n *** Enter information for filtering. Leave empty to quit")
     col = input("Enter the column name (or part of it) to apply a filter:  ")
     filt = input(f"Enter the value to be looked for in the column '{col}':  ")
     if col and filt:
@@ -66,9 +66,11 @@ if ind is None:
     print("WARNING: Could not find column PID")
     sys.exit(0)
 
-pids = table.loc[:, ind]
+col_name = table.columns[ind]
+pids = table.loc[:, col_name]
 
 for pid in pids:
+    print(f"Killing {str(pid)}")
     subprocess.call(['kill', str(pid)])
     
 print("Done")
