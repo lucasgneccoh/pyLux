@@ -1,6 +1,7 @@
 import sys
 import pandas as pd
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import subprocess
 
 def parseInputs():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
@@ -31,8 +32,8 @@ col, filt = "***", "***"
 cols, filts = [], []
 while col and filt:
     print("Enter information for filtering. Leave empty to quit")
-    col = input("Enter the column name (or part of it) to apply a filter")
-    filt = input(f"Enter the value to be looked for in the column '{col}'")
+    col = input("Enter the column name (or part of it) to apply a filter:  ")
+    filt = input(f"Enter the value to be looked for in the column '{col}':  ")
     if col and filt:
         cols.append(col)
         filts.append(filt)
@@ -53,12 +54,23 @@ print("\nThis is the resulting table")
 print()
 print(table)
 
-cont = input("Do you wish to kill all these processes? (y/n)")
+cont = input("Do you wish to kill all these processes? (y/n):  ")
 
 if cont.lower() != "y":
     sys.exit(0)
 
 # Kill them
-print("Kill processes here")
+print("Killing processes")
+ind = get_col_index(table.columns, "PID")
+if ind is None:
+    print("WARNING: Could not find column PID")
+    sys.exit(0)
+
+pids = table.loc[:, ind]
+
+for pid in pids:
+    subprocess.call(['kill', str(pid)])
+    
+print("Done")
 
 
