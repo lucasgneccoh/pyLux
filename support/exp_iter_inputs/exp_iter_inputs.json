@@ -1,6 +1,6 @@
 {
   "python_command": "python3",
-  "max_seconds_process": 30,
+  "max_seconds_process": 70,
   "params_path": "../support/exp_iter_inputs",
   "iterations": 10,
   "num_samples": 32,
