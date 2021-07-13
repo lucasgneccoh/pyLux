@@ -39,6 +39,6 @@ with open(tmp_file_name, "w") as f:
 
 pwd = os.getcwd()
 
-subprocess.run(["ssh", "-p", "5022", "lgnecco@lamgate4", "'bash -s'", "<", os.path.join(pwd,tmp_file_name)])
+subprocess.run(["ssh", "-p", "5022", "lgnecco@lamgate4", "bash", "-s", "<", os.path.join(pwd,tmp_file_name)])
 
 print("Done")
