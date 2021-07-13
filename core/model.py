@@ -31,10 +31,14 @@ def save_checkpoint(path, epoch, model, optimizer, scheduler=None, other={}):
     torch.save(state_dict, path)
 
 def load_checkpoint(load_path, model, optimizer, device):
-    state_dict = torch.load(load_path, map_location=device)
-    model.load_state_dict(state_dict['model'])
-    optimizer.load_state_dict(state_dict['optimizer'])
-    return state_dict
+    try:
+        state_dict = torch.load(load_path, map_location=device)
+        model.load_state_dict(state_dict['model'])
+        optimizer.load_state_dict(state_dict['optimizer'])
+        return state_dict
+    except Exception as e:
+        print(f"Error while opening {load_path}")
+        raise e
 
 def save_dict(save_path, state_dict):
     torch.save(state_dict, save_path)
