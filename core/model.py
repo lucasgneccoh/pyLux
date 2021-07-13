@@ -403,7 +403,7 @@ def train_model(model, optimizer, scheduler, criterion, device, epochs,
     '''
     # Load model if load_path is given
     if not load_path is None:
-        state_dict = load_dict(load_path, device)
+        state_dict = load_dict(load_path, device, encoding = 'latin1')
         model.load_state_dict(state_dict['model'])
         optimizer.load_state_dict(state_dict['optimizer'])
         scheduler.load_state_dict(state_dict['scheduler'])
