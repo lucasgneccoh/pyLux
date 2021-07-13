@@ -1,4 +1,5 @@
 import sys
+import os
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import subprocess
 
@@ -36,6 +37,9 @@ with open(tmp_file_name, "w") as f:
     f.write(command)
     f.close()
 
-subprocess.run(["ssh", "-p", "5022", "lgnecco@lamgate4", "'bash -s'", "<", tmp_file_name])
+pwd = os.getcwd()
+print(pwd)
+
+#subprocess.run(["ssh", "-p", "5022", "lgnecco@lamgate4", "'bash -s'", "<", tmp_file_name])
 
 print("Done")
