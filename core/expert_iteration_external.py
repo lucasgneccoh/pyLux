@@ -123,7 +123,7 @@ if __name__ == '__main__':
         misc.print_and_flush(f"Running {num_iter} iterations, each of {num_cpu} tasks")
         for j in range(num_iter):
             # Each iteration launches num_cpu tasks
-            misc.print_and_flush(f"\ Inner iter {j} of {num_iter}")
+            misc.print_and_flush(f"\tInner iter {j+1} of {num_iter}")
             processes = []
             
             for k in range(num_cpu):
