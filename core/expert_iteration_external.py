@@ -131,8 +131,11 @@ if __name__ == '__main__':
                 #subprocess.run(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs", self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)])
                 processes.append(Popen(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs",             self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)]))
             
-            for p in processes:
-                p.wait(timeout = max_seconds_process)
+            for k, p in enumerate(processes):
+                try:
+                    p.wait(timeout = max_seconds_process)
+                except Exception as e:
+                    print(f"Process {k} did not finish on time")
             
         
         
