@@ -136,7 +136,7 @@ if __name__ == '__main__':
                 for k, p in processes:
                     if p.poll() is not None: # process ended
                         print(f"Process {k} finished") 
-                        processes.remove(p)
+                        processes.remove((k, p))
                 # Check timer
                 if time.perf_counter() - timer_start > max_seconds_process:
                     print("*** TIMEOUT: Killing all remaining processes")
