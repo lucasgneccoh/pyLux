@@ -14,6 +14,6 @@ def parseInputs():
 args = parseInputs()
 
 # Read the file
-table = pd.read_table(args.proc)
+table = pd.read_fwf(args.proc)
 
 print(table)
