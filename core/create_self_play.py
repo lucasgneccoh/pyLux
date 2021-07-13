@@ -155,7 +155,7 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
     return state, policy_exp, value_exp
     
 
-def simple_save_state(root_path, state, policy, value, verbose=False):
+def simple_save_state(root_path, state, policy, value, verbose=False, num_task=0):
     try:
         board, _ = state.toCanonical(state.activePlayer.code)
         phase = board.gamePhase
@@ -165,6 +165,7 @@ def simple_save_state(root_path, state, policy, value, verbose=False):
         while os.path.exists(os.path.join(full_path, name)):
             num += 1
             name = f"board_{num}.json"
+        name = f"board_{num}_{num_task}.json" # Always different
         saveBoardObs(full_path, name,
                             board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
         if verbose: 
@@ -298,7 +299,7 @@ if __name__ == '__main__':
     if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Tag the states ({len(states_to_save)} states to tag)")      
     for st in states_to_save:
         st_tagged, policy_exp, value_exp = tag_with_expert_move(st, expert, temp=expert_params["temp"], verbose=verbose)
-        res = simple_save_state(path_data, st_tagged, policy_exp, value_exp, verbose=verbose)
+        res = simple_save_state(path_data, st_tagged, policy_exp, value_exp, verbose=verbose, num_task=num_task)
     if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Tag and save: Time taken -> {round(time.process_time() - start_inner,2)}")
     
         
