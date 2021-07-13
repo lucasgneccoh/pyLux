@@ -5,8 +5,8 @@ import subprocess
 
 def parseInputs():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)        
-    parser.add_argument("--subject", help="Subject of the message")
-    parser.add_argument("--attach", help="Files to attach", nargs="*")
+    parser.add_argument("--subject", "-s", help="Subject of the message")
+    parser.add_argument("--attach", "-a", help="Files to attach", nargs="*")
     parser.add_argument("--to", help="Destinataries of the message", required = True)
     args = parser.parse_args()
     return args 
@@ -14,9 +14,6 @@ def parseInputs():
 args = parseInputs()
 pwd = os.getcwd()
 
-if "attach" in args:    
-    # Assuming the entered path is realtive to the current wd
-    msg = os.path.join(pwd, args.file)
 
 
 body = "This mail was sent using Linux and python"
