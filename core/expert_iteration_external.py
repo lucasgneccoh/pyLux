@@ -129,24 +129,23 @@ if __name__ == '__main__':
             for k in range(num_cpu):
                 move_type = next(types_cycle)
                 #subprocess.run(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs", self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)])
-                processes.append(Popen(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs",             self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)]))
+                processes.append((k, Popen(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs",             self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)])))
             
-            for k, p in enumerate(processes):
-                try:
-                    code = p.wait(timeout = max_seconds_process)
-                except Exception as e:
-                    print(f"Process {k} did not finish on time")
-                    p.kill()
-                    code = -1
-                finally:
-                    print(f"Process {k}, code = {code}")
-                
-                
-                
-            
-        
-        
-        
+            timer_start = time.perf_counter()
+            while processes:                
+                for k, p in processes:
+                    if p.poll() is not None: # process ended
+                        print(f"Process {k} finished") 
+                        processes.remove(p)
+                # Check timer
+                if time.perf_counter() - timer_start > max_seconds_process:
+                    print("*** TIMEOUT: Killing all remaining processes")
+                    for k, p in processes:
+                        print(f"*** TIMEOUT: Killing {k}")
+                        p.kill()
+                    processes = []
+                        
+              
           
         print(f"Time taken: {round(time.perf_counter() - start,2)}")
     
