@@ -7,6 +7,7 @@ def parseInputs():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)        
     parser.add_argument("--subject", "-s", help="Subject of the message")
     parser.add_argument("--attach", "-a", help="Files to attach", nargs="*")
+    parser.add_argument("--body", "-b", help="Body of the email")
     parser.add_argument("--to", help="Destinataries of the message", required = True)
     args = parser.parse_args()
     return args 
@@ -14,11 +15,9 @@ def parseInputs():
 args = parseInputs()
 pwd = os.getcwd()
 
-
-
-body = "This mail was sent using Linux and python"
+body = args.body if "body" in args "This mail was sent using Linux and python"
 subj = f' -s "{args.subject}"' if "subject" in args else ""
-attach = ' ' + ' '.join([f'-a {os.path.join(pwd,s)}' for s in args.attach]) if "attach" in args else ""
+attach = ' ' + ' '.join([f'-A {os.path.join(pwd,s)}' for s in args.attach]) if "attach" in args else ""
 
 command = f'echo "{body}" | mail{subj}{attach} {args.to}'
 
@@ -33,5 +32,7 @@ with open(tmp_file_name, "w") as f:
 
 
 subprocess.run(["ssh", "-p", "5022", "lgnecco@lamgate4", "bash", "-s", "<", os.path.join(pwd,tmp_file_name)])
+
+os.remove(tmp_file_name)
 
 print("Done")
