@@ -104,7 +104,7 @@ if __name__ == '__main__':
         ##### 1. Self play
         
         print("Parallel self-play and tagging")
-        start = time.perf_counter()
+        start = time.process_time()
         
         # Create json file with inputs for the self play tasks
         input_dict = {
@@ -131,14 +131,14 @@ if __name__ == '__main__':
                 #subprocess.run(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs", self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)])
                 processes.append((k, Popen(["taskset", "-c", str(k), python_command, f"{self_play_tag}.py", "--inputs",             self_play_input_json, "--move_type", move_type, "--verbose", str(verbose), "--num_task", str(k)])))
             
-            timer_start = time.perf_counter()
+            timer_start = time.process_time()
             while processes:                
                 for k, p in processes:
                     if p.poll() is not None: # process ended
                         print(f"Process {k} finished") 
                         processes.remove((k, p))
                 # Check timer
-                if time.perf_counter() - timer_start > max_seconds_process:
+                if time.process_time() - timer_start > max_seconds_process:
                     print(f"*** TIMEOUT: Killing all remaining processes ({len(processes)})")
                     for k, p in processes: 
                         p.kill()
@@ -146,10 +146,10 @@ if __name__ == '__main__':
                         
               
           
-        print(f"Time taken: {round(time.perf_counter() - start,2)}")
+        print(f"Time taken: {round(time.process_time() - start,2)}")
     
         ##### 2. Train network on dataset
-        start = time.perf_counter()
+        start = time.process_time()
         print("Training network")
         
         # Create the input file
@@ -171,6 +171,6 @@ if __name__ == '__main__':
         subprocess.run([python_command, f"{train_apprentice_tag}.py", "--inputs", train_input_json, "--iteration", str(i), "--verbose", str(verbose), "--checkpoint", get_last_model(path_model)])
         
         
-        print(f"Time taken: {round(time.perf_counter() - start,2)}")
+        print(f"Time taken: {round(time.process_time() - start,2)}")
         
         ##### 3. Update paths so that new apprentice and expert are used on the next iteration

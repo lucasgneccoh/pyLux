@@ -45,7 +45,7 @@ def parseInputs():
 if __name__ == '__main__':
     # ---------------- Start -------------------------
     misc.print_and_flush(f"train_model: Start")
-    start = time.perf_counter()
+    start = time.process_time()
     
     args = parseInputs()
     inputs = misc.read_json(args.inputs)
@@ -137,5 +137,5 @@ if __name__ == '__main__':
         
         load_path = None # The model is already in memory
 
-    misc.print_and_flush(f"train_model: Total time taken -> {round(time.perf_counter() - start,2)}")
+    misc.print_and_flush(f"train_model: Total time taken -> {round(time.process_time() - start,2)}")
         

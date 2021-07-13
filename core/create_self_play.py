@@ -139,7 +139,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
 
 def tag_with_expert_move(state, expert, temp=1, verbose=False):
     # Tag one state with the expert move    
-    start = time.perf_counter()
+    start = time.process_time()
     _, _, value_exp, Q_value_exp = expert.getBestAction(state, player = state.activePlayer.code, num_sims = None, verbose=False)
     policy_exp = expert.getVisitCount(state, temp=temp)
     
@@ -149,7 +149,7 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
         value_exp = value_exp.detach().numpy()
     
     if verbose: 
-        print(f"\t\tTag with expert: Tagged board {state.board_id} ({state.gamePhase}). {round(time.perf_counter() - start,2)} sec")
+        print(f"\t\tTag with expert: Tagged board {state.board_id} ({state.gamePhase}). {round(time.process_time() - start,2)} sec")
         sys.stdout.flush()
     
     return state, policy_exp, value_exp
@@ -191,7 +191,7 @@ if __name__ == '__main__':
     num_task = args.num_task
     
     misc.print_and_flush(f"create_self_play ({num_task}): Start")
-    start = time.perf_counter()
+    start = time.process_time()
     
     saved_states_per_episode = inputs["saved_states_per_episode"]
     max_episode_depth = inputs["max_episode_depth"]
@@ -281,7 +281,7 @@ if __name__ == '__main__':
                                     
 
     #### START
-    start_inner = time.perf_counter()
+    start_inner = time.process_time()
     
     state = copy.deepcopy(board_orig)    
 
@@ -290,17 +290,17 @@ if __name__ == '__main__':
     
     states_to_save = create_self_play_data(move_type, path_data, state, apprentice, max_depth = max_episode_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose)
 
-    if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Play episode: Time taken: {round(time.perf_counter() - start_inner,2)}")
+    if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Play episode: Time taken: {round(time.process_time() - start_inner,2)}")
     
     
     # Tag the states and save them
-    start_inner = time.perf_counter()
+    start_inner = time.process_time()
     if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Tag the states ({len(states_to_save)} states to tag)")      
     for st in states_to_save:
         st_tagged, policy_exp, value_exp = tag_with_expert_move(st, expert, temp=expert_params["temp"], verbose=verbose)
         res = simple_save_state(path_data, st_tagged, policy_exp, value_exp, verbose=verbose)
-    if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Tag and save: Time taken -> {round(time.perf_counter() - start_inner,2)}")
+    if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Tag and save: Time taken -> {round(time.process_time() - start_inner,2)}")
     
         
-    misc.print_and_flush(f"create_self_play  ({num_task}): Total time taken -> {round(time.perf_counter() - start,2)}")
+    misc.print_and_flush(f"create_self_play  ({num_task}): Total time taken -> {round(time.process_time() - start,2)}")
     
