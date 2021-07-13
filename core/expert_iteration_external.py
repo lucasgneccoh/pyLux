@@ -133,10 +133,16 @@ if __name__ == '__main__':
             
             for k, p in enumerate(processes):
                 try:
-                    p.wait(timeout = max_seconds_process)
+                    code = p.wait(timeout = max_seconds_process)
                 except Exception as e:
                     print(f"Process {k} did not finish on time")
                     p.kill()
+                    code = -1
+                finally:
+                    print(f"Process {k}, code = {code}")
+                
+                
+                
             
         
         
