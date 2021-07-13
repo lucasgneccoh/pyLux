@@ -15,7 +15,7 @@ def parseInputs():
 args = parseInputs()
 pwd = os.getcwd()
 
-body = args.body if "body" in args "This mail was sent using Linux and python"
+body = args.body if "body" in args else "This mail was sent using Linux and python"
 subj = f' -s "{args.subject}"' if "subject" in args else ""
 attach = ' ' + ' '.join([f'-A {os.path.join(pwd,s)}' for s in args.attach]) if "attach" in args else ""
 
