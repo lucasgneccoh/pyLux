@@ -13,10 +13,12 @@ def parseInputs():
     return args 
     
 args = parseInputs()
+pwd = os.getcwd()
 
 if "file" in args:
     cmd = "cat"
-    msg = args.file
+    # Assuming the entered path is realtive to the current wd
+    msg = os.path.join(pwd, args.file)
 else:
     if "message" in args:
         cmd = "echo"
@@ -37,7 +39,7 @@ with open(tmp_file_name, "w") as f:
     f.write(command)
     f.close()
 
-pwd = os.getcwd()
+
 
 subprocess.run(["ssh", "-p", "5022", "lgnecco@lamgate4", "bash", "-s", "<", os.path.join(pwd,tmp_file_name)])
 
