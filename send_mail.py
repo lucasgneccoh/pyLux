@@ -20,7 +20,7 @@ body = "This mail was sent using Linux and python"
 subj = f' -s "{args.subject}"' if "subject" in args else ""
 attach = ' '.join([f'-a {os.path.join(pwd,s)}' for s in args.attach]) if "attach" in args else ""
 
-command = f'{cmd} {msg} | mail{subj}{attach} {args.to}'
+command = f'echo "{body}" | mail{subj}{attach} {args.to}'
 
 print(command)
 
