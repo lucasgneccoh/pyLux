@@ -13,12 +13,38 @@ def parseInputs():
   
 args = parseInputs()
 
-# Read the file
-table = pd.read_fwf(args.proc, infer_nrows=99999)
+# *** Read the file
+
+# First line just to detect the widths
+with open(args.proc, "r") as f:
+    header = f.readline()
+    f.close()
+
+widths = []
+curr = 0
+running = False
+for i, c in enumerate(header):
+    if c!=" ":
+        if not running:            
+            running = True        
+    else:
+        if running:
+            # Arrived to the end
+            widths.append(curr)
+            running = False 
+            curr = 0
+    curr += 1
+
+widths.append(curr)
+print(widths)
+    
+
+# Read the table
+table = pd.read_fwf(args.proc, widths=widths)
 
 print(table)
 
-cont = input("Is this table correct? (y/n) Check for columns. There must be at least one column named PID, other columns are optional")
+cont = input("Is this table correct? (y/n) Check for columns. There must be at least one column named PID, other columns are optional\nYour answer: ")
 
 if cont.lower() == "y":
     print("Continue")
