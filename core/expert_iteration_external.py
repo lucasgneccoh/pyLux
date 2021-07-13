@@ -139,9 +139,8 @@ if __name__ == '__main__':
                         processes.remove((k, p))
                 # Check timer
                 if time.perf_counter() - timer_start > max_seconds_process:
-                    print("*** TIMEOUT: Killing all remaining processes")
-                    for k, p in processes:
-                        print(f"*** TIMEOUT: Killing {k}")
+                    print(f"*** TIMEOUT: Killing all remaining processes ({len(processes)})")
+                    for k, p in processes: 
                         p.kill()
                     processes = []
                         
