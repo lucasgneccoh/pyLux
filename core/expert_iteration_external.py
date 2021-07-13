@@ -136,6 +136,7 @@ if __name__ == '__main__':
                     p.wait(timeout = max_seconds_process)
                 except Exception as e:
                     print(f"Process {k} did not finish on time")
+                    p.kill()
             
         
         
