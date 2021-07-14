@@ -1,14 +1,51 @@
-{"battles":{    
-    "test_peaceful": [
-    {"agent": "PeacefulAgent"},
-    {"agent": "PUCTPlayer"}
-    ],
-    "test_random": [
-    {"agent": "RandomAgent"},
-    {
-    "agent": "PUCTPlayer", 
-    "model_parameters": "../support/model_parameters/model_default_parameters.json",
-    "model_path": "../data/models"}
-    ]
-   }
+{
+  "board_params": {
+        "path_board": "../support/maps/test_map.json",
+        "initialPhase": true,
+        "useCards": true,
+        "transferCards": true, 
+        "immediateCash": true,
+        "continentIncrease": 0.05,
+        "pickInitialCountries": true,
+        "armiesPerTurnInitial": 4,
+        "console_debug" : false
+  },
+  "battles":{    
+      "test_peaceful":{
+        "players": [
+          {
+            "agent": "PeacefulAgent"
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data/models",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500          
+          }
+        ],
+        "num_rounds": 1,
+        "max_turns_per_game": 300
+        
+      },
+      "test_random":{
+        "players": [
+          {
+            "agent": "RandomAgent"
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data/models",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500          
+          }
+        ],
+        "num_rounds": 1,
+        "max_turns_per_game": 300
+        
+      }
+  }
 }

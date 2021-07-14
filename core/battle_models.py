@@ -1,9 +1,9 @@
-
 from board import Board
 from world import World, Country, Continent
 from move import Move
 import agent
 from model import load_checkpoint, GCN_risk
+import misc
 
 import os
 import itertools
@@ -36,44 +36,24 @@ def append_each_field(master, new):
         else:
             master[k] = [v]
     return master
-
-def read_json(path):
-    with open(path, 'r') as f:
-      data = json.load(f)
-    return data
+    
+def parseInputs():
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--inputs", help="Json file containing the inputs for the battles to run", default = "../support/battles/test_battle.json")    
+    args = parser.parse_args()
+    return args 
+    
+def load_puct_player(args):
+    pass
   
 if __name__ == '__main__':
+    
+    args = parseInputs()
+    inputs = misc.read_json(args.inputs)
+    
+    print(inputs)
+    sys.exit(0)
 
-    ##### DEFINE INPUTS HERE
-    battle_name = "test_peaceful"
-    console_debug = True
-    path = '../support/maps/mini_test_map.json'
-    model_parameters_json = "../support/model_parameters/model_default_parameters.json"      
-    
-    # Inputs for players
-    load_model = False 
-    max_depth = 300
-    sims_per_eval = 2
-    num_MCTS_sims = 500
-    
-    # For the game
-    num_rounds = 1
-    max_turns_per_game = 300
-    prefs = {'initialPhase': True, 'useCards':True,
-             'transferCards':True, 'immediateCash': True,
-             'continentIncrease': 0.05, 'pickInitialCountries':True,
-             'armiesPerTurnInitial':4,
-             'console_debug':True}  
-    
-    
-    
-    
-      
-      
-      
-      
-      
-      
     world = World(path)
     
 
