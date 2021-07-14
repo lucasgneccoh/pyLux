@@ -174,3 +174,6 @@ if __name__ == '__main__':
         print(f"Time taken: {round(time.process_time() - start,2)}")
         
         ##### 3. Update paths so that new apprentice and expert are used on the next iteration
+        
+        
+    
