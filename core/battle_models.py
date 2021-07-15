@@ -52,8 +52,9 @@ def parseInputs():
     
 
 def load_puct(board, args):
+    print("load:puct: args: ", args)    
     num_nodes = board.world.map_graph.number_of_nodes()
-    num_edges = board.world.map_graph.number_of_edges()
+    num_edges = board.world.map_graph.number_of_edges()    
     model_args =  misc.read_json(args["model_parameters_json"])
     net = GCN_risk(num_nodes, num_edges, 
                      model_args['board_input_dim'], model_args['global_input_dim'],
