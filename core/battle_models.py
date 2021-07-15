@@ -91,15 +91,15 @@ def battle(args):
     list_players = []
     for i, player_args in enumerate(args["players"]):
         kwargs = removekey(player_args, "agent")
-        if player["agent"] == "RandomAgent":
+        if player_args["agent"] == "RandomAgent":
             list_players.append(agent.RandomAgent(f"Random_{i}"))
-        elif player["agent"] == "PeacefulAgent":
+        elif player_args["agent"] == "PeacefulAgent":
             list_players.append(agent.PeacefulAgent(f"Peaceful_{i}"))
-        elif player["agent"] == "FlatMCPlayer":
+        elif player_args["agent"] == "FlatMCPlayer":
             list_players.append(agent.FlatMCPlayer(name=f'flatMC_{i}', **kwargs))
-        elif player["agent"] == "UCTPlayer":
+        elif player_args["agent"] == "UCTPlayer":
             list_players.append(agent.UCTPlayer(name=f'UCT_{i}', **kwargs))
-        elif player["agent"] == "PUCTPlayer":            
+        elif player_args["agent"] == "PUCTPlayer":            
             board = Board(world, [agent.RandomAgent('Random1'), agent.RandomAgent('Random2')])
             board.setPreferences(board_params)
             puct = load_puct(board, player_args)
