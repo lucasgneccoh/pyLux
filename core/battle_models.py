@@ -105,12 +105,12 @@ def battle(args):
             board.setPreferences(board_params)
             puct = load_puct(board, player_args)
             list_players.append(puct)
-    
-    board = Board(world, list_players)
-    board.setPreferences(board_params)
+            
     M = args["max_turns_per_game"]
     for i in range(args["num_rounds"]):
-        print(f"\t\tRound {i}")
+        board = Board(world, list_players)
+        board.setPreferences(board_params)
+        print(f"\t\tRound {i+1}")
         for j in range(M):
             misc.print_message_over(f"\t\tPlayer {board.activePlayer.name} playing: Turn {j}/{M}")            
             board.play()            
@@ -142,17 +142,14 @@ if __name__ == '__main__':
     battles = inputs["battles"]
           
     
-    # Battle here. Create agent first, then set number of matches and play the games    
-    results = {}
+    # Battle here. Create agent first, then set number of matches and play the games        
     for b_name, b_args in battles.items():
         print(f"Playing battle {b_name}")
         battle_args = dict(b_args)
         battle_args["board_params"] = dict(board_params)
-        res = battle(battle_args)
-        res['b_name'] = b_name
-        results = append_each_field(results, res)
+        res = battle(battle_args)                
         # Write csv with the results
-        csv, path = pd.DataFrame(data = results), f"../support/battles/{b_name}.csv"
+        csv, path = pd.DataFrame(data = res), f"../support/battles/{b_name}.csv"
         csv.to_csv(path)
         print(f"Wrote results to {path}")
         
