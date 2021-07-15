@@ -31,6 +31,11 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import pandas as pd
 
+def removekey(d, key):
+    r = dict(d)
+    del r[key]
+    return r
+
 def append_each_field(master, new):
     for k, v in new.items():
         if k in master:
@@ -45,15 +50,7 @@ def parseInputs():
     args = parser.parse_args()
     return args 
     
-def load_flat(args):
-    return agent.FlatMCPlayer(name='flatMC', max_depth = int(args["max_depth"]),
-            sims_per_eval = int(args["sims_per_eval"]),
-            num_MCTS_sims = int(args["num_MCTS_sims"]), cb = 0)
-    
-def load_uct(args):
-    return agent.UCTPlayer(name='UCT', max_depth = int(args["max_depth"]),
-            sims_per_eval = int(args["sims_per_eval"]),
-            num_MCTS_sims = int(args["num_MCTS_sims"]), cb = float(args["cb"]))
+
 def load_puct(board, args):
     num_nodes = board.world.map_graph.number_of_nodes()
     num_edges = board.world.map_graph.number_of_edges()
@@ -77,22 +74,44 @@ def load_puct(board, args):
 
     apprentice = NetApprentice(net)
              
-    pPUCT = PUCTPlayer(apprentice = apprentice, max_depth = int(args["max_depth"]),
-            sims_per_eval = int(args["sims_per_eval"]),
-            num_MCTS_sims = int(args["num_MCTS_sims"]),
-            wa = float(args["10"]), wb = float(args["10"]), cb = float(args["cb"]),
-            temp = float(args["1"]),
-            use_val = float(args["use_val"])
-            )
+    kwargs = {}
+    for a in ["sims_per_eval", "num_MCTS_sims", "wa", "wb", "cb", "temp", "use_val"]:
+        if a in args: kwargs[a] = args[a]
+    pPUCT = PUCTPlayer(apprentice = apprentice, **kwargs))
 
     
     return pPUCT
     
 def battle(args):
     results = {}
-    # TODO: Finish this function, then go to the main
+    # Create players and board
+    board_params = args["board_params"]
+    world = World(board_params["path_board"])
 
-    return results
+    list_players = []
+    for i, player_args in enumerate(args["players"]):
+        kwargs = removekey(player_args, "agent")
+        if player["agent"] == "RandomAgent":
+            list_players.append(agent.RandomAgent(f"Random_{i}"))
+        elif player["agent"] == "PeacefulAgent":
+            list_players.append(agent.PeacefulAgent(f"Peaceful_{i}"))
+        elif player["agent"] == "FlatMCPlayer":
+            list_players.append(agent.FlatMCPlayer(name=f'flatMC_{i}', **kwargs))
+        elif player["agent"] == "UCTPlayer":
+            list_players.append(agent.UCTPlayer(name=f'UCT_{i}', **kwargs))
+        elif player["agent"] == "PUCTPlayer":            
+            board = Board(world, [agent.RandomAgent('Random1'), agent.RandomAgent('Random2')])
+            board.setPreferences(board_params)
+            puct = load_puct(board, player_args)
+            list_players.append(puct)
+
+    # Baselines            
+    board = Board(world, list_players)
+    board.setPreferences(board_params)
+    
+    board.report()
+    # TODO: FINISH HERE, play the game, get the results
+    return {"num_players": len(board.players), "board_id": board.board_id}
   
 if __name__ == '__main__':
     
@@ -101,65 +120,19 @@ if __name__ == '__main__':
         
     board_params = inputs["board_params"]
     battles = inputs["battles"]
-    
-    world = World(board_params["path_board"])
-    
-    
-
-    ###### Set players  
-    # Baselines
-    pRandom = agent.RandomAgent('Random')
-    pPeaceful = agent.PeacefulAgent('Peaceful')
-    
-    
-    # PUCT Player
-    # Create a board just to obtain information needed to create PUCT player
-    board_orig = Board(world, [pRandom, pPeaceful])
-    board_orig.setPreferences(board_params)
-    
-    
-    
-        
+          
     
     # Battle here. Create agent first, then set number of matches and play the games    
     results = {}
-    for round in range(num_rounds):
-    
-        # First game        
-        p0, p1 = players[0], players[1]
-        board = Board(world, [p0, p1])
-        board.setPreferences(prefs)
+    for b_name, b_args in battles.items():
         
-        # Play
-        for turn in range(max_turns_per_game):
-            board.play()
-            if board.gameOver: break
-        
-        # Get results        
-        res = {"p0": p0.name, "p1": p1.name, "gameOver": board.gameOver,
-              "p0_countries": p0.num_countries, "p0_armies": board.getPlayerArmies(0), "p0_alive": p0.is_alive,
-              "p1_countries": p1.num_countries, "p1_armies": board.getPlayerArmies(1), "p1_alive": p1.is_alive}
-        results = append_each_field(results, res)
-
-        # Second game
-        p0, p1 = players[1], players[0]
-        board = Board(world, [p0, p1])
-        board.setPreferences(prefs)
-        
-        # Play
-        for turn in range(max_turns_per_game):
-            board.play()
-            if board.gameOver: break
-        
-        # Get results        
-        res = {"p0": p0.name, "p1": p1.name, "gameOver": board.gameOver,
-              "p0_countries": p0.num_countries, "p0_armies": board.getPlayerArmies(0), "p0_alive": p0.is_alive,
-              "p1_countries": p1.num_countries, "p1_armies": board.getPlayerArmies(1), "p1_alive": p1.is_alive}
+        res = battle(b_args)
+        res['b_name'] = b_name
         results = append_each_field(results, res)
         
     # Write csv with the results
     csv = pd.DataFrame(data = results)
-    csv.to_csv(f"../support/battles/{battle_name}.csv")
+    csv.to_csv(f"../support/battles/{b_name}.csv")
     print("Battle done")
     
     
