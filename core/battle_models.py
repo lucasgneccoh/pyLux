@@ -118,9 +118,6 @@ if __name__ == '__main__':
     args = parseInputs()
     inputs = misc.read_json(args.inputs)
     
-    print("Inputs")
-    print(inputs)
-    
         
     board_params = inputs["board_params"]
     battles = inputs["battles"]
@@ -131,7 +128,7 @@ if __name__ == '__main__':
     for b_name, b_args in battles.items():
         battle_args = dict(b_args)
         battle_args["board_params"] = dict(board_params)
-        res = battle(b_args)
+        res = battle(battle_args)
         res['b_name'] = b_name
         results = append_each_field(results, res)
         
