@@ -2,7 +2,7 @@ from board import Board
 from world import World, Country, Continent
 from move import Move
 import agent
-from model import load_checkpoint, GCN_risk
+from model import load_checkpoint, GCN_risk, load_dict
 import misc
 
 import os
@@ -54,7 +54,7 @@ def parseInputs():
 def load_puct(board, args):
     num_nodes = board.world.map_graph.number_of_nodes()
     num_edges = board.world.map_graph.number_of_edges()
-    model_args =  read_json(args["model_parameters_json"])
+    model_args =  misc.read_json(args["model_parameters_json"])
     net = GCN_risk(num_nodes, num_edges, 
                      model_args['board_input_dim'], model_args['global_input_dim'],
                      model_args['hidden_global_dim'], model_args['num_global_layers'],
