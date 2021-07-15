@@ -1062,7 +1062,7 @@ class PUCTPlayer(Agent):
                    self.wa, self.wb, self.cb, use_val = self.use_val, console_debug = self.console_debug)
                    
       
-      bestAction, bestValue = self.puct.getBestAction(state, player = self.code, num_sims = None, verbose = state.console_debug)
+      bestAction, bestValue, _, _ = self.puct.getBestAction(state, player = self.code, num_sims = None, verbose = state.console_debug)
       probs = self.puct.getVisitCount(state, temp=self.temp)
       actions = self.puct.As[hash(board)]
       # Use some criterion to choose the move
