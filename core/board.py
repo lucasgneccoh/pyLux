@@ -1063,6 +1063,16 @@ class Board(object):
     '''    
     return self.players[player].num_countries
   
+  def getPlayerContinents(self, player:int)-> int:
+    '''! Return the number of countries a player owns
+    '''    
+    self.updateContinents()    
+    s = 0
+    for i, c in self.world.continents.items():
+      if c.owner == player:
+        s += 1
+    return s
+  
   def getPlayerArmiesInContinent(self, player:int, cont:int)-> int:
     '''! Return the number of armies player has in the given continent
     '''    

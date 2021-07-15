@@ -25,7 +25,7 @@
             "num_MCTS_sims": 500          
           }
         ],
-        "num_rounds": 1,
+        "num_rounds": 5,
         "max_turns_per_game": 300
         
       },
@@ -43,7 +43,7 @@
             "num_MCTS_sims": 500          
           }
         ],
-        "num_rounds": 1,
+        "num_rounds": 5,
         "max_turns_per_game": 300        
       },
       "test_Flat":{
@@ -63,7 +63,7 @@
             "num_MCTS_sims": 500          
           }
         ],
-        "num_rounds": 1,
+        "num_rounds": 5,
         "max_turns_per_game": 300        
       },
       "test_UCT":{
@@ -89,7 +89,7 @@
             "use_val":0
           }
         ],
-        "num_rounds": 1,
+        "num_rounds": 5,
         "max_turns_per_game": 300        
       }
   }

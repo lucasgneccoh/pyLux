@@ -52,7 +52,6 @@ def parseInputs():
     
 
 def load_puct(board, args):
-    print("load:puct: args: ", args)    
     num_nodes = board.world.map_graph.number_of_nodes()
     num_edges = board.world.map_graph.number_of_edges()    
     model_args =  misc.read_json(args["model_parameters_json"])
@@ -85,6 +84,7 @@ def load_puct(board, args):
     
 def battle(args):
     results = {}
+    
     # Create players and board
     board_params = args["board_params"]
     world = World(board_params["path_board"])
@@ -105,15 +105,32 @@ def battle(args):
             board.setPreferences(board_params)
             puct = load_puct(board, player_args)
             list_players.append(puct)
-
-    # Baselines            
+    
     board = Board(world, list_players)
     board.setPreferences(board_params)
     
-    board.report()
-    # TODO: FINISH HERE, play the game, get the results
-    return {"num_players": len(board.players), "board_id": board.board_id}
+    for i in range(args.num_rounds):
+        for j in range(args.max_turns_per_game):
+            board.play()
+            if board.gameOver: break
+        
+        append_each_field(results, {"round": i})
+        for k in board.players:
+            append_each_field(results, player_results(board, k))
+        
+    
+    print(results)
+    return results
   
+def player_results(board, player_code):
+    p = board.players[player_code]
+    c = player_code
+    n = p.name
+    return {f"{n}_armies": board.getPlayerArmies(c),
+            f"{n}_income": board.getPlayerIncome(c),
+            f"{n}_countries": board.getPlayerCountries(c),
+            f"{n}_continents": board.getPlayerContinents(c)}
+
 if __name__ == '__main__':
     
     args = parseInputs()
@@ -132,10 +149,11 @@ if __name__ == '__main__':
         res = battle(battle_args)
         res['b_name'] = b_name
         results = append_each_field(results, res)
+        # Write csv with the results
+        csv = pd.DataFrame(data = results)
+        csv.to_csv(f"../support/battles/{b_name}.csv")
         
-    # Write csv with the results
-    csv = pd.DataFrame(data = results)
-    csv.to_csv(f"../support/battles/{b_name}.csv")
+    
     print("Battle done")
     
     
