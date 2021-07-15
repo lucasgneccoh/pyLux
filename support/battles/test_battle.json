@@ -20,13 +20,13 @@
             "agent": "PUCTPlayer", 
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
             "model_path": "../data/models/model_0_4_attack.tar",
-            "max_depth": 300,
+            "max_depth": 100,
             "sims_per_eval": 1,
             "num_MCTS_sims": 50
           }
         ],
-        "num_rounds": 5,
-        "max_turns_per_game": 300
+        "num_rounds": 2,
+        "max_turns_per_game": 100
         
       },
       "test_random":{
@@ -38,19 +38,19 @@
             "agent": "PUCTPlayer", 
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
             "model_path": "../data/models/model_0_4_attack.tar",
-            "max_depth": 300,
+            "max_depth": 100,
             "sims_per_eval": 1,
             "num_MCTS_sims": 50
           }
         ],
-        "num_rounds": 5,
-        "max_turns_per_game": 300        
+        "num_rounds": 2,
+        "max_turns_per_game": 100        
       },
       "test_Flat":{
         "players": [
           {
             "agent": "FlatMCPlayer",
-            "max_depth": 300,
+            "max_depth": 100,
             "sims_per_eval": 1,
             "num_MCTS_sims": 50
           },
@@ -58,19 +58,19 @@
             "agent": "PUCTPlayer", 
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
             "model_path": "../data/models/model_0_4_attack.tar",
-            "max_depth": 300,
+            "max_depth": 100,
             "sims_per_eval": 1,
             "num_MCTS_sims": 50         
           }
         ],
-        "num_rounds": 5,
-        "max_turns_per_game": 300        
+        "num_rounds": 2,
+        "max_turns_per_game": 100       
       },
       "test_UCT":{
         "players": [
           {
             "agent": "UCTPlayer",
-            "max_depth": 300,
+            "max_depth": 100,
             "sims_per_eval": 1,
             "num_MCTS_sims": 50,
             "cb": 1.414
@@ -89,8 +89,8 @@
             "use_val":0
           }
         ],
-        "num_rounds": 5,
-        "max_turns_per_game": 300        
+        "num_rounds": 2,
+        "max_turns_per_game": 100        
       }
   }
 }
