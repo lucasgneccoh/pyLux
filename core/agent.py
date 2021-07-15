@@ -1062,8 +1062,8 @@ class PUCTPlayer(Agent):
                    self.wa, self.wb, self.cb, use_val = self.use_val, console_debug = self.console_debug)
                    
       
-      bestAction, bestValue = self.puct.getBestAction(state, player = self.code, temp=self.temp, num_sims = None, use_val = self.use_val, verbose = state.console_debug)
-      probs = self.puct.getVisitCount(state)
+      bestAction, bestValue = self.puct.getBestAction(state, player = self.code, num_sims = None, use_val = self.use_val, verbose = state.console_debug)
+      probs = self.puct.getVisitCount(state, temp=self.temp)
       actions = self.puct.As[hash(board)]
       # Use some criterion to choose the move
       z = np.random.uniform()
