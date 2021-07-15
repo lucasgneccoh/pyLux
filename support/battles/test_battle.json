@@ -37,7 +37,7 @@
           {
             "agent": "PUCTPlayer", 
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data/models",
+            "model_path": "../data/models/model_0_4_attack.tar",
             "max_depth": 300,
             "sims_per_eval": 1,
             "num_MCTS_sims": 500          
@@ -57,7 +57,7 @@
           {
             "agent": "PUCTPlayer", 
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data/models",
+            "model_path": "../data/models/model_0_4_attack.tar",
             "max_depth": 300,
             "sims_per_eval": 1,
             "num_MCTS_sims": 500          
@@ -78,7 +78,7 @@
           {
             "agent": "PUCTPlayer", 
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data/models/model_0_4_startTurn.tar",
+            "model_path": "../data/models/model_0_4_attack.tar",
             "max_depth": 300,
             "sims_per_eval": 1,
             "num_MCTS_sims": 500,
