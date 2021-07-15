@@ -117,6 +117,10 @@ if __name__ == '__main__':
     
     args = parseInputs()
     inputs = misc.read_json(args.inputs)
+    
+    print("Inputs")
+    print(inputs)
+    
         
     board_params = inputs["board_params"]
     battles = inputs["battles"]
