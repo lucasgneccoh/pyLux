@@ -82,12 +82,9 @@ def load_puct(board, args):
     
     return pPUCT
     
-def battle(args):
-    results = {}
     
-    # Create players and board
-    board_params = args["board_params"]
-    world = World(board_params["path_board"])
+def create_player_list(args):
+    board_params = args["board_params"]    
 
     list_players = []
     for i, player_args in enumerate(args["players"]):
@@ -101,13 +98,21 @@ def battle(args):
         elif player_args["agent"] == "UCTPlayer":
             list_players.append(agent.UCTPlayer(name=f'UCT_{i}', **kwargs))
         elif player_args["agent"] == "PUCTPlayer":            
+            world = World(board_params["path_board"])
             board = Board(world, [agent.RandomAgent('Random1'), agent.RandomAgent('Random2')])
             board.setPreferences(board_params)
             puct = load_puct(board, player_args)
             list_players.append(puct)
-            
+    return list_players
+def battle(args):
+    results = {}
+    
+    # Create players and board    
+    board_params = args["board_params"]
     M = args["max_turns_per_game"]
     for i in range(args["num_rounds"]):
+        world = World(board_params["path_board"])
+        list_players = create_player_list(args)
         board = Board(world, list_players)
         board.setPreferences(board_params)
         print(f"\t\tRound {i+1}")
