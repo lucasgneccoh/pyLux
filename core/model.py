@@ -40,8 +40,8 @@ def load_checkpoint(load_path, model, optimizer, device):
         print(f"Error while opening {load_path}")
         raise e
 
-def save_dict(save_path, state_dict):
-    torch.save(state_dict, save_path)
+def save_dict(save_path, state_dict, encoding="latin1"):
+    torch.save(state_dict, save_path, encoding=encoding)
     
 def load_dict(load_path, device, encoding = 'utf-8'):
     with open(load_path, 'r') as f:
