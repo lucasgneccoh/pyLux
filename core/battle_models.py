@@ -77,7 +77,7 @@ def load_puct(board, args):
     kwargs = {}
     for a in ["sims_per_eval", "num_MCTS_sims", "wa", "wb", "cb", "temp", "use_val"]:
         if a in args: kwargs[a] = args[a]
-    pPUCT = PUCTPlayer(apprentice = apprentice, **kwargs))
+    pPUCT = PUCTPlayer(apprentice = apprentice, **kwargs)
 
     
     return pPUCT
