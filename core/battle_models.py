@@ -129,7 +129,8 @@ if __name__ == '__main__':
     # Battle here. Create agent first, then set number of matches and play the games    
     results = {}
     for b_name, b_args in battles.items():
-        
+        battle_args = dict(b_args)
+        battle_args["board_params"] = dict(board_params)
         res = battle(b_args)
         res['b_name'] = b_name
         results = append_each_field(results, res)
