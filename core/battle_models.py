@@ -72,7 +72,7 @@ def load_puct(board, args):
 
     net.load_state_dict(state_dict['model'])   
 
-    apprentice = NetApprentice(net)
+    apprentice = agent.NetApprentice(net)
              
     kwargs = {}
     for a in ["sims_per_eval", "num_MCTS_sims", "wa", "wb", "cb", "temp", "use_val"]:
