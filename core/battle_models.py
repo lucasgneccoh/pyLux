@@ -109,8 +109,8 @@ def battle(args):
     board = Board(world, list_players)
     board.setPreferences(board_params)
     
-    for i in range(args.num_rounds):
-        for j in range(args.max_turns_per_game):
+    for i in range(args["num_rounds"]):
+        for j in range(args["max_turns_per_game"]):
             board.play()
             if board.gameOver: break
         
