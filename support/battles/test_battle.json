@@ -18,7 +18,7 @@
           },
           {
             "agent": "PUCTPlayer", 
-            "model_parameters": "../support/model_parameters/model_default_parameters.json",
+            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
             "model_path": "../data/models",
             "max_depth": 300,
             "sims_per_eval": 1,
