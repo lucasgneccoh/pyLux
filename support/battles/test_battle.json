@@ -22,7 +22,7 @@
             "model_path": "../data/models/model_0_4_attack.tar",
             "max_depth": 300,
             "sims_per_eval": 1,
-            "num_MCTS_sims": 500          
+            "num_MCTS_sims": 50
           }
         ],
         "num_rounds": 5,
@@ -40,7 +40,7 @@
             "model_path": "../data/models/model_0_4_attack.tar",
             "max_depth": 300,
             "sims_per_eval": 1,
-            "num_MCTS_sims": 500          
+            "num_MCTS_sims": 50
           }
         ],
         "num_rounds": 5,
@@ -52,7 +52,7 @@
             "agent": "FlatMCPlayer",
             "max_depth": 300,
             "sims_per_eval": 1,
-            "num_MCTS_sims": 500 
+            "num_MCTS_sims": 50
           },
           {
             "agent": "PUCTPlayer", 
@@ -60,7 +60,7 @@
             "model_path": "../data/models/model_0_4_attack.tar",
             "max_depth": 300,
             "sims_per_eval": 1,
-            "num_MCTS_sims": 500          
+            "num_MCTS_sims": 50         
           }
         ],
         "num_rounds": 5,
@@ -72,7 +72,7 @@
             "agent": "UCTPlayer",
             "max_depth": 300,
             "sims_per_eval": 1,
-            "num_MCTS_sims": 500,
+            "num_MCTS_sims": 50,
             "cb": 1.414
           },
           {
@@ -81,7 +81,7 @@
             "model_path": "../data/models/model_0_4_attack.tar",
             "max_depth": 300,
             "sims_per_eval": 1,
-            "num_MCTS_sims": 500,
+            "num_MCTS_sims": 50,
             "wa": 10,
             "wb": 10,
             "cb": 1.414,
