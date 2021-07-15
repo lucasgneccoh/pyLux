@@ -44,8 +44,53 @@
           }
         ],
         "num_rounds": 1,
-        "max_turns_per_game": 300
-        
+        "max_turns_per_game": 300        
+      },
+      "test_Flat":{
+        "players": [
+          {
+            "agent": "FlatMCPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500 
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data/models",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500          
+          }
+        ],
+        "num_rounds": 1,
+        "max_turns_per_game": 300        
+      },
+      "test_UCT":{
+        "players": [
+          {
+            "agent": "UCTPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500,
+            "cb": 1.414
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data/models/model_0_4_startTurn.tar",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500,
+            "wa": 10,
+            "wb": 10,
+            "cb": 1.414,
+            "temp": 1,
+            "use_val":0
+          }
+        ],
+        "num_rounds": 1,
+        "max_turns_per_game": 300        
       }
   }
 }
