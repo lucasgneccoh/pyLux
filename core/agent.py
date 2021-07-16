@@ -588,7 +588,7 @@ class FlatMCPlayer(Agent):
         state.readyForSimulation()
         state.console_debug = False
         
-        bestAction, bestValue, _, _ = self.flat.getBestAction(state, self.code, temp=1, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, _, _ = self.flat.getBestAction(state, self.code, num_sims = num_sims, verbose=False)
                 
         return bestAction
       
@@ -652,7 +652,7 @@ class UCTPlayer(Agent):
  
     def run(self, board, num_sims=None):   
         self.uct = UCT(max_depth, sims_per_eval, num_MCTS_sims, cb)    
-        bestAction, bestValue, _, _ = self.uct.getBestAction(board, self.code, temp=1, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, _, _ = self.uct.getBestAction(board, self.code, num_sims = num_sims, verbose=False)
         return bestAction
       
     
