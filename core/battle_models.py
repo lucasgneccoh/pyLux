@@ -126,6 +126,9 @@ def battle(args):
         for k in board.players:
             append_each_field(results, player_results(board, k))
             
+        world = None
+        board = None
+            
     return results
   
 def player_results(board, player_code):
