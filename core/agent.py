@@ -259,7 +259,11 @@ class FlatMC(object):
         state.playMove(move)
         
         # Once the search is done, update values for current (state, action) using the hashes s and a
-        v, net_v = self.search(state, depth+1)
+        try:
+            v, net_v = self.search(state, depth+1)
+        except Exception as e:
+            print("Problems while doing search")
+            print(e)
         
         if isinstance(net_v, torch.Tensor):
             net_v = net_v.detach().numpy()
@@ -470,7 +474,11 @@ class UCT(object):
         state.playMove(move)
         
         # Once the search is done, update values for current (state, action) using the hashes s and a
-        v, net_v = self.search(state, depth+1)
+        try:
+            v, net_v = self.search(state, depth+1)
+        except Exception as e:
+            print("Problems while doing search")
+            print(e)
         
         if isinstance(net_v, torch.Tensor):
             net_v = net_v.detach().numpy()
@@ -916,7 +924,11 @@ class PUCT(object):
         state.playMove(move)
         
         # Once the search is done, update values for current (state, action) using the hashes s and a
-        v, net_v = self.search(state, depth+1)
+        try:
+            v, net_v = self.search(state, depth+1)
+        except Exception as e:
+            print("Problems while doing search")
+            print(e)
         
         if isinstance(net_v, torch.Tensor):
             net_v = net_v.detach().numpy()
