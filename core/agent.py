@@ -812,8 +812,8 @@ class PUCT(object):
             policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
                     
         
-        if self.console_debug: print(f"OnLeaf: State {state.board_id} ({s})")
-        if self.console_debug: print(f"OnLeaf: Found this actions to expand {moves}")
+        #if self.console_debug: print(f"OnLeaf: State {state.board_id} ({s})")
+        #if self.console_debug: print(f"OnLeaf: Found this actions to expand {moves}")
         
         if not isinstance(policy, torch.Tensor):
             policy = torch.Tensor(policy)
@@ -847,11 +847,12 @@ class PUCT(object):
         action = -1
         bestScore = -float('inf')
         
-        if self.console_debug: print("treePolicy: Start")
-        if self.console_debug: print("Valid:")
-        if self.console_debug: print(self.Vs[s])
-        if self.console_debug: print("Actions:")
-        if self.console_debug: print(self.As[s])
+        
+        #if self.console_debug: print("treePolicy: Start")
+        #if self.console_debug: print("Valid:")
+        #if self.console_debug: print(self.Vs[s])
+        #if self.console_debug: print("Actions:")
+        #if self.console_debug: print(self.As[s])
                 
         for i, act in enumerate(self.As[s]):
             a = hash(act)
@@ -869,10 +870,10 @@ class PUCT(object):
                     prior = self.Ps[s][i]
                     sc = mean + self.cb * prior * np.sqrt(self.Ns[s]) / (self.Nsa[(s,a)]+1)
                     
-                    if self.console_debug: print(f"treePolicy: score for action {act}:  {sc}")
+                    #if self.console_debug: print(f"treePolicy: score for action {act}:  {sc}")
                 else:
                     # Unseen action, take it
-                    if self.console_debug: print(f"treePolicy: unseen action {act}")
+                    #if self.console_debug: print(f"treePolicy: unseen action {act}")
                     action = act
                     break
                 if sc > bestScore:
@@ -906,7 +907,7 @@ class PUCT(object):
         # Not a leaf, keep going down. Use values for the current player
         action = self.treePolicy(state)
         
-        if self.console_debug: print(f"Best action found by tree policy: {action}")
+        #if self.console_debug: print(f"Best action found by tree policy: {action}")
         
         if isinstance(action, int) and action == -1:
             print("**** No move?? *****")
@@ -971,7 +972,7 @@ class PUCT(object):
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
-            if verbose: print_message_over (f'MCTS:getBestAction:{i+1} / {num_sims}')
+            if verbose: misc.print_message_over(f"PUCT:getBestAction: simulation {i}")            
             sim = copy.deepcopy(state)
             v, net_v= self.search(sim, 0)
             R += v
@@ -993,13 +994,6 @@ class PUCT(object):
             print(self.As)
             raise Exception("Looking for state that has not been seen??")
 
-
-        
-        if not s in self.As:
-            # This is happening, but I dont understand why
-            state.report()
-            print(self.As)
-            raise Exception("Looking for state that has not been seen??")
 
         bestAction = None
         bestValue = -float('inf')
