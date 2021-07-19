@@ -7,9 +7,10 @@ The agent module contains the pyRisk players.
 import numpy as np
 from deck import Deck
 from move import Move
+import misc
+
 import copy
 import itertools
-from misc import print_message_over
 import json
 import os
 import sys
@@ -302,7 +303,7 @@ class FlatMC(object):
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
-            if verbose: print_message_over(f'FlatMC:getBestAction:{i+1} / {num_sims}')            
+            if verbose: misc.print_message_over(f'FlatMC:getBestAction:{i+1} / {num_sims}')            
             sim = copy.deepcopy(state)            
             #sim.console_debug = False
             v, net_v= self.search(sim, 0)
@@ -514,7 +515,7 @@ class UCT(object):
         R, Q = np.zeros(6), np.zeros(6) 
         
         for i in range(num_sims):
-            if verbose: print_message_over(f'UCT:getBestAction:{i+1} / {num_sims}')            
+            if verbose: misc.print_message_over(f'UCT:getBestAction:{i+1} / {num_sims}')            
             sim = copy.deepcopy(state)
             sim.console_debug = False
             v, net_v= self.search(sim, 0)
@@ -1135,15 +1136,6 @@ def parseInputs():
   args = parser.parse_args()
   return args
   
-def read_json(path):
-  with open(path, 'r') as f:
-    data = json.load(f)
-  return data
-    
-
-def print_message_over(message):
-    sys.stdout.write('\r{0}'.format(message))
-    sys.stdout.flush()
 
 
 '''
@@ -1260,8 +1252,8 @@ if __name__ == "__main__":
         EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs.json"
         
         # Create the net using the same parameters
-        inputs = read_json(EI_inputs_path)
-        model_args =  read_json(inputs["model_parameters"])
+        inputs = misc.read_json(EI_inputs_path)
+        model_args =  misc.read_json(inputs["model_parameters"])
         board_params = inputs["board_params"]
         path_board = board_params["path_board"]
 
