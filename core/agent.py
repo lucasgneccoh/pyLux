@@ -1327,29 +1327,28 @@ if __name__ == "__main__":
         
         puct = PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
                  wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False)
-                 
-        neuralPlayer = PUCTPlayer(apprentice = apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 200,
-                 wa = 10, wb = 10, cb = np.sqrt(2), temp = 1, use_val = False)
         
         # Play some random moves, then use puct or player puct to tag the move (Expert move)
         
         board = copy.deepcopy(board_orig)
         
+        
+        print("\nReceived args:\n")
+        print(sys.argv)        
+        
+        num_sims = int(sys.argv[1])
+        temp = int(sys.argv[2])
+        num_plays = int(sys.argv[3])
+        
         # Test play
-        for i in range(40):
+        for i in range(num_plays):
           board.play()
           if board.gameOver: break
   
         print("\n\n *** End of play")  
         board.report()
         print(board.countriesPandas())
-
         
-        print("\nReceived args:\n")
-        print(sys.argv)
-        
-        num_sims = int(sys.argv[1])
-        temp = int(sys.argv[2])
         
         print("\n\n Playing PUCT")
         board.console_debug = False
