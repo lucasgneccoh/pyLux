@@ -659,9 +659,12 @@ class UCTPlayer(Agent):
         self.uct = UCT(max_depth, sims_per_eval, num_MCTS_sims, cb)
         
  
-    def run(self, board, num_sims=None):   
+    def run(self, board, num_sims=None): 
+        state = copy.deepcopy(board)
+        state.readyForSimulation()
+        state.console_debug = False
         self.uct = UCT(self.max_depth, self.sims_per_eval, self.num_MCTS_sims, self.cb)    
-        bestAction, bestValue, _, _ = self.uct.getBestAction(board, self.code, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, _, _ = self.uct.getBestAction(state, self.code, num_sims = num_sims, verbose=False)
         return buildMove(board, bestAction)
       
     
@@ -1032,9 +1035,6 @@ class PUCT(object):
         return np.array(probs)
 
 
-#%% Neural MCTS
-    
-
 
 class PUCTPlayer(Agent):
   """! MCTS biased by a neural network  
@@ -1323,7 +1323,7 @@ if __name__ == "__main__":
         apprentice = NetApprentice(net)
         
         puct = PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = 0.4, use_val = 0, console_debug = verbose)
+                 wa = 10, wb = 10, cb = 1.1, use_val = 0, console_debug = verbose)
         
         # Play some random moves, then use puct or player puct to tag the move (Expert move)
         
