@@ -1,9 +1,9 @@
 {
   "python_command": "python3",
-  "max_seconds_process": 5000,
+  "max_seconds_process": 15000,
   "params_path": "../support/exp_iter_inputs",
   "iterations": 10,
-  "num_samples": 1000,
+  "num_samples": 200,
   "num_cpu": 100,  
   "saved_states_per_episode": 2,
   "max_episode_depth": 300,
@@ -13,15 +13,15 @@
       "max_depth": 300,
       "num_MCTS_sims": 300,
       "temp": 1,
-      "sims_per_eval": 3
+      "sims_per_eval": 1
   },
   "expert_params": {
       "max_depth": 300,
       "num_MCTS_sims": 800,
-      "sims_per_eval": 3,
-      "wa": 10,
-      "wb": 10,
-      "cb": 1.414,
+      "sims_per_eval": 1,
+      "wa": 0,
+      "wb": 0,
+      "cb": 1.1,
       "use_val": 0,
       "temp": 1
   },
