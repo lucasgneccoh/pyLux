@@ -661,7 +661,7 @@ class UCTPlayer(Agent):
     def run(self, board, num_sims=None):   
         self.uct = UCT(self.max_depth, self.sims_per_eval, self.num_MCTS_sims, self.cb)    
         bestAction, bestValue, _, _ = self.uct.getBestAction(board, self.code, num_sims = num_sims, verbose=False)
-        return bestAction
+        return buildMove(board, bestAction)
       
     
     def pickCountry(self, board):
