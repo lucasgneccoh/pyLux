@@ -117,7 +117,7 @@ def battle(args):
         board.setPreferences(board_params)
         print(f"\t\tRound {i+1}")
         for j in range(M):
-            misc.print_message_over(f"\t\tPlayer {board.activePlayer.name} playing: Turn {j}/{M}")            
+            misc.print_message_over(f"\t\tPlayer {board.activePlayer.name} playing: Turn {j}")
             board.play()            
             if board.gameOver: break
         print()
