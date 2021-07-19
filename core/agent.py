@@ -1268,7 +1268,8 @@ if __name__ == "__main__":
         # Create the net using the same parameters
         inputs = read_json(EI_inputs_path)
         model_args =  read_json(inputs["model_parameters"])
-        path_board = inputs["path_board"]
+        board_params = inputs["board_params"]
+        path_board = board_params["path_board"]
 
         # ---------------- Model -------------------------
 
