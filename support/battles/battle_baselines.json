@@ -1,0 +1,47 @@
+{
+  "board_params": {
+        "path_board": "../support/maps/test_map.json",
+        "initialPhase": true,
+        "useCards": true,
+        "transferCards": true, 
+        "immediateCash": true,
+        "continentIncrease": 0.05,
+        "pickInitialCountries": true,
+        "armiesPerTurnInitial": 4,
+        "console_debug" : false
+  },
+  "battles":{    
+      "peace_flat":{
+        "players": [
+          {
+            "agent": "PeacefulAgent"
+          },
+          {
+            "agent": "FlatMCPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 1000
+          }
+        ],
+        "num_rounds": 5,
+        "max_turns_per_game": 300
+        
+      },
+      "peace_uct":{
+        "players": [
+          {
+            "agent": "PeacefulAgent"
+          },
+          {
+            "agent": "UCTPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 1000,
+            "cb": 0.4
+          }
+        ],
+        "num_rounds": 5,
+        "max_turns_per_game": 300
+      }      
+  }
+}

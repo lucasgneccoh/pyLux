@@ -1227,7 +1227,7 @@ if __name__ == "__main__":
         board.report()
         print(board.countriesPandas())
         flat = FlatMC(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = 0)
-        uct = UCT(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = np.sqrt(2))
+        uct = UCT(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = 0.4)
         
         p = board.activePlayer
         
