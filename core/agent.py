@@ -823,27 +823,29 @@ class PUCT(object):
         self.Ps[s] = policy.squeeze().detach().numpy()
         self.Ns[s] = 1
 
-        # Return an evaluation
-        v = np.zeros(6)
-        for _ in range(self.sims_per_eval):
-            sim = copy.deepcopy(state)
-            sim.simulate()
-            v += score_players(sim)                
-        v /= self.sims_per_eval
-
-        # Fix order of value returned by net
-        value = value.squeeze()
-        # Apprentice already does this
-        cor_value = np.array([value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
+        if not self.use_val:
+            # Return an evaluation
+            v = np.zeros(6)
+            for _ in range(self.sims_per_eval):
+                sim = copy.deepcopy(state)
+                sim.simulate()
+                v += score_players(sim)                
+            v /= self.sims_per_eval
+            cor_value = v
+        else:
+            # Fix order of value returned by net
+            value = value.squeeze()
+            # Apprentice already does this
+            cor_value = np.array([value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
         
-        return v, cor_value
+        # Value estimated by the network, value estimated by the network
+        return cor_value, cor_value
         
     def treePolicy(self, state):
         s = hash(state)
         p = state.activePlayer.code
         action = -1
         bestScore = -float('inf')
-        
         
         if self.console_debug: print("treePolicy: Start")
         if self.console_debug: print("Valid:")
@@ -857,10 +859,16 @@ class PUCT(object):
             if self.Vs[s][i]>0.0:
                 if (s,a) in self.Rsa:
                     # PUCT formula
+                    """
                     uct = self.Rsa[(s,a)][p]+ self.cb * np.sqrt(np.log(self.Ns[s]) / max(self.Nsa[(s,a)], self.eps))
                     pol = 0 if self.apprentice is None else self.wa * self.Ps[s][i]/(self.Nsa[(s,a)]+1)
-                    val = [0]*6 if self.apprentice is None else self.wb * self.Qsa[(s,a)] * (self.use_val)                     
+                    val = [0]*6 if self.apprentice is None else self.wb * self.Qsa[(s,a)] * (self.use_val)
                     sc = uct + pol + val[p]
+                    """
+                    mean = self.Rsa[(s,a)][p]
+                    prior = self.Ps[s][i]
+                    sc = mean + self.cb * prior * np.sqrt(self.Ns[s]) / (self.Nsa[(s,a)]+1)
+                    
                     if self.console_debug: print(f"treePolicy: score for action {act}:  {sc}")
                 else:
                     # Unseen action, take it
@@ -936,14 +944,14 @@ class PUCT(object):
             v = v.detach().numpy()
 
         if (s,a) in self.Rsa:
-            rsa, qsa, nsa = self.Rsa[(s,a)], self.Qsa[(s,a)], self.Nsa[(s,a)]
+            rsa, nsa = self.Rsa[(s,a)], self.Nsa[(s,a)]
             self.Rsa[(s,a)] = (nsa*rsa + v) /(nsa + 1)
-            self.Qsa[(s,a)] = (nsa*qsa + net_v) /(nsa + 1)
+            # self.Qsa[(s,a)] = (nsa*qsa + net_v) /(nsa + 1)
             self.Nsa[(s,a)] += 1
         
         else:
             self.Rsa[(s,a)] = v
-            self.Qsa[(s,a)] = net_v
+            # self.Qsa[(s,a)] = net_v
             self.Nsa[(s,a)] = 1
         
         self.Ns[s] += 1
