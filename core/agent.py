@@ -928,7 +928,7 @@ class PUCT(object):
         else:
           move = action
         
-        if self.console_debug: print(move)
+        # if self.console_debug: print(move)
         
         state.playMove(move)
         
@@ -1351,7 +1351,7 @@ if __name__ == "__main__":
         
         print("\n\n Playing PUCT")
         board.console_debug = False
-        bestAction, bestValue, R, Q = puct.getBestAction(board, player = board.activePlayer.code, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, R, Q = puct.getBestAction(board, player = board.activePlayer.code, num_sims = num_sims, verbose=verbose)
         probs = puct.getVisitCount(board, temp=temp)
         
         
