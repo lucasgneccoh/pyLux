@@ -1311,7 +1311,7 @@ if __name__ == "__main__":
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         net.to(device)
         
-        load_model = False
+        load_model = True
         
         if load_model:
             # Choose a model at random
@@ -1322,16 +1322,6 @@ if __name__ == "__main__":
             net.load_state_dict(state_dict['model'])
             print("Model has been loaded")
             
-        # Create player that uses neural net
-        
-        apprentice = NetApprentice(net)
-        
-        puct = PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False)
-        
-        # Play some random moves, then use puct or player puct to tag the move (Expert move)
-        
-        board = copy.deepcopy(board_orig)
         
         
         print("\nReceived args:\n")
@@ -1340,6 +1330,20 @@ if __name__ == "__main__":
         num_sims = int(sys.argv[1])
         temp = int(sys.argv[2])
         num_plays = int(sys.argv[3])
+        verbose = int(sys.argv[4]) if len(sys.argv)>4 else 0
+        
+        # Create player that uses neural net
+        
+        apprentice = NetApprentice(net)
+        
+        puct = PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
+                 wa = 10, wb = 10, cb = 0.4, use_val = 0, console_debug = verbose)
+        
+        # Play some random moves, then use puct or player puct to tag the move (Expert move)
+        
+        board = copy.deepcopy(board_orig)
+        
+        
         
         # Test play
         for i in range(num_plays):
