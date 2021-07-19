@@ -11,22 +11,6 @@
         "console_debug" : false
   },
   "battles":{    
-      "peace_flat":{
-        "players": [
-          {
-            "agent": "PeacefulAgent"
-          },
-          {
-            "agent": "FlatMCPlayer",
-            "max_depth": 300,
-            "sims_per_eval": 1,
-            "num_MCTS_sims": 1000
-          }
-        ],
-        "num_rounds": 5,
-        "max_turns_per_game": 300
-        
-      },
       "peace_uct":{
         "players": [
           {
@@ -42,6 +26,22 @@
         ],
         "num_rounds": 5,
         "max_turns_per_game": 300
-      }      
+      },
+      "peace_flat":{
+        "players": [
+          {
+            "agent": "PeacefulAgent"
+          },
+          {
+            "agent": "FlatMCPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 1000
+          }
+        ],
+        "num_rounds": 5,
+        "max_turns_per_game": 300
+        
+      }
   }
 }
