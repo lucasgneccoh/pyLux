@@ -662,7 +662,7 @@ class UCTPlayer(Agent):
     def run(self, board, num_sims=None): 
         state = copy.deepcopy(board)
         state.readyForSimulation()
-        state.console_debug = False
+        state.console_debug = False        
         self.uct = UCT(self.max_depth, self.sims_per_eval, self.num_MCTS_sims, self.cb)    
         bestAction, bestValue, _, _ = self.uct.getBestAction(state, self.code, num_sims = num_sims, verbose=False)
         return buildMove(board, bestAction)
