@@ -1186,7 +1186,7 @@ if __name__ == "__main__":
     
     board = copy.deepcopy(board_orig)    
     
-    if False:
+    if True:
     
         print("**** Test play")
         board.report()
@@ -1247,7 +1247,7 @@ if __name__ == "__main__":
     
         
     # Now try the network, and the MCTS with the network (apprentice and expert)
-    if True:
+    if False:
         path_model = "../data/models"
         EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs.json"
         
