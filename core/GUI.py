@@ -2,8 +2,10 @@ import sys
 import json
 import time
 import copy
-import core
 import agent
+from board import Board
+from world import World, Country, Continent
+from deck import Deck
 # For the GUI
 import pygame
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -269,7 +271,7 @@ if __name__ == "__main__":
   prefs['console_debug'] = console_debug
   
   # Load map
-  world = core.World(prefs['map_path'])
+  world = World(prefs['map_path'])
   
   
   # Set players
@@ -281,8 +283,9 @@ if __name__ == "__main__":
     players.append(ag)
   
   # Set board
-  board = core.Board(world, players)
+  board = Board(world, players)
   board.setPreferences(prefs)
+  print("Board set")
   
 #%% Draw the board
   # Draw game as a simple graph
@@ -338,7 +341,7 @@ if __name__ == "__main__":
   
   # Start pygame    
   pygame.init()
-  pygame.display.set_caption("core")
+  pygame.display.set_caption("PyLUX")
   screen = pygame.display.set_mode((WIDTH, HEIGHT)) 
   myfont = pygame.font.SysFont(FONT, FONT_SIZE)
   
@@ -484,7 +487,7 @@ if __name__ == "__main__":
           
         # Check if more than 5 cards at the start of the turn
         if board.gamePhase == 'startTurn' and len(board.activePlayer.cards)>=5:
-          card_set = core.Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
+          card_set = Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
           if not card_set is None:
             armies = board.cashCards(*card_set)
             if console_debug: print(f"GUI:Force cashed {armies} armies")
@@ -647,7 +650,7 @@ if __name__ == "__main__":
                   action_msg = 'No cash after turn start phase!'
                   continue
                 showing_cards = False
-                card_set = core.Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
+                card_set = Deck.yieldBestCashableSet(board.activePlayer.cards, board.activePlayer.code, board.countries())
                 if not card_set is None:
                   armies = board.cashCards(*card_set)
                   if console_debug: print(f"GUI:Cashed {armies} armies")
