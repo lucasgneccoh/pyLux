@@ -10,47 +10,7 @@
         "armiesPerTurnInitial": 4,
         "console_debug" : false
   },
-  "battles":{    
-      "test_random_0":{
-        "players": [
-          {
-            "agent": "RandomAgent"
-          },
-          {
-            "agent": "PUCTPlayer", 
-            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data/models/model_0_4_startTurn.tar",
-            "max_depth": 300,
-            "move_selection": "argmax",
-            "use_val": 0,
-            "sims_per_eval": 1,
-            "num_MCTS_sims": 500
-          }
-        ],
-        "num_rounds": 5,
-        "max_turns_per_game": 300
-        
-      },
-      "test_random_1":{
-        "players": [
-          {
-            "agent": "RandomAgent"
-          },
-          {
-            "agent": "PUCTPlayer", 
-            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data/models/model_1_4_attack.tar",
-            "max_depth": 300,
-            "move_selection": "argmax",
-            "use_val": 0,
-            "sims_per_eval": 1,
-            "num_MCTS_sims": 500
-          }
-        ],
-        "num_rounds": 5,
-        "max_turns_per_game": 300
-        
-      },
+  "battles":{     
       "test_random_2":{
         "players": [
           {
