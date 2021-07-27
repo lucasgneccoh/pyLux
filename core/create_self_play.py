@@ -142,6 +142,7 @@ def tag_with_expert_move(state, expert, temp=1, verbose=False):
     start = time.process_time()
     _, _, value_exp, Q_value_exp = expert.getBestAction(state, player = state.activePlayer.code, num_sims = None, verbose=False)
     policy_exp = expert.getVisitCount(state, temp=temp)
+    # TODO: Katago improvement
     
     if isinstance(policy_exp, torch.Tensor):
         policy_exp = policy_exp.detach().numpy()

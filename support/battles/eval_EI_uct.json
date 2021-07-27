@@ -1,0 +1,111 @@
+{
+  "board_params": {
+        "path_board": "../support/maps/test_map.json",
+        "initialPhase": true,
+        "useCards": true,
+        "transferCards": true, 
+        "immediateCash": true,
+        "continentIncrease": 0.05,
+        "pickInitialCountries": true,
+        "armiesPerTurnInitial": 4,
+        "console_debug" : false
+  },
+  "battles":{     
+      "test_uct_0":{
+        "players": [
+          {
+            "agent": "UCTPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500,
+            "cb": 0.4
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data/models/model_0_4_startTurn.tar",
+            "max_depth": 300,
+            "move_selection": "argmax",
+            "use_val": 0,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500
+          }
+        ],
+        "num_rounds": 5,
+        "max_turns_per_game": 300
+        
+      },
+      "test_uct_3":{
+        "players": [
+          {
+            "agent": "UCTPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500,
+            "cb": 0.4
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data/models/model_3_4_initialPick.tar",
+            "max_depth": 300,
+            "move_selection": "argmax",
+            "use_val": 0,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500
+          }
+        ],
+        "num_rounds": 5,
+        "max_turns_per_game": 300
+        
+      },
+      "test_uct_6":{
+        "players": [
+          {
+            "agent": "UCTPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500,
+            "cb": 0.4
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data/models/model_6_4_initialPick.tar",
+            "max_depth": 300,
+            "move_selection": "argmax",
+            "use_val": 0,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500
+          }
+        ],
+        "num_rounds": 5,
+        "max_turns_per_game": 300
+        
+      },
+      "test_uct_9":{
+        "players": [
+          {
+            "agent": "UCTPlayer",
+            "max_depth": 300,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500,
+            "cb": 0.4
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data/models/model_9_4_initialPick.tar",
+            "max_depth": 300,
+            "move_selection": "argmax",
+            "use_val": 0,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 500
+          }
+        ],
+        "num_rounds": 5,
+        "max_turns_per_game": 300
+        
+      }      
+  }
+}
