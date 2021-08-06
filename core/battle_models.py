@@ -103,6 +103,7 @@ def create_player_list(args):
             board.setPreferences(board_params)
             puct = load_puct(board, player_args)
             list_players.append(puct)
+            
     return list_players
 def battle(args):
     results = {}
