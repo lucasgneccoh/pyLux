@@ -146,7 +146,7 @@ if __name__ == '__main__':
                         
               
           
-        print(f"Time taken: {round(time.process_time() - start,2)}")
+        print(f"Time taken self-play: {round(time.process_time() - start,2)}")
     
         ##### 2. Train network on dataset
         start = time.process_time()
@@ -172,7 +172,7 @@ if __name__ == '__main__':
         subprocess.run([python_command, f"{train_apprentice_tag}.py", "--inputs", train_input_json, "--iteration", str(i), "--verbose", str(verbose), "--checkpoint", checkpoint])
         
         
-        print(f"Time taken: {round(time.process_time() - start,2)}")
+        print(f"Time taken training: {round(time.process_time() - start,2)}")
         
         ##### 3. Update paths so that new apprentice and expert are used on the next iteration
         

@@ -2,22 +2,22 @@
   "python_command": "python3",
   "max_seconds_process": 15000,
   "params_path": "../support/exp_iter_inputs",
-  "iterations": 10,
-  "num_samples": 200,
-  "num_cpu": 100,  
-  "saved_states_per_episode": 2,
-  "max_episode_depth": 300,
+  "iterations": 20,
+  "num_samples": 64,
+  "num_cpu": 64,  
+  "saved_states_per_episode": 1,
+  "max_episode_depth": 500,
   "apprentice_params": {
       "type": "mcts",
       "model_name": "",
-      "max_depth": 300,
-      "num_MCTS_sims": 300,
+      "max_depth": 500,
+      "num_MCTS_sims": 1000,
       "temp": 1,
       "sims_per_eval": 1
   },
   "expert_params": {
-      "max_depth": 300,
-      "num_MCTS_sims": 800,
+      "max_depth": 500,
+      "num_MCTS_sims": 5000,
       "sims_per_eval": 1,
       "wa": 0,
       "wb": 0,
@@ -27,10 +27,10 @@
   },
   "path_data": "../data",
   "path_model": "../data/models",
-  "batch_size": 32,
+  "batch_size": 64,
   "model_parameters": "../support/model_parameters/model_default_parameters.json",
   "board_params": {
-      "path_board": "../support/maps/test_map.json",
+      "path_board": "../support/maps/classic_world_map.json",
       "initialPhase": true,
       "useCards": true,
       "transferCards": true, 
@@ -43,5 +43,5 @@
   "self_play_tag": "create_self_play",
   "train_apprentice_tag": "train_model",
   "epochs": 15,
-  "eval_every": 99
+  "eval_every": 99999
 }
