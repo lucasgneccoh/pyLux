@@ -95,6 +95,9 @@ if __name__ == '__main__':
     # Here, we launch num_cpu tasks, so it all comes down to calculate the number of iterations
     # num_samples = num_iter * num_cpu * saved_states_per_episode
     # --> num_iter = int(num_samples / (num_cpu * saved_states_per_episode))
+    if os.cpu_count() < num_cpu:
+        print(f"num_cpu given as input is too high: Given was {num_cpu}, only {os.cpu_count()} available")        
+        num_cpu = os.cpu_count()
     num_iter = int(num_samples / (num_cpu * saved_states_per_episode))
     
     types_cycle = itertools.cycle(["initialPick", "initialFortify", "startTurn", "attack", "fortify"])

@@ -5,7 +5,7 @@
   "iterations": 2,
   "delete_previous": 1,
   "num_samples": 400,
-  "num_cpu": 20,
+  "num_cpu": 80,
   "saved_states_per_episode": 1,
   "max_episode_depth": 500,
   "apprentice_params": {
