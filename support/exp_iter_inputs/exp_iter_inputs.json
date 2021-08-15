@@ -4,7 +4,7 @@
   "params_path": "../support/exp_iter_inputs",
   "iterations": 3,
   "delete_previous": 1,
-  "num_samples": 320,
+  "num_samples": 400,
   "num_cpu": 80,
   "saved_states_per_episode": 1,
   "max_episode_depth": 500,
@@ -26,8 +26,8 @@
       "use_val": 0,
       "temp": 1
   },
-  "path_data": "../data",
-  "path_model": "../data/models",
+  "path_data": "../data_15_08",
+  "path_model": "../data_15_08/models_15_08",
   "batch_size": 64,
   "model_parameters": "../support/model_parameters/model_default_parameters.json",
   "board_params": {
@@ -43,6 +43,6 @@
   },
   "self_play_tag": "create_self_play",
   "train_apprentice_tag": "train_model",
-  "epochs": 15,
+  "epochs": 10,
   "eval_every": 99999
 }
