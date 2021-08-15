@@ -1,5 +1,6 @@
 
 import os
+import shutil
 import itertools
 import numpy as np
 import copy
@@ -105,6 +106,12 @@ if __name__ == '__main__':
         
         print("Parallel self-play and tagging")
         start = time.process_time()
+        
+        # If data is not kept, erase folders and create new data
+        if inputs["delete_previous"]:
+            for folder in move_types:
+                shutil.rmtree(os.path.join(path_data, folder))
+                os.makedirs(os.path.join(path_data, folder, 'raw'))
         
         # Create json file with inputs for the self play tasks
         input_dict = {

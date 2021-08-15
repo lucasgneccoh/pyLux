@@ -37,6 +37,7 @@ def parseInputs():
   parser.add_argument("--move_type", help="Type of move to consider", default = "all")
   parser.add_argument("--verbose", help="Print on the console?", type=int, default = 0)
   parser.add_argument("--num_task", help="Number of the task for debugging and tracking", default = 0)
+  parser.add_argument("--delete_previous", help="Delete existing self play data", default = 0)
   args = parser.parse_args()
   return args
        
