@@ -2,10 +2,10 @@
   "python_command": "python3",
   "max_seconds_process": 15000,
   "params_path": "../support/exp_iter_inputs",
-  "iterations": 3,
+  "iterations": 2,
   "delete_previous": 1,
   "num_samples": 400,
-  "num_cpu": 80,
+  "num_cpu": 20,
   "saved_states_per_episode": 1,
   "max_episode_depth": 500,
   "apprentice_params": {
