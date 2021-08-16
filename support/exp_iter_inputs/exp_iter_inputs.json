@@ -1,6 +1,6 @@
 {
   "python_command": "python3",
-  "max_seconds_process": 15000,
+  "max_seconds_process": 18000,
   "params_path": "../support/exp_iter_inputs",
   "iterations": 2,
   "delete_previous": 1,

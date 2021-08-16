@@ -480,6 +480,7 @@ class UCT(object):
         except Exception as e:
             print("Problems while doing search")
             print(e)
+            # Define v and net_v??
         
         if isinstance(net_v, torch.Tensor):
             net_v = net_v.detach().numpy()

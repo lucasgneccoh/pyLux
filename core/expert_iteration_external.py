@@ -76,6 +76,9 @@ if __name__ == '__main__':
     epochs = inputs["epochs"]
     eval_every = inputs["eval_every"]
     
+    print(f"Iterations: {iterations}")
+    print(f"Path data: {path_data}")
+    print(f"Path model: {path_model}")
     print("done")
     
     
