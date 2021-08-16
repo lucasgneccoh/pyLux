@@ -1,12 +1,12 @@
 {
   "python_command": "python3",
-  "max_seconds_process": 00,
+  "max_seconds_process": 20000,
   "params_path": "../support/exp_iter_inputs",
   "iterations": 20,
   "delete_previous": 1,
   "num_samples": 960,
   "num_cpu": 80,
-  "saved_states_per_episode": 1,
+  "saved_states_per_episode": 2,
   "max_episode_depth": 500,
   "apprentice_params": {
       "type": "mcts",
