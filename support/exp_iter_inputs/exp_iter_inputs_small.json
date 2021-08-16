@@ -25,8 +25,8 @@
       "use_val": 0,
       "temp": 1
   },
-  "path_data": "../data",
-  "path_model": "../data/models",
+  "path_data": "../data_test",
+  "path_model": "../data_test/models",
   "batch_size": 16,
   "model_parameters": "../support/model_parameters/model_default_parameters.json",
   "board_params": {
