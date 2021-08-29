@@ -26,8 +26,8 @@
       "use_val": 0,
       "temp": 1
   },
-  "path_data": "../data_16_08",
-  "path_model": "../data_16_08/models_16_08",
+  "path_data": "../data_29_08",
+  "path_model": "../data_29_08/models_29_08",
   "batch_size": 64,
   "model_parameters": "../support/model_parameters/model_default_parameters.json",
   "board_params": {
