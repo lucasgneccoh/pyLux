@@ -1,15 +1,10 @@
-
 import os
 import shutil
 import itertools
-import numpy as np
-import copy
-import sys
-import json
 import time
 import subprocess
 from subprocess import Popen
-from threading import Timer
+
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import misc
@@ -36,7 +31,7 @@ def get_last_model(path_model):
           if i>best_i or (i==best_i and j>best_j):
               last_model = name
               best_i, best_j = i, j
-      except Exception as e:
+      except Exception:
           pass
   return last_model
           
@@ -108,11 +103,12 @@ if __name__ == '__main__':
     for i in range(iterations):
     
         print(f"\n********* Starting iteration {i+1} *********") 
-        ##### 1. Self play
         
-        print("Parallel self-play and tagging")
+        ##### 1. Self play
         start = time.process_time()
         
+        print("Parallel self-play and tagging")
+                
         # If data is not kept, erase folders and create new data
         if inputs["delete_previous"]:
             for folder in move_types:
@@ -189,5 +185,11 @@ if __name__ == '__main__':
         
         ##### 3. Update paths so that new apprentice and expert are used on the next iteration
         
+        # Change apprentice so that next time the apprentice is the newest neural network
+        last_model = get_last_model(path_model)
+        apprentice_params = {"type": "net",
+                             "model_name": last_model}
+        
+        # Expert does not change appart from the inner apprentice
         
     

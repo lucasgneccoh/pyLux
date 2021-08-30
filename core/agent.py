@@ -186,7 +186,7 @@ class FlatMC(object):
             self.root = s
             # Expand 
             moves = state.legalMoves()
-            policy, value = np.zeros(len(moves)), np.zeros(6) 
+            policy, _ = np.zeros(len(moves)), np.zeros(6) 
             # All moves are legal because we called board.legalMoves
             self.Vs[s] = np.ones(len(moves))
             self.As[s] = moves
@@ -382,11 +382,11 @@ class UCT(object):
         s = hash(state)
 
         
-        # Expand 
+        # Expand (no networks used, just to call get mask and be aligned with PUCT)
         batch = torch_geometric.data.Batch.from_data_list([boardToData(state)])
         mask, moves = maskAndMoves(state, state.gamePhase, batch.edge_index)
                 
-        policy, value = np.zeros(len(moves)), np.zeros(6) 
+        policy, _ = np.zeros(len(moves)), np.zeros(6) 
         # All moves are legal because we called board.legalMoves
         self.Vs[s] = mask.squeeze().detach().numpy()
         self.As[s] = moves
@@ -420,7 +420,7 @@ class UCT(object):
                     uct = self.Rsa[(s,a)][p]+ self.cb*np.sqrt(np.log(self.Ns[s]) / max(self.Nsa[(s,a)], self.eps))
                     val = 0 # self.wb*self.Qsa[(s,a)] * (use_val) 
                     pol = 0 #self.wa*self.Ps[s][i]/(self.Nsa[(s,a)]+1)
-                    sc = uct
+                    sc = uct + val + pol
                 else:
                     # Unseen action, take it
                     action = act
@@ -649,7 +649,7 @@ class FlatMCPlayer(Agent):
 class UCTPlayer(Agent):
 
     def __init__(self, name='UCT', max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                  cb = np.sqrt(2)):        
+                  cb = np.sqrt(2), verbose = False):        
         self.name = name
         self.human = False
         self.console_debug = False 
@@ -658,6 +658,7 @@ class UCTPlayer(Agent):
         self.num_MCTS_sims = num_MCTS_sims
         self.cb = cb
         self.uct = UCT(max_depth, sims_per_eval, num_MCTS_sims, cb)
+        self.verbose = verbose
         
  
     def run(self, board, num_sims=None): 
@@ -665,7 +666,7 @@ class UCTPlayer(Agent):
         state.readyForSimulation()
         state.console_debug = False        
         self.uct = UCT(self.max_depth, self.sims_per_eval, self.num_MCTS_sims, self.cb)    
-        bestAction, bestValue, _, _ = self.uct.getBestAction(state, self.code, num_sims = num_sims, verbose=False)
+        bestAction, bestValue, _, _ = self.uct.getBestAction(state, self.code, num_sims = num_sims, verbose=self.verbose)
         return buildMove(board, bestAction)
       
     
@@ -771,6 +772,7 @@ class NetApprentice(object):
             
         policy = policy * mask
         value = value.squeeze()        
+        # value is given in canonical order, must reorder to original player order
         return policy.detach().numpy(), value.detach().numpy()
         
     def play(self, canon, play_mode = "argmax"):
@@ -811,10 +813,13 @@ class PUCT(object):
         mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
         
         if not self.apprentice is None:
-            policy, value = self.apprentice.getPolicy(canon)
+            policy, net_value = self.apprentice.getPolicy(canon)
+            # Fix order of value returned by net
+            net_value = net_value.squeeze()
+            # Apprentice already does this
+            cor_value = np.array([net_value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
         else:
-            # No bias
-            policy, value = torch.ones_like(mask)/max(mask.shape), torch.zeros((1,6))
+            raise Exception("PUCT without apprentice")
                     
         
         #if self.console_debug: print(f"OnLeaf: State {state.board_id} ({s})")
@@ -828,23 +833,16 @@ class PUCT(object):
         self.Ps[s] = policy.squeeze().detach().numpy()
         self.Ns[s] = 1
 
-        if not self.use_val:
-            # Return an evaluation
-            v = np.zeros(6)
-            for _ in range(self.sims_per_eval):
-                sim = copy.deepcopy(state)
-                sim.simulate()
-                v += score_players(sim)                
-            v /= self.sims_per_eval
-            cor_value = v
-        else:
-            # Fix order of value returned by net
-            value = value.squeeze()
-            # Apprentice already does this
-            cor_value = np.array([value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
+        # Monte Carlo evaluation        
+        v = np.zeros(6)
+        for _ in range(self.sims_per_eval):
+            sim = copy.deepcopy(state)
+            sim.simulate()
+            v += score_players(sim)                
+        v /= self.sims_per_eval        
         
-        # Value estimated by the network, value estimated by the network
-        return cor_value, cor_value
+        # Value MC, value estimated by the network
+        return v, cor_value
         
     def treePolicy(self, state):
         s = hash(state)
@@ -865,13 +863,8 @@ class PUCT(object):
             if self.Vs[s][i]>0.0:
                 if (s,a) in self.Rsa:
                     # PUCT formula
-                    """
-                    uct = self.Rsa[(s,a)][p]+ self.cb * np.sqrt(np.log(self.Ns[s]) / max(self.Nsa[(s,a)], self.eps))
-                    pol = 0 if self.apprentice is None else self.wa * self.Ps[s][i]/(self.Nsa[(s,a)]+1)
-                    val = [0]*6 if self.apprentice is None else self.wb * self.Qsa[(s,a)] * (self.use_val)
-                    sc = uct + pol + val[p]
-                    """
-                    mean = self.Rsa[(s,a)][p]
+             
+                    mean = (1-self.use_val)*self.Rsa[(s,a)][p] + self.use_val*self.Qsa[(s,a)][p]
                     prior = self.Ps[s][i]
                     sc = mean + self.cb * prior * np.sqrt(self.Ns[s]) / (self.Nsa[(s,a)]+1)
                     
@@ -950,14 +943,14 @@ class PUCT(object):
             v = v.detach().numpy()
 
         if (s,a) in self.Rsa:
-            rsa, nsa = self.Rsa[(s,a)], self.Nsa[(s,a)]
+            rsa, nsa, qsa = self.Rsa[(s,a)], self.Nsa[(s,a)], self.Qsa[(s,a)]
             self.Rsa[(s,a)] = (nsa*rsa + v) /(nsa + 1)
-            # self.Qsa[(s,a)] = (nsa*qsa + net_v) /(nsa + 1)
+            self.Qsa[(s,a)] = (nsa*qsa + net_v) /(nsa + 1)
             self.Nsa[(s,a)] += 1
         
         else:
             self.Rsa[(s,a)] = v
-            # self.Qsa[(s,a)] = net_v
+            self.Qsa[(s,a)] = net_v
             self.Nsa[(s,a)] = 1
         
         self.Ns[s] += 1
@@ -991,7 +984,6 @@ class PUCT(object):
         Q /= num_sims
 
         s = hash(state)
-        counts = []
 
         if not s in self.As:
             # This is happening, but I dont understand why
@@ -1005,8 +997,9 @@ class PUCT(object):
         for i, act in enumerate(self.As[s]):
             a = hash(act)
             if (s,a) in self.Rsa:
-                if self.Rsa[(s,a)][player] >= bestValue:
-                    bestValue = self.Rsa[(s,a)][player]
+                sc = (1-self.use_val)*self.Rsa[(s,a)][player] + self.use_val*self.Qsa[(s,a)][player]
+                if sc >= bestValue:
+                    bestValue = sc
                     bestAction = act
             else:
                 pass
@@ -1082,7 +1075,6 @@ class PUCTPlayer(Agent):
       probs = self.puct.getVisitCount(state, temp=self.temp)
       actions = self.puct.As[hash(board)]
       # Use some criterion to choose the move
-      z = np.random.uniform()
       if self.move_selection == "argmax":
           ind = np.argmax(probs)
       elif self.move_selection == "random_proportional":
@@ -1129,13 +1121,6 @@ class PUCTPlayer(Agent):
   def fortifyPhase(self, board):      
       move = self.run(board)
       return move
-    
-
-def parseInputs():
-  parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-  parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
-  args = parser.parse_args()
-  return args
   
 
 
@@ -1172,9 +1157,9 @@ if __name__ == "__main__":
     pR1, pR2, pR3 = RandomAgent('Red'), RandomAgent('Green'), RandomAgent('Blue')
     
     pFlat = FlatMCPlayer(name='flatMC', max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 700, cb = 0)
-    pUCT = UCTPlayer(name='UCT', max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000, cb = np.sqrt(2))
+    pUCT = UCTPlayer(name='UCT', max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000, cb = np.sqrt(2), verbose = True)
     
-    players = [pR1, pFlat]
+    players = [pUCT, pR1]
     # Set board
     prefs = {'initialPhase': True, 'useCards':True,
              'transferCards':True, 'immediateCash': True,
@@ -1187,13 +1172,13 @@ if __name__ == "__main__":
     
     board = copy.deepcopy(board_orig)    
     
-    if True:
+    if False:
     
         print("**** Test play")
         board.report()
         print(board.countriesPandas())
         
-        for i in range(50):
+        for i in range(4):
           board.play()
           if board.gameOver: break
         
@@ -1202,7 +1187,7 @@ if __name__ == "__main__":
         print(board.countriesPandas())
     
     
-    if False:
+    if True:
         print("\n\n")
         print("**** Test FlatMC, UCT and MCTS\n")
         
@@ -1246,9 +1231,9 @@ if __name__ == "__main__":
         
         
     
-        
+    #%%% Try PUCT    
     # Now try the network, and the MCTS with the network (apprentice and expert)
-    if False:
+    if True:
         path_model = "../data/models"
         EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs.json"
         
@@ -1261,8 +1246,7 @@ if __name__ == "__main__":
         # ---------------- Model -------------------------
 
         print("Creating board")
-
-        #%%% Create Board
+        
         
         world = World(path_board)
 
@@ -1305,44 +1289,38 @@ if __name__ == "__main__":
             model_name = np.random.choice(os.listdir(path_model))    
             print(f"Chosen model is {model_name}")
             state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')
-            print(state_dict)
+            # print(state_dict)
             net.load_state_dict(state_dict['model'])
             print("Model has been loaded")
             
         
-        
-        print("\nReceived args:\n")
-        print(sys.argv)        
-        
-        num_sims = int(sys.argv[1])
-        temp = int(sys.argv[2])
-        num_plays = int(sys.argv[3])
-        verbose = int(sys.argv[4]) if len(sys.argv)>4 else 0
+        num_sims = 1000
+        temp = 1
+        num_plays = 0
+        verbose = 1
         
         # Create player that uses neural net
         
         apprentice = NetApprentice(net)
         
         puct = PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
-                 wa = 10, wb = 10, cb = 1.1, use_val = 0, console_debug = verbose)
+                 wa = 10, wb = 10, cb = 1.1, use_val = 0.5, console_debug = verbose)
         
         # Play some random moves, then use puct or player puct to tag the move (Expert move)
         
         board = copy.deepcopy(board_orig)
-        
-        
         
         # Test play
         for i in range(num_plays):
           board.play()
           if board.gameOver: break
   
-        print("\n\n *** End of play")  
+        print("\n\n ***** End of play")  
         board.report()
         print(board.countriesPandas())
         
         
-        print("\n\n Playing PUCT")
+        print("\n\n ***** Playing PUCT")
         board.console_debug = False
         bestAction, bestValue, R, Q = puct.getBestAction(board, player = board.activePlayer.code, num_sims = num_sims, verbose=verbose)
         probs = puct.getVisitCount(board, temp=temp)
@@ -1350,7 +1328,7 @@ if __name__ == "__main__":
         
         print("\n\nExpert results")
         print("Action and value: ", bestAction, bestValue)
-        print("R, Q: \n", R, "\n", Q)
+        print("R, Q: \n", R, "\n", Q)        
         print("probs: \n", probs)
         print("Actions (As): \n", puct.As[hash(board)])
         print("Policy (Ps): \n", puct.Ps[hash(board)])
