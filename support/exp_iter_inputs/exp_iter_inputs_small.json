@@ -11,14 +11,14 @@
   "apprentice_params": {
       "type": "mcts",
       "model_name": "",
-      "max_depth": 100,
-      "num_MCTS_sims": 100,
+      "max_depth": 150,
+      "num_MCTS_sims": 300,
       "temp": 1,
       "sims_per_eval": 1
   },
   "expert_params": {
-      "max_depth": 100,
-      "num_MCTS_sims": 200,
+      "max_depth": 150,
+      "num_MCTS_sims": 600,
       "sims_per_eval": 1,
       "wa": 10,
       "wb": 10,
