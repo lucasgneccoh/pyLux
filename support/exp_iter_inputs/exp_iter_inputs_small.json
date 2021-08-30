@@ -1,8 +1,8 @@
 {
   "python_command": "python3",
-  "max_seconds_process": 1500,
+  "max_seconds_process": 3600,
   "params_path": "../support/exp_iter_inputs",
-  "iterations": 3,
+  "iterations": 5,
   "delete_previous": 0,
   "num_samples": 2048,
   "num_cpu": 64,  
@@ -18,7 +18,7 @@
   },
   "expert_params": {
       "max_depth": 150,
-      "num_MCTS_sims": 600,
+      "num_MCTS_sims": 1000,
       "sims_per_eval": 1,
       "wa": 10,
       "wb": 10,
@@ -26,8 +26,8 @@
       "use_val": 0.5,
       "temp": 1
   },
-  "path_data": "../data_test",
-  "path_model": "../data_test/models",
+  "path_data": "../data_diamond",
+  "path_model": "../data_diamond/models",
   "batch_size": 32,
   "model_parameters": "../support/model_parameters/model_default_parameters.json",
   "board_params": {

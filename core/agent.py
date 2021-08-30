@@ -1148,7 +1148,7 @@ if __name__ == "__main__":
 
     # Load map
     #path = '../support/maps/classic_world_map.json'
-    path = '../support/maps/mini_test_map.json'
+    path = '../support/maps/diamond_map.json'
       
     world = World(path)
     
@@ -1159,7 +1159,7 @@ if __name__ == "__main__":
     pFlat = FlatMCPlayer(name='flatMC', max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 700, cb = 0)
     pUCT = UCTPlayer(name='UCT', max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000, cb = np.sqrt(2), verbose = True)
     
-    players = [pUCT, pR1]
+    players = [pR2, pR1]
     # Set board
     prefs = {'initialPhase': True, 'useCards':True,
              'transferCards':True, 'immediateCash': True,
@@ -1192,31 +1192,37 @@ if __name__ == "__main__":
         print("**** Test FlatMC, UCT and MCTS\n")
         
         # Get to the desired phase
-        while board.gamePhase != "attack":
+        
+        for _ in range(0):
             board.play()
-            if board.gameOver: break
+        
+        # while board.gamePhase != "attack":
+        #     board.play()
+        #     if board.gameOver: break
 
         board.report()
         print(board.countriesPandas())
+        
         flat = FlatMC(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = 0)
         uct = UCT(max_depth = 300, sims_per_eval = 2, num_MCTS_sims = 2000, cb = 0.4)
-        
+        temp = 1
         p = board.activePlayer
         
-        bestAction, bestValue = flat.getBestAction(p.code, board, temp=1, num_sims = None, verbose=False)
+        # bestAction, bestValue = flat.getBestAction(board, p.code, temp=1, num_sims = None, verbose=False)
         
-        print(f"Done flatMC: Player {p.code}")
-        actions = flat.As[hash(board)]
-        for i, a in enumerate(actions):
-            print(a, " -> ", flat.Rsa[(hash(board), hash(a))])
+        # print(f"Done flatMC: Player {p.code}")
+        # actions = flat.As[hash(board)]
+        # for i, a in enumerate(actions):
+        #     print(a, " -> ", flat.Rsa[(hash(board), hash(a))])
         
-        print()
-        print(bestAction)
-        print(bestValue)  
-        print(f"Length of the tree: {len(flat.Ns)}")
+        # print()
+        # print(bestAction)
+        # print(bestValue)  
+        # print(f"Length of the tree: {len(flat.Ns)}")
         
         
-        bestAction, bestValue = uct.getBestAction(p.code, board, temp=1, num_sims = None, verbose=False)
+        bestAction, bestValue, R, Q = uct.getBestAction(board, p.code, num_sims = None, verbose=True)
+        probs = uct.getVisitCount(board, temp=temp)
         print("----------------------------")
         print(f"Done UCT: Player {p.code}")
         actions = uct.As[hash(board)]
@@ -1224,8 +1230,11 @@ if __name__ == "__main__":
             print(a, " -> ", uct.Rsa[(hash(board), hash(a))])
         
         print()
-        print(bestAction)
-        print(bestValue)   
+        print("Best action: ", bestAction)
+        print("Best value: ", bestValue)
+        print("R: ", R)
+        print("Q: ", Q)
+        print("probs: ", probs)
         print(f"Length of the tree: {len(uct.Ns)}")
         
         
@@ -1233,9 +1242,9 @@ if __name__ == "__main__":
     
     #%%% Try PUCT    
     # Now try the network, and the MCTS with the network (apprentice and expert)
-    if True:
+    if False:
         path_model = "../data/models"
-        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs.json"
+        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_small.json"
         
         # Create the net using the same parameters
         inputs = misc.read_json(EI_inputs_path)
@@ -1294,7 +1303,7 @@ if __name__ == "__main__":
             print("Model has been loaded")
             
         
-        num_sims = 1000
+        num_sims = 100
         temp = 1
         num_plays = 0
         verbose = 1
@@ -1303,7 +1312,7 @@ if __name__ == "__main__":
         
         apprentice = NetApprentice(net)
         
-        puct = PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
+        puct = PUCT(apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = num_sims,
                  wa = 10, wb = 10, cb = 1.1, use_val = 0.5, console_debug = verbose)
         
         # Play some random moves, then use puct or player puct to tag the move (Expert move)
