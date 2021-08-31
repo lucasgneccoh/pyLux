@@ -36,7 +36,7 @@ def play_episode(root, max_depth, apprentice, move_type = "all", verbose=False):
         # Check if episode is over            
         if state.gameOver: break
 
-        # Check is current player is alive or not
+        # Check if current player is alive or not
         if not state.activePlayer.is_alive: 
             # print("\npassing, dead player")
             state.endTurn()

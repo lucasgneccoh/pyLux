@@ -1,7 +1,7 @@
 from board import Board
 from world import World
 import agent
-from model import GCN_risk, RiskDataset, train_model, TPT_Loss
+from model import GCN_risk, RiskDataset, train_model, total_Loss
 import misc
 
 import os
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     net.to(device)    
     optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
-    criterion = TPT_Loss
+    criterion = total_Loss
     
 
     #state_dict = model.load_dict(os.path.join(path_model, checkpoint), device = 'cpu', encoding = 'latin1')
