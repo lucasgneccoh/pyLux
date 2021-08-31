@@ -5,6 +5,7 @@ Created on Sun Apr 18 19:52:33 2021
 @author: lucas
 """
 
+#%%% Preliminaries
 
 import agent
 
@@ -110,16 +111,19 @@ apprentice = agent.NetApprentice(net)
 board = copy.deepcopy(board_orig)
 
 
+#%%% Random play
 #### Random play
 for _ in range(0):
     board.play()
 
-
+#%%% Board status
 ### See board status
 board.report()
 print(board.countriesPandas())
 
-#### Human move
+
+
+#%%% Human move
 
 # See legal moves
 print("\n*** Human info")
@@ -133,7 +137,7 @@ print("Human playing move: ", m)
 board.playMove(m)
 
 
-#### Net move
+#%%% Net move
 canon, map_to_orig = board.toCanonical(board.activePlayer.code)
 batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
 mask, moves = agent.maskAndMoves(canon, canon.gamePhase, batch.edge_index)
@@ -144,6 +148,7 @@ print("\n*** Net info")
 print(mask)
 print(moves)
 print(policy)
+print(value)
 pol = policy.ravel() / policy.sum()
 ind = np.random.choice(len(moves), p = pol)
 m = agent.buildMove(board, moves[ind])

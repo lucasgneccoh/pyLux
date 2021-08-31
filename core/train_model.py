@@ -27,8 +27,8 @@ def parseInputs():
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
-    misc.print_and_flush("train_model: Start")
-    start = time.process_time()
+    print("\t\ttrain_model: Start")
+    start_train = time.process_time()
     
     args = parseInputs()
     inputs = misc.read_json(args.inputs)
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     num_nodes = board_orig.world.map_graph.number_of_nodes()
     num_edges = board_orig.world.map_graph.number_of_edges()
 
-    if verbose: misc.print_and_flush("Creating model")
+    if verbose: print("\t\ttrain_model: Creating model")
     net = GCN_risk(num_nodes, num_edges, 
                      model_args['board_input_dim'], model_args['global_input_dim'],
                      model_args['hidden_global_dim'], model_args['num_global_layers'],
@@ -101,10 +101,10 @@ if __name__ == '__main__':
         
         
     # Train network on dataset
-    if verbose: misc.print_and_flush("Training network")
+    if verbose: print("\t\ttrain_model: Training network")
     shuffle(move_types)
     for j, move_type in enumerate(move_types):
-        if verbose: misc.print_and_flush(f"\tTraining {j}:  {move_type}")
+        if verbose: print(f"\t\t\tTraining {j}:  {move_type}")
         save_path = f"{path_model}/model_{iteration}_{j}_{move_type}.tar"
         root_path = f'{path_data}/{move_type}'
         
@@ -120,5 +120,5 @@ if __name__ == '__main__':
         
         load_path = None # The model is already in memory
 
-    misc.print_and_flush(f"train_model: Total time taken -> {round(time.process_time() - start,2)}")
+    print(f"\t\ttrain_model done: Total time taken -> {round(time.process_time() - start_train,2)}")
         
