@@ -1,31 +1,14 @@
 from board import Board
-from world import World, Country, Continent
-from move import Move
+from world import World
 import agent
-from model import boardToData, GCN_risk, RiskDataset, saveBoardObs, train_model, TPT_Loss
+from model import GCN_risk, RiskDataset, train_model, TPT_Loss
 import misc
 
 import os
-import itertools
-import numpy as np
-import copy
-import sys
-import json
-
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
 
-import torch_geometric 
+
 from torch_geometric.data import DataLoader as G_DataLoader
-from torch_geometric.data import Data
-from torch_geometric.nn import GCNConv
-from torch_geometric.data import Dataset as G_Dataset
-from torch_geometric.data import download_url
-import torch_geometric.transforms as T
-from torch_geometric import utils
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
@@ -44,7 +27,7 @@ def parseInputs():
 
 if __name__ == '__main__':
     # ---------------- Start -------------------------
-    misc.print_and_flush(f"train_model: Start")
+    misc.print_and_flush("train_model: Start")
     start = time.process_time()
     
     args = parseInputs()
@@ -87,7 +70,7 @@ if __name__ == '__main__':
     num_nodes = board_orig.world.map_graph.number_of_nodes()
     num_edges = board_orig.world.map_graph.number_of_edges()
 
-    if verbose: print_and_flush("Creating model")
+    if verbose: misc.print_and_flush("Creating model")
     net = GCN_risk(num_nodes, num_edges, 
                      model_args['board_input_dim'], model_args['global_input_dim'],
                      model_args['hidden_global_dim'], model_args['num_global_layers'],
@@ -118,7 +101,7 @@ if __name__ == '__main__':
         
         
     # Train network on dataset
-    if verbose: print_and_flush("Training network")
+    if verbose: misc.print_and_flush("Training network")
     shuffle(move_types)
     for j, move_type in enumerate(move_types):
         if verbose: misc.print_and_flush(f"\tTraining {j}:  {move_type}")

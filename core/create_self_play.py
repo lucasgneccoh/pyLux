@@ -125,7 +125,7 @@ def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, sa
 def tag_with_expert_move(state, expert, temp=1, verbose=False):
     # Tag one state with the expert move    
     start = time.process_time()
-    _, _, value_exp, Q_value_exp = expert.getBestAction(state, player = state.activePlayer.code, num_sims = None, verbose=False)
+    _, _, value_exp, Q_value_exp = expert.getBestAction(state, player = state.activePlayer.code, num_sims = None, verbose=verbose)
     policy_exp = expert.getVisitCount(state, temp=temp)
     # TODO: Katago improvement
     

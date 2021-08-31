@@ -1,21 +1,17 @@
 from board import Board # Only used for the Board.fromDicts
-import itertools
 import os
 import json
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+
 
 import torch_geometric 
-from torch_geometric.data import DataLoader as G_DataLoader
-from torch_geometric.data import Data
+
 from torch_geometric.nn import GCNConv
 from torch_geometric.data import Dataset as G_Dataset
-from torch_geometric.data import download_url
-import torch_geometric.transforms as T
+
 from torch_geometric import utils
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -345,7 +341,6 @@ class GCN_risk(torch.nn.Module):
 
         place = F.softmax(place, dim=1)
         
-        # TODO: Mask invalid moves
 
         # attack head
         attack = self.attack_layers[0](x, adj_t)        
@@ -359,7 +354,7 @@ class GCN_risk(torch.nn.Module):
         for i in range(len(self.attack_final)):
             attack = self.attack_final[i](attack)
         attack = F.softmax(attack, dim = 1)
-        # TODO: Mask invalid moves
+        
 
         # fortify head
         fortify = self.fortify_layers[0](x, adj_t)        
@@ -373,7 +368,6 @@ class GCN_risk(torch.nn.Module):
         for i in range(len(self.fortify_final)):
             fortify = self.fortify_final[i](fortify)
         fortify = F.softmax(fortify, dim = 1)
-        # TODO: Mask invalid moves
 
         # value head
         value = self.value_layers[0](x, adj_t)        
@@ -386,18 +380,19 @@ class GCN_risk(torch.nn.Module):
         value = F.relu(self.value_fc_1(value))
         value = torch.sigmoid(self.value_fc_2(value))
 
-
-        # TODO: Add global features somehow
-        
-
         
         #########################################        
         return pick, place, attack, fortify, value
         
 
-def TPT_Loss(output, target):
-    # TODO: Add regularisation
+def TPT_Loss(output, target):    
     return -(target*torch.log(output)).sum()
+
+def V_Loss(v, z):
+    return (-z*torch.log(v) - (1-z)*torch.log(1-v)).sum()
+
+def total_Loss(output, v, target, z):
+    return TPT_Loss(output, target) + V_Loss(v,z)  
      
 def train_model(model, optimizer, scheduler, criterion, device, epochs,
                 train_loader, val_loader = None, eval_every = 1,
@@ -446,9 +441,10 @@ def train_model(model, optimizer, scheduler, criterion, device, epochs,
                 out = fortify            
             
             y = batch.y.view(batch.num_graphs,-1)
+            z = batch.value.view(batch.num_graphs,-1)
             # print("out\n", out)
             # print("y\n", y)
-            loss = criterion(out, y)            
+            loss = criterion(out, value, y, z)  
             # print(loss)
             loss.backward()
             optimizer.step()
@@ -486,3 +482,10 @@ def train_model(model, optimizer, scheduler, criterion, device, epochs,
                         'optimizer':optimizer.state_dict(),
                         'scheduler':scheduler.state_dict(),
                         'epoch': epoch, 'best_loss':total_loss})
+    
+    
+if __name__ == "__main__":
+    # Test the model loading, the forward and the loss
+    print("script model.py")
+    
+    

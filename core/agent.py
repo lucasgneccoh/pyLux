@@ -11,9 +11,7 @@ import misc
 
 import copy
 import itertools
-import json
 import os
-import sys
 
 from board import Board, Agent, RandomAgent
 from world import World
@@ -21,10 +19,8 @@ from world import World
 import torch
 
 # Needs torch_geometric
-from model import boardToData, buildGlobalFeature, GCN_risk, load_dict, save_dict
+from model import boardToData, buildGlobalFeature, GCN_risk, load_dict
 import torch_geometric
-
-
 
 
 class PeacefulAgent(RandomAgent):
@@ -711,7 +707,6 @@ class UCTPlayer(Agent):
         return self.run(board)
 
 
-    
 class MctsApprentice(object):
     def __init__(self, num_MCTS_sims = 1000, sims_per_eval = 1, temp=1, max_depth=100): 
         self.max_depth = max_depth
@@ -738,7 +733,6 @@ class MctsApprentice(object):
         probs = self.apprentice.getVisitCount(state, temp = self.temp)
         return probs, R
         
-
 
 class NetApprentice(object):
 
@@ -1187,13 +1181,13 @@ if __name__ == "__main__":
         print(board.countriesPandas())
     
     
-    if True:
+    if False:
         print("\n\n")
         print("**** Test FlatMC, UCT and MCTS\n")
         
         # Get to the desired phase
         
-        for _ in range(0):
+        for _ in range(2):
             board.play()
         
         # while board.gamePhase != "attack":
@@ -1213,7 +1207,8 @@ if __name__ == "__main__":
         # print(f"Done flatMC: Player {p.code}")
         # actions = flat.As[hash(board)]
         # for i, a in enumerate(actions):
-        #     print(a, " -> ", flat.Rsa[(hash(board), hash(a))])
+        #     if uct.Vs[hash(board)][i]:
+        #         print(a, " -> ", flat.Rsa[(hash(board), hash(a))])
         
         # print()
         # print(bestAction)
@@ -1227,7 +1222,8 @@ if __name__ == "__main__":
         print(f"Done UCT: Player {p.code}")
         actions = uct.As[hash(board)]
         for i, a in enumerate(actions):
-            print(a, " -> ", uct.Rsa[(hash(board), hash(a))])
+            if uct.Vs[hash(board)][i]:
+                print(a, " -> ", uct.Rsa[(hash(board), hash(a))])
         
         print()
         print("Best action: ", bestAction)
@@ -1264,11 +1260,7 @@ if __name__ == "__main__":
         pR1, pR2, pR3 = RandomAgent('Red'), RandomAgent('Blue'), RandomAgent('Green')
         players = [pR1, pR2]
         # Set board
-        # TODO: Send to inputs
-        prefs = {'initialPhase': True, 'useCards':True,
-                'transferCards':True, 'immediateCash': True,
-                'continentIncrease': 0.05, 'pickInitialCountries':True,
-                'armiesPerTurnInitial':4,'console_debug':True}
+        prefs = board_params
                 
         board_orig = Board(world, players)
         board_orig.setPreferences(prefs)
@@ -1291,7 +1283,7 @@ if __name__ == "__main__":
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         net.to(device)
         
-        load_model = True
+        load_model = False
         
         if load_model:
             # Choose a model at random
@@ -1344,4 +1336,318 @@ if __name__ == "__main__":
         print("Valid (Vs): \n", puct.Vs[hash(board)])
         
 
+    if True:
+      # Test the net training. Get random boards, tag them with PUCT, then train
+      
+        ##### IMPORT FROM CREATE_SELF_PLAY
+        import sys
+        import time
+        from model import saveBoardObs, save_dict
+        def play_episode(root, max_depth, apprentice, move_type = "all", verbose=False):
+            episode = []
+            state = copy.deepcopy(root)
+            edge_index = boardToData(root).edge_index
+            # ******************* PLAY EPISODE ***************************
+            for i in range(max_depth):  
+                #print_message_over(f"Playing episode: {i}/{max_depth}")
+        
+                # Check if episode is over            
+                if state.gameOver: break
+        
+                # Check is current player is alive or not
+                if not state.activePlayer.is_alive: 
+                    # print("\npassing, dead player")
+                    state.endTurn()
+                    continue
+        
+                # Get possible moves, and apprentice policy
+                mask, actions = maskAndMoves(state, state.gamePhase, edge_index)
+                
+                try:
+                    policy, value = apprentice.getPolicy(state)
+                except Exception as e:
+                    state.report()
+                    print(state.activePlayer.is_alive)
+                    print(state.activePlayer.num_countries)
+                    raise e
+                
+                if isinstance(mask, torch.Tensor):
+                    mask = mask.detach().numpy()
+                
+                probs = policy * mask             
+                
+                probs = probs.flatten()
+                  
+                probs =  probs / probs.sum()
+        
+                # Random selection? e-greedy?
+                
+                ind = np.random.choice(range(len(actions)), p = probs)
+                move = buildMove(state, actions[ind])
+                
+                saved = (move_type=="all" or move_type==state.gamePhase)
+                if verbose:             
+                    # print(f"\t\tPlay episode: turn {i}, move = {move}, saved = {saved}")
+                    pass
+                
+                if saved:
+                    episode.append(copy.deepcopy(state))
+                    
+                if move_type == "initialPick":
+                    if state.gamePhase != "initialPick":
+                        break
+                elif move_type == "initialFortify":
+                    if state.gamePhase in ["startTurn", "attack", "fortify"]:
+                        break
+                        
+                    
+                # Play the move to continue
+                state.playMove(move)
+                
+            return episode
+             
+        def create_self_play_data(move_type, path, root, apprentice, max_depth = 100, saved_states_per_episode=1, verbose = False):
+            """ Function to create episodes from self play.
+                Visited states are saved and then re visited with the expert to label the data        
+            """
+        
+            if verbose: 
+                print("\t\tSelf-play starting")
+                sys.stdout.flush()
+                
+            try:
+                # Define here how many states to select, and how
+                # edge_index = boardToData(root).edge_index    
+        
+                # ******************* PLAY EPISODE ***************************
+                episode = play_episode(root, max_depth, apprentice, move_type = move_type, verbose = verbose)
+                
+                # ******************* SELECT STATES ***************************
+                # Take some states from episode    
+                
+                options = [s for s in episode if s.gamePhase == move_type]
+                if not options:
+                    # TODO: What to do in this case? For now just take some random states to avoid wasting the episode
+                    options = episode
+                states_to_save = np.random.choice(options, min(saved_states_per_episode, len(options)), replace=False)
+            except Exception as e:
+                raise e
+            
+            if verbose: 
+                print(f"\t\tSelf-play done: move_type = {move_type}, {len(states_to_save)} states to save")
+                sys.stdout.flush()
+                
+            return states_to_save
+        
+        
+        def tag_with_expert_move(state, expert, temp=1, verbose=False):
+            # Tag one state with the expert move    
+            start = time.process_time()
+            _, _, value_exp, Q_value_exp = expert.getBestAction(state, player = state.activePlayer.code, num_sims = None, verbose=verbose)
+            policy_exp = expert.getVisitCount(state, temp=temp)
+            # TODO: Katago improvement
+            
+            if isinstance(policy_exp, torch.Tensor):
+                policy_exp = policy_exp.detach().numpy()
+            if isinstance(value_exp, torch.Tensor):
+                value_exp = value_exp.detach().numpy()
+            
+            if verbose: 
+                print(f"\t\tTag with expert: Tagged board {state.board_id} ({state.gamePhase}). {round(time.process_time() - start,2)} sec")
+                sys.stdout.flush()
+            
+            return state, policy_exp, value_exp
+            
+        
+        def simple_save_state(root_path, state, policy, value, verbose=False, num_task=0):
+            try:
+                board, _ = state.toCanonical(state.activePlayer.code)
+                phase = board.gamePhase
+                full_path = os.path.join(root_path, phase, 'raw')
+                num = len(os.listdir(full_path))+1        
+                name = f"board_{num}.json"
+                while os.path.exists(os.path.join(full_path, name)):
+                    num += 1
+                    name = f"board_{num}.json"
+                name = f"board_{num}_{num_task}.json" # Always different
+                saveBoardObs(full_path, name,
+                                    board, board.gamePhase, policy.ravel().tolist(), value.ravel().tolist())
+                if verbose: 
+                    print(f"\t\tSimple save: Saved board {state.board_id} {os.path.join(full_path, name)}")
+                    sys.stdout.flush()
+                return True
+            except Exception as e:
+                print(e)
+                raise e
+                
+                
+        ##### end IMPORT FROM CREATE_SELF_PLAY ############
+        
+        
+        # Define inputs here
+        load_model = True
+        max_depth = 150
+        move_type = "startTurn"
+        path_data = "../data_diamond_test"
+        path_model = "../data_diamond_test/models"
+        num_sims = 600
+        saved_states_per_episode=1
+        verbose = 1
+        num_states = 4
+        batch_size = 4
+        temp = 1
+        
+        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_small.json"
+        
+        
+        # Create folders if they dont exist
+        move_types = ["initialPick", "initialFortify", "startTurn", "attack", "fortify"]
+        for folder in move_types:
+            os.makedirs(os.path.join(path_data, folder, 'raw'), exist_ok = True)
+        os.makedirs(path_model, exist_ok = True)
+        
+        # Create the net using the same parameters
+        inputs = misc.read_json(EI_inputs_path)
+        model_args =  misc.read_json(inputs["model_parameters"])
+        board_params = inputs["board_params"]
+        path_board = board_params["path_board"]
+
+        # ---------------- Model -------------------------
+
+        print("Creating board")
+        
+        world = World(path_board)
+
+
+        # Set players
+        pR1, pR2, pR3 = RandomAgent('Red'), RandomAgent('Blue'), RandomAgent('Green')
+        players = [pR1, pR2]
+        # Set board
+        prefs = board_params
+                
+        board_orig = Board(world, players)
+        board_orig.setPreferences(prefs)
+
+        num_nodes = board_orig.world.map_graph.number_of_nodes()
+        num_edges = board_orig.world.map_graph.number_of_edges()
+
+        ##### Create the net 
+        
+        print("Creating model")
+        net = GCN_risk(num_nodes, num_edges, 
+                         model_args['board_input_dim'], model_args['global_input_dim'],
+                         model_args['hidden_global_dim'], model_args['num_global_layers'],
+                         model_args['hidden_conv_dim'], model_args['num_conv_layers'],
+                         model_args['hidden_pick_dim'], model_args['num_pick_layers'], model_args['out_pick_dim'],
+                         model_args['hidden_place_dim'], model_args['num_place_layers'], model_args['out_place_dim'],
+                         model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
+                         model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
+                         model_args['hidden_value_dim'], model_args['num_value_layers'],
+                         model_args['dropout'])
+
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        net.to(device)
+        
+        
+        ##### Load the model to use as apprentice
+        
+        if load_model:
+            # Choose a model at random
+            model_name = np.random.choice(os.listdir(path_model))    
+            print(f"Chosen model is {model_name}")
+            state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')
+            # print(state_dict)
+            net.load_state_dict(state_dict['model'])
+            print("Model has been loaded")
+            
+        
+        ###### Get some random games and tag them
+        # Define apprentice and expert 
+        apprentice = NetApprentice(net)        
+        expert = PUCT(apprentice, max_depth = max_depth, sims_per_eval = 1, num_MCTS_sims = num_sims,
+                 wa = 10, wb = 10, cb = 1.1, use_val = 0.5, console_debug = verbose)
+        
+        # Play
+        state = copy.deepcopy(board_orig)
+        states_to_save = []
+        for _ in range(num_states):
+            aux = create_self_play_data(move_type, path_data, state, apprentice, max_depth = max_depth, saved_states_per_episode=saved_states_per_episode, verbose = verbose)
+            states_to_save.extend(aux)
+        
+        
+        # Tag and save
+        for k, st in enumerate(states_to_save):
+            print(f"Tagging state {k}")
+            st_tagged, policy_exp, value_exp = tag_with_expert_move(st, expert, temp=temp, verbose=verbose)
+            res = simple_save_state(path_data, st_tagged, policy_exp, value_exp, verbose=verbose, num_task=k)
+        
+        
+        
+        # Now train the model
+        
+        # Create the dataset
+        from model import RiskDataset
+        from torch_geometric.data import DataLoader as G_DataLoader
+        
+        save_path = f"{path_model}/model_test_test_{move_type}.tar"
+        root_path = f'{path_data}/{move_type}'
+        
+        if len(os.listdir(os.path.join(root_path, 'raw')))<batch_size:
+            raise Exception("Not enough data")
+        
+        risk_dataset = RiskDataset(root = root_path)        
+        
+        train_loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
+
+        # Create optimizer and scheduler
+        
+        optimizer = torch.optim.Adam(net.parameters(), lr=0.001, weight_decay=0.001)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+        from model import total_Loss
+        criterion = total_Loss
+        
+       
+        for batch, global_batch in train_loader:   
+            batch.to(device)
+            global_batch.to(device) 
+            optimizer.zero_grad()
+            try:
+                pick, place, attack, fortify, value = net.forward(batch, global_batch)
+            except Exception as e:
+                print("Batch: \n", batch.x)
+                print(batch.x.shape)
+                print("global: ", global_batch.shape)
+                raise e
+            # print("pick", pick)
+            # print("place", place)
+            # print("attack", attack)
+            # print("fortify", fortify)
+            # print("value", value)
+            phase = batch.phase[0]
+            if phase == 'initialPick':
+                out = pick
+            elif phase in ['initialFortify', 'startTurn']:
+                out = place
+            elif phase == 'attack':
+                out = attack
+            elif phase == 'fortify':
+                out = fortify            
+            
+            y = batch.y.view(batch.num_graphs,-1)
+            z = batch.value.view(batch.num_graphs,-1)
+            # print("out\n", out)
+            # print("y\n", y)
+            loss = criterion(out, value, y, z)
+            # print("out: ", out)
+            # print("value: ", value)
+            # print("target: ", y)
+            # print("value target: ", z)
+            # print(loss)
+            loss.backward()
+            optimizer.step()
+            
+        save_dict(save_path, {'model':net.state_dict(),
+                        'optimizer':optimizer.state_dict(),
+                        'scheduler':scheduler.state_dict(),
+                        'epoch': 0, 'best_loss':0})
  
