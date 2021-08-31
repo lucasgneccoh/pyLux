@@ -289,5 +289,5 @@ if __name__ == '__main__':
     if verbose: misc.print_and_flush(f"create_self_play  ({num_task}): Tag and save: Time taken -> {round(time.process_time() - start_inner,2)}")
     
         
-    misc.print_and_flush(f"create_self_play  ({num_task}): Total time taken -> {round(time.process_time() - start,2)}")
+    misc.print_and_flush(f"create_self_play  ({num_task}) ({move_type}): Total time taken -> {round(time.process_time() - start,2)}")
     
