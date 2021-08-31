@@ -3,7 +3,7 @@
   "max_seconds_process": 2000,
   "params_path": "../support/exp_iter_inputs",
   "iterations": 10,
-  "delete_previous": 0,
+  "delete_previous": 1,
   "num_samples": 320,
   "num_cpu": 64,  
   "saved_states_per_episode": 2,
