@@ -9,8 +9,8 @@
   "saved_states_per_episode": 2,
   "max_episode_depth": 150,
   "apprentice_params": {
-      "type": "mcts",
-      "model_name": "",
+      "type": "net",
+      "model_name": "model_0_0_initialPick.tar",
       "max_depth": 150,
       "num_MCTS_sims": 300,
       "temp": 1,
