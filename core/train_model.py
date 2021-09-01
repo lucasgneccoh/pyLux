@@ -19,7 +19,7 @@ import time
 def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/train_apprentice.json")
-  parser.add_argument("--verbose", help="Print on the console?", type=int, default = 0)
+  parser.add_argument("--verbose", help="Print on the console?", type=int, default = 1)
   parser.add_argument("--checkpoint", help="Checkpoint to use when loading the model, optimizer and scheduler", default = "")
   parser.add_argument("--iteration", help="Global iteration of Expert Iteration", type=int, default = 0)
   args = parser.parse_args()
@@ -95,6 +95,7 @@ if __name__ == '__main__':
     #optimizer.load_state_dict(state_dict['optimizer'])
     #scheduler.load_state_dict(state_dict['scheduler'])
     load_path = os.path.join(path_model, checkpoint) if checkpoint else None 
+    print("Loading model from: ", load_path)
     # This is used only at the beginning. Then the model that is loaded is trained and saved at each time.
     # We avoid reloading the last saved model
     
@@ -104,16 +105,18 @@ if __name__ == '__main__':
     if verbose: print("\t\ttrain_model: Training network")
     shuffle(move_types)
     for j, move_type in enumerate(move_types):
-        if verbose: print(f"\t\t\tTraining {j}:  {move_type}")
+        print(f"\t\t\tTraining {j}:  {move_type}")
         save_path = f"{path_model}/model_{iteration}_{j}_{move_type}.tar"
         root_path = f'{path_data}/{move_type}'
         
-        if len(os.listdir(os.path.join(root_path, 'raw')))<batch_size: continue
+        if len(os.listdir(os.path.join(root_path, 'raw')))<batch_size: 
+            print("\t\TLess data than batch size, passing")
+            continue
         
         risk_dataset = RiskDataset(root = root_path)
         # TODO: add validation data
         loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
-        if verbose: misc.print_and_flush(f"\tTrain on {root_path}, model = {save_path}")
+        print(f"\tTrain on {root_path}, model = {save_path}")
         train_model(net, optimizer, scheduler, criterion, device,
                     epochs = epochs, train_loader = loader, val_loader = None, eval_every = eval_every,
                     load_path = load_path, save_path = save_path)

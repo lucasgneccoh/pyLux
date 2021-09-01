@@ -156,10 +156,11 @@ print("Net playing move: ", m)
 board.playMove(m)
 
 
-    
-    
-    
-    
+
+
+
+
+
     
     
     

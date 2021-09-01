@@ -827,7 +827,7 @@ class PUCT(object):
         self.Ps[s] = policy.squeeze().detach().numpy()
         self.Ns[s] = 1
 
-        # Monte Carlo evaluation        
+        # Monte Carlo evaluation       
         v = np.zeros(6)
         for _ in range(self.sims_per_eval):
             sim = copy.deepcopy(state)
