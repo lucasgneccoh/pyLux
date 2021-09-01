@@ -4,8 +4,8 @@
   "params_path": "../support/exp_iter_inputs",
   "iterations": 20,
   "delete_previous": 1,
-  "num_samples": 128,
-  "num_cpu": 64,
+  "num_samples": 320,
+  "num_cpu": 80,
   "saved_states_per_episode": 2,
   "max_episode_depth": 200,
   "apprentice_params": {
