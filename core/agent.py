@@ -1077,8 +1077,80 @@ class PUCTPlayer(Agent):
           raise Exception("Invalid kind of move selection criterion")
       
       # Return the selected move, destroy tree
-      self.puct = None
+      self.puct = None # Dont destroy tree?
       return buildMove(board, actions[ind])
+  
+  def pickCountry(self, board) -> int:
+      move = self.run(board)
+      return move
+    
+  def placeInitialArmies(self, board, numberOfArmies:int):
+      move = self.run(board)
+      return move
+  
+  
+  def cardPhase(self, board, cards):
+      if len(cards)<5 or not Deck.containsSet(cards): 
+        return None
+      c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
+      if not c is None:      
+        return c
+  
+  
+  def placeArmies(self, board, numberOfArmies:int):    
+      move = self.run(board)
+      return move
+  
+  
+  def attackPhase(self, board):
+      move = self.run(board)
+      return move 
+    
+  def moveArmiesIn(self, board, countryCodeAttacker:int, countryCodeDefender:int) -> int:
+      # Default for now
+      
+      # Default is to move all but one army
+      return board.world.countries[countryCodeAttacker].armies-1
+
+  def fortifyPhase(self, board):      
+      move = self.run(board)
+      return move
+  
+
+class NetPlayer(Agent):  
+  def __init__(self, apprentice = None, name = "netPlayer", move_selection = "random_proportional"):
+      
+      self.name = name    
+      self.human = False
+      self.console_debug = False
+      
+      self.apprentice = apprentice     
+      self.move_selection = move_selection      
+  
+  def run(self, state):
+    
+      canon, map_to_orig = state.toCanonical(state.activePlayer.code)                        
+      batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
+      mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)      
+      policy, net_value = self.apprentice.getPolicy(canon)
+      # Fix order of value returned by net
+      # net_value = net_value.squeeze()
+      
+      # cor_value = np.array([net_value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
+      
+      pol = (policy * mask.detach().numpy()).squeeze()
+      probs = pol / pol.sum()
+      
+      # Use some criterion to choose the move
+      if self.move_selection == "argmax":
+          ind = np.argmax(probs)
+      elif self.move_selection == "random_proportional":
+          ind = np.random.choice(len(moves), p = probs)
+      else:
+          raise Exception("Invalid kind of move selection criterion")
+      
+      # Return the selected move, destroy tree      
+      return buildMove(state, moves[ind])
   
   def pickCountry(self, board) -> int:
       move = self.run(board)
@@ -1336,7 +1408,7 @@ if __name__ == "__main__":
         print("Valid (Vs): \n", puct.Vs[hash(board)])
         
 
-    if True:
+    if False:
       # Test the net training. Get random boards, tag them with PUCT, then train
       
         ##### IMPORT FROM CREATE_SELF_PLAY
@@ -1650,4 +1722,88 @@ if __name__ == "__main__":
                         'optimizer':optimizer.state_dict(),
                         'scheduler':scheduler.state_dict(),
                         'epoch': 0, 'best_loss':0})
+        
+    if True:
+      
+        # Test NetPlayer
+        path_model = "../data_test/models"
+        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_small.json"
+        
+        # Create the net using the same parameters
+        inputs = misc.read_json(EI_inputs_path)
+        model_args =  misc.read_json(inputs["model_parameters"])
+        board_params = inputs["board_params"]
+        path_board = board_params["path_board"]
+
+        # ---------------- Model -------------------------
+
+        print("Creating board")
+        
+        
+        world = World(path_board)
+
+
+        # Set players
+        pR1, pR2, pR3 = RandomAgent('Red'), RandomAgent('Blue'), RandomAgent('Green')
+        players = [pR1, pR2]
+        # Set board
+        prefs = board_params
+                
+        board_orig = Board(world, players)
+        board_orig.setPreferences(prefs)
+
+        num_nodes = board_orig.world.map_graph.number_of_nodes()
+        num_edges = board_orig.world.map_graph.number_of_edges()
+
+        print("Creating model")
+        net = GCN_risk(num_nodes, num_edges, 
+                         model_args['board_input_dim'], model_args['global_input_dim'],
+                         model_args['hidden_global_dim'], model_args['num_global_layers'],
+                         model_args['hidden_conv_dim'], model_args['num_conv_layers'],
+                         model_args['hidden_pick_dim'], model_args['num_pick_layers'], model_args['out_pick_dim'],
+                         model_args['hidden_place_dim'], model_args['num_place_layers'], model_args['out_place_dim'],
+                         model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
+                         model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
+                         model_args['hidden_value_dim'], model_args['num_value_layers'],
+                         model_args['dropout'])
+
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        net.to(device)
+        
+        load_model = True
+        model_name = "model_9_4_initialPick.tar"
+        
+        if load_model:
+            if model_name is None:
+                # Choose a model at random
+                model_name = np.random.choice(os.listdir(path_model))    
+            print(f"Chosen model is {model_name}")
+            state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')
+            # print(state_dict)
+            net.load_state_dict(state_dict['model'])
+            print("Model has been loaded\n\n")
+        
+                
+                    
+        # Create player that uses neural net
+        
+        apprentice = NetApprentice(net)
+        netPlayer = NetPlayer(apprentice, move_selection = "random_proportional")
+        
+        players = [netPlayer, pR2]
+        # Set board
+        prefs = board_params
+        board = Board(world, players)
+        board.setPreferences(prefs)
+        board.console_debug=True
+                
+        
+        # Test play
+        for i in range(50):
+          board.play()
+          if board.gameOver: break
+  
+        print("\n\n ***** End of play")  
+        board.report()
+        print(board.countriesPandas())
  
