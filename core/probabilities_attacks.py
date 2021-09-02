@@ -62,7 +62,7 @@ print("Results of one attack")
 print(results)
 print("\n\n")
 
-num_tries = 10000
+num_tries = 50000
 def attack_till_dead(A,D):
   while A>0 and D>0:
      aLoss, dLoss = board.roll(min(A,3), min(D,2))
