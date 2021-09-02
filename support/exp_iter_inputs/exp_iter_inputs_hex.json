@@ -10,7 +10,7 @@
   "max_episode_depth": 200,
   "apprentice_params": {
       "type": "net",
-      "model_name": "model_0_0_hex.tar",
+      "model_name": "model_0_0_hex.tar"
   },
   "expert_params": {
       "max_depth": 200,
