@@ -1,18 +1,7 @@
 {
-  "players": [
+  "players": [ 
     {
       "agent": "Human", 
-      "name": "Yo"      
-    },
-    {
-      "agent": "NetPlayer",
-      "name": "net_9",
-      "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-      "model_path": "../data_test_map/models/model_9_4_initialPick.tar",
-      "move_selection": "random_proportional"
-    },
-    {
-      "agent": "PUCTPlayer", 
       "name": "PUCT",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
       "model_path": "../data_test_map/models/model_9_4_initialPick.tar",
@@ -23,6 +12,13 @@
       "num_MCTS_sims": 300,
       "cb":0.4,
       "console_debug": 1
+    },
+    {
+      "agent": "NetPlayer",
+      "name": "net_4_0",
+      "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+      "model_path": "../data_test_map/models/model_4_0_initialFortify.tar",
+      "move_selection": "random_proportional"
     }
   ],
   "board_params": {
@@ -35,7 +31,7 @@
       "continentIncrease": 0.05,
       "console_debug": true,
       "armiesPerTurnInitial": 4,
-      "initialArmies": 35
+      "initialArmies": 40
     },
   "key_till_dead": [
     1073742049,
