@@ -1,20 +1,16 @@
 {
   "players": [
     {
-      "agent": "RandomAgent", 
-      "name": "Random_1"      
+      "agent": "Human", 
+      "name": "Yo"      
     },
     {
       "agent": "RandomAgent", 
       "name": "Random_2"      
-    },
-    {
-      "agent": "RandomAgent", 
-      "name": "Random_3"      
     }
   ],
   "board_params": {
-      "path_board": "../support/maps/classic_world_map.json",
+      "path_board": "../support/maps/triangle_map.json",
       "pickInitialCountries": true,
       "initialPhase": true,
       "useCards": true,
@@ -22,8 +18,9 @@
       "immediateCash": true,
       "continentIncrease": 0.05,
       "console_debug": true,
-      "armiesPerTurnInitial": 4
-    },
+      "armiesPerTurnInitial": 4,
+      "initialArmies": 10
+      },
   "key_till_dead": [
     1073742049,
     1073742053

@@ -5,16 +5,12 @@
       "name": "Random_1"      
     },
     {
-      "agent": "RandomAgent", 
-      "name": "Random_2"      
-    },
-    {
-      "agent": "RandomAgent", 
-      "name": "Random_3"      
+      "agent": "Human", 
+      "name": "Yo"      
     }
   ],
   "board_params": {
-      "path_board": "../support/maps/classic_world_map.json",
+      "path_board": "../support/maps/diamond_map.json",
       "pickInitialCountries": true,
       "initialPhase": true,
       "useCards": true,
@@ -23,7 +19,7 @@
       "continentIncrease": 0.05,
       "console_debug": true,
       "armiesPerTurnInitial": 4
-    },
+      },
   "key_till_dead": [
     1073742049,
     1073742053

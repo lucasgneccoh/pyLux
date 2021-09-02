@@ -23,6 +23,14 @@ from model import boardToData, buildGlobalFeature, GCN_risk, load_dict
 import torch_geometric
 
 
+class HumanAgent(RandomAgent):
+
+  def __init__(self, name='human'):
+    super().__init__(name = name)
+    self.human = True
+    
+
+
 class PeacefulAgent(RandomAgent):
 
   def __init__(self, name='peace'):

@@ -2,12 +2,10 @@ import sys
 import itertools
 import numpy as np
 import copy
-import random
-import time
 import pandas as pd
 
 from deck import Deck, ListThenArithmeticCardSequence
-from world import World, Country, Continent
+from world import World, Country
 from move import Move
 
 from misc import iter_all_strings
@@ -142,6 +140,8 @@ class Agent(object):
     linked and have moveable armies.
     '''
     pass
+  def youWon(self):
+    return "This agent won the game"
 
 class RandomAgent(Agent):
   """ Base agent
@@ -244,7 +244,7 @@ class Board(object):
       raise Exception("Minimum 2 players to play pyRisk")
     else:
       initialArmies = armiesForPlayers[N]
-    
+    self.initialArmies = initialArmies
     # random.shuffle(players) Make this outside for now
     self.orig_players = copy.deepcopy(players)
     self.players = {i: p for i, p in enumerate(players)}
@@ -396,7 +396,7 @@ class Board(object):
   
   def setPreferences(self, prefs):
     self.prefs = prefs
-    available_prefs = ['initialPhase', 'useCards', 'transferCards', 'immediateCash', 'continentIncrease', 'pickInitialCountries', 'armiesPerTurnInitial', 'console_debug']
+    available_prefs = ['initialArmies', 'initialPhase', 'useCards', 'transferCards', 'immediateCash', 'continentIncrease', 'pickInitialCountries', 'armiesPerTurnInitial', 'console_debug']
     # In the future, card sequences, num_wildcards, armiesInitial
     for a in available_prefs:
       r = prefs.get(a)
@@ -404,6 +404,10 @@ class Board(object):
         print(f"Board preferences: value for '{a}' not given. Leaving default value {getattr(self, a)}")
       else:
         setattr(self, a, r)
+    if 'initialArmies' in prefs:
+      init = prefs['initialArmies']
+      for _, p in self.players.items():       
+        p.initialArmies = int(init)        
         
 #%% Board: Play related functions
   
@@ -733,8 +737,8 @@ class Board(object):
     '''
     if attack > 3 or attack <= 0: return None
     if defense > 2 or defense <= 0: return None
-    aDice = sorted(np.random.randint(0,7,size=attack), reverse=True)
-    dDice = sorted(np.random.randint(0,7,size=defense), reverse=True)
+    aDice = sorted(np.random.randint(1,7,size=attack), reverse=True)
+    dDice = sorted(np.random.randint(1,7,size=defense), reverse=True)
     aLoss, dLoss = 0, 0
     for a, d in zip(aDice, dDice):
       if a<=d:

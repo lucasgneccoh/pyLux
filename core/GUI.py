@@ -4,8 +4,9 @@ import time
 import copy
 import agent
 from board import Board
-from world import World, Country, Continent
+from world import World
 from deck import Deck
+from battle_models import create_player_list
 # For the GUI
 import pygame
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -13,7 +14,8 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-  parser.add_argument("--preferences", help="Path to the preferences file. It is a JSON file containing all the game and visual preferences", default = "../support/GUI_config/classic_map_default_config.json")
+  parser.add_argument("--preferences", 
+                      help="Path to the preferences file. It is a JSON file containing all the game and visual preferences", default = "../support/GUI_config/classic_map_default_config.json")
   
   parser.add_argument("--console_debug", help="Set to true to print on the console messages to help debugging", default ="false")
   args = parser.parse_args()
@@ -22,7 +24,7 @@ def parseInputs():
   args.console_debug = (args.console_debug.lower()=='true')
   return args
 
-#%% Utils
+#%%% Utils
 def color_all(boxes, color=pygame.Color(211, 230, 225, a=125)):
   for i, b in boxes.items():
     b.fill(color)
@@ -247,7 +249,7 @@ def show_active_player_box(player, player_name_containers, player_colors, color_
   color_player = player_colors[player.code]
   for i, b in player_name_containers.items():
     if i==player.code:
-      label = myfont.render('{:<15}'.format(player.name()), 1, color_text, color_player)
+      label = myfont.render('{:<15}'.format(player.name), 1, color_text, color_player)
       b.fill(color_player)      
       b.blit(label, (0, 0))      
     else:
@@ -259,7 +261,7 @@ def fill_and_label(button, color, text, color_text):
   button.fill(color)
   button.blit(label, (0,0))
  
-#%% start
+#%%% start
 if __name__ == "__main__":
 
   args = parseInputs()
@@ -268,23 +270,21 @@ if __name__ == "__main__":
   with open(args.preferences, 'r') as f:
     prefs = json.load(f)
   
+  board_params = prefs["board_params"]
   prefs['console_debug'] = console_debug
   
+  
   # Load map
-  world = World(prefs['map_path'])
+  world = World(board_params['path_board'])
   
   
   # Set players
-  players = []
-  available_players = agent.all_agents
-  for p, n in zip(prefs['players'], prefs['players_names']):
-    ag = available_players[p](n)
-    ag.console_debug = console_debug and False
-    players.append(ag)
+
+  players = create_player_list(prefs)
   
   # Set board
   board = Board(world, players)
-  board.setPreferences(prefs)
+  board.setPreferences(board_params)
   print("Board set")
   
 #%% Draw the board
@@ -541,7 +541,7 @@ if __name__ == "__main__":
                 continue
               else:
                 board.gamePhase = 'fortify'
-                board.updateMovable()
+                board.updatemoveable()
                 source, target = None, None
                 showing_cards = False
                 action_msg = None
@@ -561,7 +561,9 @@ if __name__ == "__main__":
                 continue
               else:
                 source, target = None, None
-                board.gamePhase = 'end'
+                board.gamePhase = 'fortify'
+                # Play a pass move
+                board.playMove(agent.buildMove(board, -1))
                 showing_cards = False
                 action_msg = None
                 draw_lines(coords, board)
@@ -610,8 +612,9 @@ if __name__ == "__main__":
                   action_msg = "Key not available during initial phases!"
                   continue
                 else:
-                  board.gamePhase = 'fortify'
-                  board.updateMovable()
+                  board.gamePhase = 'attack'
+                  # Play a pass move
+                  board.playMove(agent.buildMove(board, -1))
                   source, target = None, None
                   showing_cards = False
                   action_msg = None
@@ -630,7 +633,9 @@ if __name__ == "__main__":
                   continue
                 else:
                   source, target = None, None
-                  board.gamePhase = 'end'
+                  board.gamePhase = 'fortify'
+                  # Play a pass move
+                  board.playMove(agent.buildMove(board, -1))
                   showing_cards = False
                   action_msg = None
                   draw_lines(coords, board)
@@ -677,7 +682,8 @@ if __name__ == "__main__":
             if board.gamePhase == 'initialPick':
               if c.owner == -1:
                 if console_debug: print(f'GUI:Human picked: {c.id}')
-                board.initialPickOneHuman(c)
+                move = agent.buildMove(board, ('pi', c.code))
+                board.playMove(move)
                 action_msg = f'Picked {c.name}'
               else:
                 action_msg = 'Territory already has an owner'
@@ -690,7 +696,8 @@ if __name__ == "__main__":
                 numberOfArmies = 1
                 if bool_move_all: numberOfArmies = 0
                 if bool_move_5: numberOfArmies = 5
-                board.initialFortifyHuman(c, numberOfArmies)
+                move = agent.buildMove(board, ('pl', c.code))
+                board.playMove(move)
                 action_msg = f'Fortified {c.name}'
               else:
                 if console_debug: print("GUI:Territory belongs to enemy player")
@@ -703,7 +710,8 @@ if __name__ == "__main__":
                 numberOfArmies = 1
                 if bool_move_all: numberOfArmies = 0
                 if bool_move_5: numberOfArmies = 5
-                board.startTurnPlaceArmiesHuman(c, numberOfArmies)
+                move = agent.buildMove(board, ('pl', c.code))
+                board.playMove(move)
               else:
                 if console_debug: print("GUI:Territory belongs to enemy player")
                 action_msg = "Territory belongs to enemy player"
@@ -722,9 +730,9 @@ if __name__ == "__main__":
                   target = c
                   
                   if console_debug: print(f'GUI:Human attacked {source.id} -> {target.id}')
-                  
-                  val = board.attack(source.code, target.code, bool_till_dead)
-                  battle_results = {7: 'Conquest!', 13:'Defeat...', 0:'Not much', -1:'ERROR'}                  
+                  move = agent.buildMove(board, ('a', source.code, target.code))
+                  val = board.playMove(move)                  
+                  battle_results = {7: 'Conquest!', 13:'Defeat...', 0:'Not much', -1:'ERROR', 99:'Game Over !'}                  
                   res = battle_results[val]                  
                   action_msg = f'Attack: {source.id} -> {target.id}. Result: {res}'
                   # Reset
@@ -759,7 +767,8 @@ if __name__ == "__main__":
                     if bool_move_all: numberOfArmies = source.movable_armies
                     if bool_move_5: numberOfArmies = min(5, source.movable_armies)
                                         
-                    board.fortifyArmies(numberOfArmies, source.code, target.code)
+                    move = agent.buildMove(board, ('f', source.code, target.code))
+                    val = board.playMove(move) 
                     # Reset                    
                     action_msg = f'Fortified: {source.id}->{target.id}'
                     target = None
@@ -778,9 +787,9 @@ if __name__ == "__main__":
         wait_for_quit()
         # This function contains all the different stages
         if console_debug: 
-          print(f'GUI:Player {board.activePlayer.code}, {board.activePlayer.name()}, board phase: {board.gamePhase}')
+          print(f'GUI:Player {board.activePlayer.code}, {board.activePlayer.name}, board phase: {board.gamePhase}')
   
-        action_msg = f'Player {board.activePlayer.code}, {board.activePlayer.name()}'
+        action_msg = f'Player {board.activePlayer.code}, {board.activePlayer.name}'
         last_AI_player = board.activePlayer
         board.play() 
         AI_played = True
@@ -806,7 +815,7 @@ if __name__ == "__main__":
       msgs = []
       
       if not AI_played:
-        msgs.append(f'Player {board.activePlayer.name()}: {board.gamePhase}')
+        msgs.append(f'Player {board.activePlayer.name}: {board.gamePhase}')
         # This is in the middle of the human turn
         if board.gamePhase == 'initialPick':
           msgs.append('Pick an empty country')
@@ -852,7 +861,7 @@ if __name__ == "__main__":
             break
         final_message.append('{:*^50}'.format(''))
         final_message.append('{:*^50}'.format('   GAME OVER   '))
-        final_message.append('{: ^50}'.format(f'Winner was {winner.code}, {winner.name()}'))
+        final_message.append('{: ^50}'.format(f'Winner was {winner.code}, {winner.name}'))
         final_message.append('{: ^50}'.format(winner.youWon()))
         final_message.append('{:*^50}'.format(''))
         

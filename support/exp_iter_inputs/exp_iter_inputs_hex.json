@@ -1,0 +1,45 @@
+{
+  "python_command": "python3",
+  "max_seconds_process": 3600,
+  "params_path": "../support/exp_iter_inputs",
+  "iterations": 20,
+  "delete_previous": 1,
+  "num_samples": 320,
+  "num_cpu": 80,
+  "saved_states_per_episode": 2,
+  "max_episode_depth": 200,
+  "apprentice_params": {
+      "type": "net",
+      "model_name": "model_0_0_hex.tar",
+  },
+  "expert_params": {
+      "max_depth": 200,
+      "num_MCTS_sims": 3000,
+      "sims_per_eval": 1,
+      "wa": 0,
+      "wb": 0,
+      "cb": 1.1,
+      "use_val": 0.5,
+      "temp": 1
+  },
+  "path_data": "../data_hex",
+  "path_model": "../data_hex/models",
+  "batch_size": 64,
+  "model_parameters": "../support/model_parameters/model_default_parameters.json",
+  "board_params": {
+      "path_board": "../support/maps/hex_map.json",
+      "initialPhase": true,
+      "useCards": true,
+      "transferCards": true, 
+      "immediateCash": true,
+      "continentIncrease": 0.05,
+      "pickInitialCountries": true,
+      "armiesPerTurnInitial": 4,
+      "console_debug" : false,
+      "initialArmies": 10
+  },
+  "self_play_tag": "create_self_play",
+  "train_apprentice_tag": "train_model",
+  "epochs": 12,
+  "eval_every": 99999
+}
