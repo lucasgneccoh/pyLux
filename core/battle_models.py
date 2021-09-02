@@ -106,7 +106,7 @@ def load_NetPlayer(board, args):
     apprentice = agent.NetApprentice(net)
     
     kwargs = {}
-    for a in ["move_selection", "name"]:
+    for a in ["move_selection", "name", "temp"]:
         if a in args: kwargs[a] = args[a]
     netPlayer = agent.NetPlayer(apprentice, **kwargs)
     

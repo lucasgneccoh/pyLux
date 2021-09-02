@@ -529,7 +529,7 @@ class Board(object):
     elif self.gamePhase == 'attack':
       if self.console_debug: 
         if not move.source is None: 
-          print(f"Board {self.board_id} PlayMove:Attack: {move.source.id}, {move.target.id}, tillDead: {bool(move.details)}")
+          print(f"Board {self.board_id} PlayMove:Attack: {move.source.id} ({move.source.armies}), {move.target.id} ({move.target.armies}), tillDead: {bool(move.details)}")
         else:
           print("PlayMove:Attack: PASS")
       # Pass move, do not attack

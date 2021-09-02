@@ -1126,14 +1126,15 @@ class PUCTPlayer(Agent):
   
 
 class NetPlayer(Agent):  
-  def __init__(self, apprentice = None, name = "netPlayer", move_selection = "random_proportional"):
+  def __init__(self, apprentice = None, name = "netPlayer", move_selection = "random_proportional", temp = 1):
       
       self.name = name    
       self.human = False
       self.console_debug = False
       
       self.apprentice = apprentice     
-      self.move_selection = move_selection      
+      self.move_selection = move_selection  
+      self.temp = temp
   
   def run(self, state):
     
@@ -1147,7 +1148,15 @@ class NetPlayer(Agent):
       # cor_value = np.array([net_value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
       
       pol = (policy * mask.detach().numpy()).squeeze()
-      probs = pol / pol.sum()
+      if self.temp == 0: 
+          self.move_selection = "argmax"
+          T = 1
+      else:
+          T = self.temp
+      
+      exp = np.exp(np.log(np.maximum(pol,0.0001))/T)
+      S = exp.sum()
+      probs = exp/S
       
       # Use some criterion to choose the move
       if self.move_selection == "argmax":
@@ -1157,7 +1166,13 @@ class NetPlayer(Agent):
       else:
           raise Exception("Invalid kind of move selection criterion")
       
-      # Return the selected move, destroy tree      
+      print()
+      print(f"Net player policy with temp {self.temp}, {self.move_selection}")
+      print("Move -- Mask -- Orig pol -- softmax")
+      
+      print(*zip(moves, mask.detach().numpy().squeeze(), pol.round(3), probs.round(3)), sep="\n")
+      
+      
       return buildMove(state, moves[ind])
   
   def pickCountry(self, board) -> int:
@@ -1223,6 +1238,7 @@ if __name__ == "__main__":
     # Load map
     #path = '../support/maps/classic_world_map.json'
     path = '../support/maps/diamond_map.json'
+    path = '../support/maps/test_map.json'
       
     world = World(path)
     
@@ -1246,13 +1262,13 @@ if __name__ == "__main__":
     
     board = copy.deepcopy(board_orig)    
     
-    if False:
+    if True:
     
         print("**** Test play")
         board.report()
         print(board.countriesPandas())
         
-        for i in range(4):
+        for i in range(0):
           board.play()
           if board.gameOver: break
         
@@ -1731,11 +1747,11 @@ if __name__ == "__main__":
                         'scheduler':scheduler.state_dict(),
                         'epoch': 0, 'best_loss':0})
         
-    if True:
+    if False:
       
         # Test NetPlayer
-        path_model = "../data_test/models"
-        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_small.json"
+        path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map/models"
+        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs.json"
         
         # Create the net using the same parameters
         inputs = misc.read_json(EI_inputs_path)
@@ -1759,6 +1775,8 @@ if __name__ == "__main__":
                 
         board_orig = Board(world, players)
         board_orig.setPreferences(prefs)
+
+
 
         num_nodes = board_orig.world.map_graph.number_of_nodes()
         num_edges = board_orig.world.map_graph.number_of_edges()

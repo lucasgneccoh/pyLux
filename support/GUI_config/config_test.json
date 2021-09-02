@@ -1,10 +1,18 @@
 {
   "players": [ 
     {
-      "agent": "Human", 
-      "name": "PUCT",
+      "agent": "NetPlayer",
+      "name": "net_19_4",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-      "model_path": "../data_test_map/models/model_9_4_initialPick.tar",
+      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map/models/model_19_4_startTurn.tar",
+      "move_selection": "random_proportional",
+      "temp": 0.7
+    },
+    {
+      "agent": "RandomAgent", 
+      "name": "Human",
+      "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map/models/model_9_4_initialPick.tar",
       "max_depth": 150,
       "move_selection": "random_proportional",
       "use_val": 0.5,
@@ -12,13 +20,6 @@
       "num_MCTS_sims": 300,
       "cb":0.4,
       "console_debug": 1
-    },
-    {
-      "agent": "NetPlayer",
-      "name": "net_4_0",
-      "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-      "model_path": "../data_test_map/models/model_4_0_initialFortify.tar",
-      "move_selection": "random_proportional"
     }
   ],
   "board_params": {
@@ -31,7 +32,7 @@
       "continentIncrease": 0.05,
       "console_debug": true,
       "armiesPerTurnInitial": 4,
-      "initialArmies": 40
+      "initialArmies": 20
     },
   "key_till_dead": [
     1073742049,
@@ -45,10 +46,10 @@
     1073742048,
     1073742052
   ],
+  "time_sleep_ai": 1,
   "key_fortify_phase": "f",
   "key_end_turn": "q",
-  "key_cards": "c",
-  "time_sleep_ai": 0.5,
+  "key_cards": "c",  
   "screen_W": 1280,
   "screen_H": 720,
   "sq_radius": 23,
