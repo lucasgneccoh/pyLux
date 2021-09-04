@@ -1,7 +1,7 @@
 {
   "players": [ 
     {
-      "agent": "NetPlayer",
+      "agent": "Human",
       "name": "net_23_4",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
       "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map_2/models/model_23_4_startTurn.tar",
@@ -9,7 +9,7 @@
       "temp": 0.1
     },
     {
-      "agent": "NetPlayer",
+      "agent": "Human",
       "name": "net_23_4",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
       "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map_2/models/model_23_4_startTurn.tar",

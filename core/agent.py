@@ -1268,7 +1268,7 @@ if __name__ == "__main__":
     
     board = copy.deepcopy(board_orig)    
     
-    if True:
+    if False:
     
         print("**** Test play")
         board.report()
@@ -1753,11 +1753,14 @@ if __name__ == "__main__":
                         'scheduler':scheduler.state_dict(),
                         'epoch': 0, 'best_loss':0})
         
-    if False:
+    if True:
       
         # Test NetPlayer
-        path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map/models"
-        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs.json"
+        path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_02_09_test_map/models"
+        EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_test.json"
+        
+        load_model = True
+        model_name = "model_27_0_initialPick.tar"
         
         # Create the net using the same parameters
         inputs = misc.read_json(EI_inputs_path)
@@ -1802,8 +1805,7 @@ if __name__ == "__main__":
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         net.to(device)
         
-        load_model = True
-        model_name = "model_9_4_initialPick.tar"
+        
         
         if load_model:
             if model_name is None:
@@ -1838,4 +1840,7 @@ if __name__ == "__main__":
         print("\n\n ***** End of play")  
         board.report()
         print(board.countriesPandas())
- 
+        
+        apprentice.getPolicy(board)
+        
+        for name, param in net.named_parameters(): print(name, param, sep="\n")
