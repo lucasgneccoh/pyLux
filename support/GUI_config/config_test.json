@@ -2,24 +2,19 @@
   "players": [ 
     {
       "agent": "NetPlayer",
-      "name": "net_19_4",
+      "name": "net_23_4",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map/models/model_19_4_startTurn.tar",
+      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map_2/models/model_23_4_startTurn.tar",
       "move_selection": "random_proportional",
-      "temp": 0.7
+      "temp": 0.1
     },
     {
-      "agent": "RandomAgent", 
-      "name": "Human",
+      "agent": "NetPlayer",
+      "name": "net_23_4",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map/models/model_9_4_initialPick.tar",
-      "max_depth": 150,
+      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_map_2/models/model_23_4_startTurn.tar",
       "move_selection": "random_proportional",
-      "use_val": 0.5,
-      "sims_per_eval": 1,
-      "num_MCTS_sims": 300,
-      "cb":0.4,
-      "console_debug": 1
+      "temp": 0.1
     }
   ],
   "board_params": {

@@ -7,18 +7,14 @@
   "num_samples": 320,
   "num_cpu": 80,
   "saved_states_per_episode": 2,
-  "max_episode_depth": 200,
+  "max_episode_depth": 150,
   "apprentice_params": {
       "type": "net",
-      "model_name": "model_0_0_base.tar",
-      "max_depth": 200,
-      "num_MCTS_sims": 500,
-      "temp": 1,
-      "sims_per_eval": 1
+      "model_name": "model_0_0_base.tar"
   },
   "expert_params": {
-      "max_depth": 200,
-      "num_MCTS_sims": 3000,
+      "max_depth": 100,
+      "num_MCTS_sims": 4000,
       "sims_per_eval": 1,
       "wa": 0,
       "wb": 0,
@@ -26,8 +22,8 @@
       "use_val": 0.5,
       "temp": 1
   },
-  "path_data": "../data_02_09_test_map",
-  "path_model": "../data_02_09_test_map/models",
+  "path_data": "../data_04_09_test_map",
+  "path_model": "../data_04_09_test_map/models",
   "batch_size": 32,
   "model_parameters": "../support/model_parameters/model_default_parameters.json",
   "board_params": {
@@ -39,10 +35,11 @@
       "continentIncrease": 0.05,
       "pickInitialCountries": true,
       "armiesPerTurnInitial": 4,
-      "console_debug" : false
+      "console_debug" : false,
+      "initialArmies": 35
   },
   "self_play_tag": "create_self_play",
   "train_apprentice_tag": "train_model",
-  "epochs": 12,
+  "epochs": 15,
   "eval_every": 99999
 }

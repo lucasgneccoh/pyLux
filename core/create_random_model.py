@@ -17,7 +17,7 @@ import torch
 def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument("--inputs", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
-  parser.add_argument("--save_path", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/exp_iter_inputs.json")
+  parser.add_argument("--save_path", help="Path to the json file containing the inputs to the script", default = "../support/exp_iter_inputs/model_random.tar")
   args = parser.parse_args()
   return args 
 

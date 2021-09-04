@@ -1,8 +1,12 @@
 {
   "players": [
     {
-      "agent": "RandomAgent", 
-      "name": "Random_1"      
+      "agent": "NetPlayer",
+      "name": "net_102_3",
+      "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_hex/models/model_102_3_attack.tar",
+      "move_selection": "random_proportional",
+      "temp": 0.1
     },
     {
       "agent": "Human", 

@@ -1169,8 +1169,14 @@ class NetPlayer(Agent):
       print()
       print(f"Net player policy with temp {self.temp}, {self.move_selection}")
       print("Move -- Mask -- Orig pol -- softmax")
-      
-      print(*zip(moves, mask.detach().numpy().squeeze(), pol.round(3), probs.round(3)), sep="\n")
+      moves_aux = []
+      countries = state.countries()
+      for m in moves:
+          if len(m) > 2:
+              moves_aux.append((m[0], countries[m[1]].id, countries[m[2]].id))
+          else:
+              moves_aux.append((m[0], countries[m[1]].id))
+      print(*zip(moves_aux, mask.detach().numpy().squeeze(), pol.round(3), probs.round(3)), sep="\n")
       
       
       return buildMove(state, moves[ind])
