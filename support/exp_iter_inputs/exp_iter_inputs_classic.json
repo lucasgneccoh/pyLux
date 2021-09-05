@@ -10,14 +10,10 @@
   "max_episode_depth": 200,
   "apprentice_params": {
       "type": "net",
-      "model_name": "model_0_0_base_classic.tar",
-      "max_depth": 200,
-      "num_MCTS_sims": 500,
-      "temp": 1,
-      "sims_per_eval": 1
+      "model_name": "model_0_0_base_classic.tar"
   },
   "expert_params": {
-      "max_depth": 150,
+      "max_depth": 200,
       "num_MCTS_sims": 3000,
       "sims_per_eval": 1,
       "wa": 0,

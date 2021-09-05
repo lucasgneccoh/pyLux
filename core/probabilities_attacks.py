@@ -75,20 +75,65 @@ def attack_till_dead(A,D):
     return 1
   else:
     return None
+  
 if True:
 
   num_tries = 100000
   max_A, max_D = 20 , 20 
   res = [[0 for _ in range(3,max_D+1)] for _ in range(3,max_A+1)]
-  for a in range(3,max_A+1):
-    for d in range(3,max_D+1):
+  for i, a in enumerate(range(3,max_A+1)):
+    for j, d in enumerate(range(3,max_D+1)):
       aux = 0
       for _ in range(num_tries):
         aux += attack_till_dead(a, d)
         
-      res[a-1][d-1] = aux/num_tries
+      res[i][j] = aux/num_tries
       
       
   pd.DataFrame(res).to_csv("attack_probs.csv")
-        
-      
+
+
+import time
+def matrix(a, d, num_tries):
+  r = np.array([[0,0],[0,0]])
+  for _ in range(num_tries):
+    r[0,0] += attack_till_dead(a, a)
+    r[0,1] += attack_till_dead(a, d)
+    r[1,0] += attack_till_dead(d, a)
+    r[1,1] += attack_till_dead(d, d)
+    
+  r = r / num_tries
+  return r.round(3)
+  
+if False:
+
+   
+
+
+  
+  start = time.process_time()  
+  num_tries = 20000
+  
+  a, d = 3,6
+  start = time.process_time()
+  r = matrix(a,d, num_tries)
+  end = time.process_time()
+  print(f"A\D: A = {a}, D = {d}")
+  print(r)
+  print(f"Time taken: {end - start}\n")
+  
+  
+  
+  a, d = 3,8
+  start = time.process_time()
+  r = matrix(a,d, num_tries)
+  end = time.process_time()
+  print(f"A\D: A = {a}, D = {d}")
+  print(r)
+  print(f"Time taken: {end - start}")
+  
+  
+  
+  
+  
+  

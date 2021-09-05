@@ -16,7 +16,9 @@ import agent
 import copy
 
 def get_model_order(path):    
-    models = os.listdir(path)
+  
+    # models = filter(lambda s: "initialPick" in s, os.listdir(path))
+    models = filter(lambda s: True, os.listdir(path))
     
     def key_sort(x):
         s = x.split("_")
@@ -34,8 +36,8 @@ def get_model_order(path):
 
 
 #%% See policy for country pick over time
-path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_02_09_test_map/models"
-EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_test.json"
+path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_hex/models"
+EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_hex.json"
 
 load_model = True
 model_name = "model_27_0_initialPick.tar"
@@ -88,7 +90,12 @@ net.to(device)
 # Prepare board
 board = copy.deepcopy(board_orig)
 # Play moves if needed
-
+board.playMove(agent.buildMove(board, ("pi", 5)))
+board.playMove(agent.buildMove(board, ("pi", 4)))
+board.playMove(agent.buildMove(board, ("pi", 3)))
+board.playMove(agent.buildMove(board, ("pi", 2)))
+board.playMove(agent.buildMove(board, ("pi", 1)))
+board.playMove(agent.buildMove(board, ("pi", 0)))
 
 # Prepare table
 countries_names = {x.code : x.id for x in board.countries()}
@@ -109,6 +116,36 @@ for i, model_name in enumerate(models_sorted):
 data = pd.DataFrame(np.array(policies).squeeze(1))
 
 data.rename(columns = countries_names, inplace=True)
-ax = data.rolling(window=5).mean().plot.line()
-ax.legend(loc='lower center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, shadow=True)
+
+
+style = {"C0":(252/255, 59/255, 45/255), 
+         "C1":(140/255, 12/255, 3/255),
+         "C2":(255/255, 176/255, 31/255),
+         "C3":(240/255, 128/255, 24/255),
+         "C4":(23/255, 236/255, 255/255),
+         "C5":(37/255, 84/255, 250/255),
+         "VEN":(255/255, 0/255, 0/255),
+         "BRA":(255/255, 80/255, 80/255),
+         "PER":(255/255, 160/255, 160/255),
+         "NAF":"black",
+         "EGY":(160/255, 160/255, 160/255),
+         "MEX":(255/255, 145/255, 0/255),
+         "GRE":(255/255, 191/255, 107/255),
+         "ICE":(0/255, 251/255, 255/255),
+         "SEU":(0/255, 42/255, 255/255),}
+
+roll = data.rolling(window=8).mean()
+
+fig, ax = plt.subplots(1,1,figsize=(12,5))
+
+for col in roll:
+  ax.plot(roll[col], color = style[col], label = col)
+
+ax.legend(loc='best', ncol=3, fancybox=True, shadow=True)
+ax.set_xlabel("Training step")
+ax.set_ylabel("Probability")
+ax.set_title("Test map: Pick country after ICE is not available")
+# bbox_to_anchor=(0.5, 1.05)
+
 plt.show()
+
