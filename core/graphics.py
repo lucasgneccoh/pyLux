@@ -36,8 +36,8 @@ def get_model_order(path):
 
 
 #%% See policy for country pick over time
-path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_hex/models"
-EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_hex.json"
+path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_03_09_classic/models"
+EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_classic.json"
 
 load_model = True
 model_name = "model_27_0_initialPick.tar"
@@ -90,12 +90,12 @@ net.to(device)
 # Prepare board
 board = copy.deepcopy(board_orig)
 # Play moves if needed
-board.playMove(agent.buildMove(board, ("pi", 5)))
-board.playMove(agent.buildMove(board, ("pi", 4)))
-board.playMove(agent.buildMove(board, ("pi", 3)))
-board.playMove(agent.buildMove(board, ("pi", 2)))
-board.playMove(agent.buildMove(board, ("pi", 1)))
-board.playMove(agent.buildMove(board, ("pi", 0)))
+# board.playMove(agent.buildMove(board, ("pi", 5)))
+# board.playMove(agent.buildMove(board, ("pi", 4)))
+# board.playMove(agent.buildMove(board, ("pi", 3)))
+# board.playMove(agent.buildMove(board, ("pi", 2)))
+# board.playMove(agent.buildMove(board, ("pi", 1)))
+# board.playMove(agent.buildMove(board, ("pi", 0)))
 
 # Prepare table
 countries_names = {x.code : x.id for x in board.countries()}
@@ -134,18 +134,30 @@ style = {"C0":(252/255, 59/255, 45/255),
          "ICE":(0/255, 251/255, 255/255),
          "SEU":(0/255, 42/255, 255/255),}
 
-roll = data.rolling(window=8).mean()
+#%%% Plot
 
-fig, ax = plt.subplots(1,1,figsize=(12,5))
+roll = data.rolling(window=4).mean()
 
-for col in roll:
-  ax.plot(roll[col], color = style[col], label = col)
+# {0: South America. bonus = 2, owner = -1,
+#  1: North America. bonus = 5, owner = -1,
+#  2: Europe. bonus = 5, owner = -1,
+#  3: Africa. bonus = 3, owner = -1,
+#  4: Asia. bonus = 7, owner = -1,
+#  5: Oceania. bonus = 3, owner = -1}
 
-ax.legend(loc='best', ncol=3, fancybox=True, shadow=True)
-ax.set_xlabel("Training step")
-ax.set_ylabel("Probability")
-ax.set_title("Test map: Pick country after ICE is not available")
-# bbox_to_anchor=(0.5, 1.05)
-
-plt.show()
+for cont in range(6): 
+  fig, ax = plt.subplots(1,1,figsize=(12,5))
+  
+  for col in roll:
+    # ax.plot(roll[col], color = style[col], label = col)
+    if col in board.world.continents[cont]['countries_id']:
+      ax.plot(roll[col], label = col)
+  
+  ax.legend(loc='lower center', ncol=3, fancybox=True, shadow=True)
+  ax.set_xlabel("Training step")
+  ax.set_ylabel("Probability")
+  ax.set_title(f"Classic: Country picking in {board.world.continents[cont]['name']}")
+  # bbox_to_anchor=(0.5, 1.05)
+  
+  plt.show()
 

@@ -91,7 +91,7 @@
   ],
   "continents": [
     {
-      "name": "A1",
+      "name": "Red",
       "bonus": 1,
       "countries": [
         "C0","C1"
@@ -103,7 +103,7 @@
       ]
     },
     {
-      "name": "A2",
+      "name": "Yellow",
       "bonus": 4,
       "countries": [
         "C2","C3"
@@ -115,7 +115,7 @@
       ]
     },
     {
-      "name": "A3",
+      "name": "Blue",
       "bonus": 9,
       "countries": [
         "C4","C5"      

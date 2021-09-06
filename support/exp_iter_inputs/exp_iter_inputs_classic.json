@@ -3,7 +3,7 @@
   "max_seconds_process": 3600,
   "params_path": "../support/exp_iter_inputs",
   "iterations": 100,
-  "delete_previous": 1,
+  "delete_previous": 0,
   "num_samples": 320,
   "num_cpu": 80,
   "saved_states_per_episode": 2,
@@ -14,7 +14,7 @@
   },
   "expert_params": {
       "max_depth": 200,
-      "num_MCTS_sims": 3000,
+      "num_MCTS_sims": 4000,
       "sims_per_eval": 1,
       "wa": 0,
       "wb": 0,
@@ -22,8 +22,8 @@
       "use_val": 0.5,
       "temp": 1
   },
-  "path_data": "../data_03_09_classic",
-  "path_model": "../data_03_09_classic/models",
+  "path_data": "../data_06_09_classic",
+  "path_model": "../data_06_09_classic/models",
   "batch_size": 32,
   "model_parameters": "../support/model_parameters/model_default_parameters.json",
   "board_params": {
@@ -40,6 +40,6 @@
   },
   "self_play_tag": "create_self_play",
   "train_apprentice_tag": "train_model",
-  "epochs": 20,
+  "epochs": 10,
   "eval_every": 99999
 }
