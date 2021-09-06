@@ -76,23 +76,7 @@ def attack_till_dead(A,D):
   else:
     return None
   
-if True:
-
-  num_tries = 100000
-  max_A, max_D = 20 , 20 
-  res = [[0 for _ in range(3,max_D+1)] for _ in range(3,max_A+1)]
-  for i, a in enumerate(range(3,max_A+1)):
-    for j, d in enumerate(range(3,max_D+1)):
-      aux = 0
-      for _ in range(num_tries):
-        aux += attack_till_dead(a, d)
-        
-      res[i][j] = aux/num_tries
-      
-      
-  pd.DataFrame(res).to_csv("attack_probs.csv")
-
-
+  
 import time
 def matrix(a, d, num_tries):
   r = np.array([[0,0],[0,0]])
@@ -104,6 +88,25 @@ def matrix(a, d, num_tries):
     
   r = r / num_tries
   return r.round(3)
+
+
+if True:
+
+  num_tries = 100000
+  max_A, max_D = 20 , 20 
+  res = [[0 for _ in range(3,max_D+1)] for _ in range(3,max_A+1)]
+  for i, a in enumerate(range(3,max_A+1)):
+    for j, d in enumerate(range(3,max_D+1)):
+      aux = 0
+      for _ in range(num_tries):
+        aux += attack_till_dead(a, d)
+      res[i][j] = aux/num_tries
+      
+      
+  pd.DataFrame(res).to_csv("attack_probs.csv")
+
+
+
   
 if False:
 
