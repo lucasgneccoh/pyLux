@@ -280,7 +280,7 @@ class Board(object):
     # Fixed for the moment (must be copied manually)
     self.cardSequence = ListThenArithmeticCardSequence(sequence=[4,6,8,10,12,15], incr=5)
     self.deck = Deck()
-    num_wildcards = len(self.world.countries)//20
+    num_wildcards = len(self.world.countries)//20*0
     self.deck.create_deck(self.countries(), num_wildcards=num_wildcards)
     self.nextCashArmies = self.cardSequence.nextCashArmies()
     self.aux_cont = 0
@@ -649,8 +649,8 @@ class Board(object):
               if not card_set is None:
                 cashed += self.cashCards(*card_set)
               else:
-                # Error                
-                raise Exception("More than 5 cards but not able to find a cashable set. Maybe the deck has too many wildcards?")
+                # Error
+                raise Exception(f"More than 5 cards but not able to find a cashable set. Maybe the deck has too many wildcards? -- {p.cards}")
           armies += cashed          
         self.activePlayer.income += cashed
         move = p.placeArmies(self, armies)
@@ -1354,8 +1354,8 @@ if __name__ == "__main__":
   # Load a board, try to play
 
   # Load map
-  #path = '../support/maps/classic_world_map.json'
-  path = '../support/maps/test_map.json'
+  path = '../support/maps/classic_world_map.json'
+  # path = '../support/maps/test_map.json'
     
   world = World(path)
   
@@ -1368,7 +1368,7 @@ if __name__ == "__main__":
   prefs = {'initialPhase': True, 'useCards':True,
            'transferCards':True, 'immediateCash': True,
            'continentIncrease': 0.05, 'pickInitialCountries':True,
-           'armiesPerTurnInitial':4,'console_debug':True}  
+           'armiesPerTurnInitial':4,'console_debug':False}  
            
   board_orig = Board(world, players)
   board_orig.setPreferences(prefs)
@@ -1384,11 +1384,11 @@ if __name__ == "__main__":
   
   print("\n\n")
   
-  print("**** Test play")
-  board.report()
-  print(board.countriesPandas())
+  # print("**** Test play")
+  # board.report()
+  # print(board.countriesPandas())
   
-  for i in range(100):
+  for i in range(2000):
     board.play()
     if board.gameOver: break
   
@@ -1398,12 +1398,12 @@ if __name__ == "__main__":
   
   print("\n\n")
   
-  print("**** Simulation")
+  # print("**** Simulation")
   # board.simulate(maxRounds = 60, safety=10e5, sim_console_debug = True)
   # board.report()
   # print(board.countriesPandas())
   
-  print()
+  # print()
   # print("Board orig")
   
   # board_orig.report()

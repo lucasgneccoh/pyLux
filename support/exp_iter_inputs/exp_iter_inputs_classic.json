@@ -7,13 +7,13 @@
   "num_samples": 320,
   "num_cpu": 80,
   "saved_states_per_episode": 2,
-  "max_episode_depth": 200,
+  "max_episode_depth": 2000,
   "apprentice_params": {
       "type": "net",
       "model_name": "model_0_0_base.tar"
   },
   "expert_params": {
-      "max_depth": 200,
+      "max_depth": 2000,
       "num_MCTS_sims": 5000,
       "sims_per_eval": 1,
       "wa": 0,

@@ -120,7 +120,7 @@ if False:
   start = time.process_time()  
   num_tries = 20000
   
-  a, d = 3,6
+  a, d = 38,28
   start = time.process_time()
   r = matrix(a,d, num_tries)
   end = time.process_time()
@@ -130,7 +130,7 @@ if False:
   
   
   
-  a, d = 3,8
+  a, d = 28,38
   start = time.process_time()
   r = matrix(a,d, num_tries)
   end = time.process_time()
@@ -302,7 +302,7 @@ plt.show()
 
 
 # Valor de las armadas
-diff = 5
+diff = -10
 prob_att = []
 prob_def = []
 
