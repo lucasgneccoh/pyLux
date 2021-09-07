@@ -85,8 +85,8 @@ if __name__ == '__main__':
     
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     net.to(device)    
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.005, weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.96)
     criterion = total_Loss
     
 
