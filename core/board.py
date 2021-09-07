@@ -439,7 +439,7 @@ class Board(object):
       for source in self.getCountriesPlayerThatCanAttack(p.code):
         for target in self.world.getCountriesToAttack(source.code):
           # Attack once
-          moves.append(Move(source, target, 0, 'attack'))
+          # moves.append(Move(source, target, 0, 'attack'))
           # Attack till dead
           moves.append(Move(source, target, 1, 'attack'))
       # Always possible to just pass
