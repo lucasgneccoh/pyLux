@@ -116,6 +116,9 @@ if __name__ == '__main__':
                 os.makedirs(os.path.join(path_data, folder, 'raw'))
         
         # Create json file with inputs for the self play tasks
+        if "iter_turn_value_on" in inputs:
+            if inputs["iter_turn_value_on"] == i:
+                expert_params["use_val"] = inputs["value_turn_value_on"]                
         input_dict = {
           "saved_states_per_episode": saved_states_per_episode,          
           "apprentice_params": apprentice_params,          
@@ -134,21 +137,7 @@ if __name__ == '__main__':
             # Each iteration launches num_cpu tasks
             misc.print_and_flush(f"\tInner iter {j+1} of {num_iter}")
             
-            if "iter_turn_value_on" in inputs:
-                if inputs["iter_turn_value_on"] == j:
-                    expert_params["use_val"] = inputs["value_turn_value_on"]
-                    input_dict = {
-                        "saved_states_per_episode": saved_states_per_episode,          
-                        "apprentice_params": apprentice_params,          
-                        "expert_params": expert_params,          
-                        "path_data": path_data,
-                        "path_model": path_model,
-                        "model_parameters": inputs["model_parameters"],
-                        "board_params": board_params,
-                        "max_episode_depth": inputs["max_episode_depth"]          
-                      }
-                    self_play_input_json = os.path.join(params_path, self_play_tag) + ".json"
-                    misc.write_json(input_dict, self_play_input_json)
+            
             
             processes = []
             
