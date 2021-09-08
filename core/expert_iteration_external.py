@@ -114,6 +114,9 @@ if __name__ == '__main__':
             for folder in move_types:
                 shutil.rmtree(os.path.join(path_data, folder))
                 os.makedirs(os.path.join(path_data, folder, 'raw'))
+                # Delete only the last half
+                # list_files = os.listdir(os.path.join(path_data, folder))
+                
         
         # Create json file with inputs for the self play tasks
         if "iter_turn_value_on" in inputs:

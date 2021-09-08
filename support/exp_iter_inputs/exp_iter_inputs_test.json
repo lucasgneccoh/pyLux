@@ -26,7 +26,7 @@
   "value_turn_value_on": 0.5,
   "path_data": "../data_08_09_test_map",
   "path_model": "../data_08_09_test_map/models",
-  "batch_size": 32,
+  "batch_size": 20,
   "model_parameters": "../support/model_parameters/model_parameters_small.json",
   "board_params": {
       "path_board": "../support/maps/test_map.json",
