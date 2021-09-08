@@ -1176,7 +1176,9 @@ class NetPlayer(Agent):
               moves_aux.append((m[0], countries[m[1]].id, countries[m[2]].id))
           else:
               moves_aux.append((m[0], countries[m[1]].id))
-      print(*zip(moves_aux, mask.detach().numpy().squeeze(), pol.round(3), probs.round(3)), sep="\n")
+      for m, v, p, pp in zip(moves_aux, mask.detach().numpy().squeeze(), pol.round(3), probs.round(3)):
+        if v:
+          print(m, p, pp)
       
       
       return buildMove(state, moves[ind])
@@ -1843,4 +1845,3 @@ if __name__ == "__main__":
         
         apprentice.getPolicy(board)
         
-        for name, param in net.named_parameters(): print(name, param, sep="\n")

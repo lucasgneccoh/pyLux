@@ -67,6 +67,7 @@ def load_puct(board, args):
                      model_args['dropout'])
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     net.to(device)
+    net.eval()
     
     state_dict = load_dict(args["model_path"], device = 'cpu', encoding = 'latin1')
 
@@ -98,6 +99,7 @@ def load_NetPlayer(board, args):
                      model_args['dropout'])
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     net.to(device)
+    net.eval()
     
     state_dict = load_dict(args["model_path"], device = 'cpu', encoding = 'latin1')
 

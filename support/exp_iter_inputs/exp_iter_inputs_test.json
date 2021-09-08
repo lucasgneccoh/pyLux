@@ -2,30 +2,32 @@
   "python_command": "python3",
   "max_seconds_process": 3600,
   "params_path": "../support/exp_iter_inputs",
-  "iterations": 50,
+  "iterations": 100,
   "delete_previous": 1,
   "num_samples": 320,
   "num_cpu": 80,
   "saved_states_per_episode": 2,
-  "max_episode_depth": 150,
+  "max_episode_depth": 1000,
   "apprentice_params": {
       "type": "net",
       "model_name": "model_0_0_base.tar"
   },
   "expert_params": {
-      "max_depth": 100,
-      "num_MCTS_sims": 4000,
+      "max_depth": 1000,
+      "num_MCTS_sims": 10000,
       "sims_per_eval": 1,
       "wa": 0,
       "wb": 0,
       "cb": 1.1,
-      "use_val": 0.5,
+      "use_val": 0,
       "temp": 1
   },
-  "path_data": "../data_04_09_test_map",
-  "path_model": "../data_04_09_test_map/models",
+  "iter_turn_value_on": 20,
+  "value_turn_value_on": 0.5,
+  "path_data": "../data_08_09_test_map",
+  "path_model": "../data_08_09_test_map/models",
   "batch_size": 32,
-  "model_parameters": "../support/model_parameters/model_default_parameters.json",
+  "model_parameters": "../support/model_parameters/model_parameters_small.json",
   "board_params": {
       "path_board": "../support/maps/test_map.json",
       "initialPhase": true,
@@ -36,10 +38,10 @@
       "pickInitialCountries": true,
       "armiesPerTurnInitial": 4,
       "console_debug" : false,
-      "initialArmies": 35
+      "initialArmies": 20
   },
   "self_play_tag": "create_self_play",
   "train_apprentice_tag": "train_model",
-  "epochs": 15,
+  "epochs": 8,
   "eval_every": 99999
 }

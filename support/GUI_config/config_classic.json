@@ -4,12 +4,12 @@
       "agent": "NetPlayer",
       "name": "net",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_06_09_classic/models/model_16_1_initialPick.tar",
+      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_07_09_classic/models/model_7_1_startTurn.tar",
       "move_selection": "random_proportional",
       "temp": 0.1
     },
     {
-      "agent": "RandomAgent",
+      "agent": "Human",
       "name": "Yo",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
       "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_06_09_classic/models/model_16_1_initialPick.tar",

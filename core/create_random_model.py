@@ -69,7 +69,7 @@ if __name__ == "__main__":
     print("Net ready, creating other elements of the .tar file")
     
     optimizer = torch.optim.Adam(net.parameters(), lr=0.005, weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.96)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.97)
     
     save_dict(save_path, {'model':net.state_dict(),
                         'optimizer':optimizer.state_dict(),

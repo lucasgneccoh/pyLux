@@ -467,6 +467,59 @@ if __name__ == "__main__":
   winner = None
   
   
+  # Board modifications
+  # board.playMove(agent.buildMove(board, ("pi", 0)))
+  # board.playMove(agent.buildMove(board, ("pi", 8)))
+  # board.playMove(agent.buildMove(board, ("pi", 1)))
+  # board.playMove(agent.buildMove(board, ("pi", 7)))
+  # board.playMove(agent.buildMove(board, ("pi", 2)))
+  # board.playMove(agent.buildMove(board, ("pi", 6)))
+  # board.playMove(agent.buildMove(board, ("pi", 3)))
+  # board.playMove(agent.buildMove(board, ("pi", 5)))
+  # board.playMove(agent.buildMove(board, ("pi", 4)))
+  
+  # board.playMove(agent.buildMove(board, ("pl", 5)))
+  # board.playMove(agent.buildMove(board, ("pl", 4)))
+  # board.playMove(agent.buildMove(board, ("pl", 5)))
+  # board.playMove(agent.buildMove(board, ("pl", 4)))
+  # board.playMove(agent.buildMove(board, ("pl", 5)))
+  # board.playMove(agent.buildMove(board, ("pl", 4)))
+  # board.playMove(agent.buildMove(board, ("pl", 5)))
+  # board.playMove(agent.buildMove(board, ("pl", 4)))
+  
+  
+  
+  
+  # # Modifications for the attack example (Dont put them in SEU)
+  # board.world.countries[4].armies = 12
+  # board.world.countries[5].armies = 12
+
+
+
+# Modifications for the attack example (pinned in Peru)
+  
+  # board.playMove(agent.buildMove(board, ("pl", 5)))
+  # board.playMove(agent.buildMove(board, ("a", -1,-1)))
+  # board.playMove(agent.buildMove(board, ("f", -1,-1)))
+  
+  # board.world.countries[4].armies = 1
+  # board.world.countries[5].armies = 1
+  
+  
+  # board.world.countries[0].owner = 1
+  # board.world.countries[1].owner = 1
+  # board.world.countries[3].owner = 1
+  # board.world.countries[4].owner = 1
+  
+  # board.world.countries[0].armies = 1 # Venezuela
+  # board.world.countries[1].armies = 20 # Brazil
+  
+  
+  # board.playMove(agent.buildMove(board, ("pl", 2)))
+  
+  # board.world.countries[2].armies = 20
+  
+  
 #%% Main loop
   while running:
     

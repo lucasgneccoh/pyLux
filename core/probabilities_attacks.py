@@ -45,6 +45,12 @@ def attack_till_dead(A,D):
   else:
     return None
   
+def attack_till_dead_a_left(A,D):
+  while A>1 and D>0:
+     aLoss, dLoss = board.roll(min(A-1,3), min(D,2))
+     A -= aLoss
+     D -= dLoss
+  return A
   
 import time
 def matrix(a, d, num_tries):
@@ -111,8 +117,24 @@ if False:
       
   pd.DataFrame(res).to_csv("attack_probs.csv")
 
+def expected_armies_remain(A,D, num_tries = 2000):
+  res = attack_till_dead_a_left(A,D)
+  for i in range(num_tries-1):
+    res = (res*(i+1) + attack_till_dead_a_left(A, D))/(i+2)
+  print(f"Expected number of armies left for A after battle (A = {A}, D = {D}): {res} ")
 
+  
 
+      
+if False:
+  A = 12
+  D = 1
+  p_a = 855/1296
+
+  for a in range(A, -1, -1):
+    print(a)
+  
+  print(f"Expected number of armies left for A after battle (A = {A}, D = {D}): {res} ")
   
 if False:
 
@@ -231,7 +253,7 @@ class Tree(object):
     return r
     
   
-if True:
+if False:
   T = {(1,1,1): 540/1296,
        (1,1,-1): 756/1296,
        (2,1,1): 750/1296,
@@ -270,69 +292,70 @@ if True:
         
   pd.DataFrame(res).to_csv("attack_probs_tree.csv")
   
+
   
+if False:
+  #%% Graphics
   
-#%% Graphics
-
-import matplotlib.pyplot as plt
-plt.rcParams.update({'font.size': 20})
-# from scipy.interpolate import make_interp_spline, BSpline
-
-fig, ax = plt.subplots(1,1, figsize=(12,7))
-
-diag = np.array(list(filter(lambda x: x>=0, [res[i][i] for i in range(len(res))])))
-x_axis = np.arange(diag.shape[0])+2
-
-# xnew = np.linspace(x_axis.min(), x_axis.max(), 300) 
-# spl = make_interp_spline(x_axis, diag, k=3)  # type: BSpline
-# diag_smooth = spl(xnew)
-
-line_50 = [0.5 for _ in diag]
-
-
-
-ax.plot(x_axis, line_50, color="red", linestyle='-')
-ax.plot(x_axis, diag, color="blue")
-ax.scatter(x_axis, diag, color="blue")
-ax.set_xlabel("Number of armies for both A and D")
-ax.set_xticks(x_axis)
-ax.set_ylabel("Probability")
-ax.set_title("Probability of winning a battle as the attacker with same number of troops\n")
-plt.show()
-
-
-# Valor de las armadas
-diff = -10
-prob_att = []
-prob_def = []
-
-lim_inf = 2 if diff>0 else 2-diff
-lim_sup = max_armies-diff if diff>0 else max_armies
-x_axis = range(lim_inf, lim_sup)
-for a in x_axis:
-  d = a + diff
-  prob_att.append(tree.probs[Node(a,d)])
-  prob_def.append(tree.probs[Node(d,a)])
-
-att = np.array(prob_att)
-defe = 1 - np.array(prob_def)
-
-
-fig, ax = plt.subplots(1,1, figsize=(20,9))
-
-ax.plot(x_axis, att, color="red", linestyle='-', label="Attacking")
-ax.plot(x_axis, defe, color="blue", label="Defending")
-ax.set_xlabel("Armies for player")
-ax.set_xticks(list(filter(lambda x: x%2==0, x_axis)))
-ax.set_ylabel("Probability")
-sign = "+" if diff>0 else "-"
-ax.set_title(f"Probability of winning a battle having x armies against {sign}{abs(diff)}")
-ax.legend(loc="best")
-plt.show()
+  import matplotlib.pyplot as plt
+  plt.rcParams.update({'font.size': 20})
+  # from scipy.interpolate import make_interp_spline, BSpline
   
+  fig, ax = plt.subplots(1,1, figsize=(12,7))
   
-
-   
+  diag = np.array(list(filter(lambda x: x>=0, [res[i][i] for i in range(len(res))])))
+  x_axis = np.arange(diag.shape[0])+2
+  
+  # xnew = np.linspace(x_axis.min(), x_axis.max(), 300) 
+  # spl = make_interp_spline(x_axis, diag, k=3)  # type: BSpline
+  # diag_smooth = spl(xnew)
+  
+  line_50 = [0.5 for _ in diag]
   
   
   
+  ax.plot(x_axis, line_50, color="red", linestyle='-')
+  ax.plot(x_axis, diag, color="blue")
+  ax.scatter(x_axis, diag, color="blue")
+  ax.set_xlabel("Number of armies for both A and D")
+  ax.set_xticks(x_axis)
+  ax.set_ylabel("Probability")
+  ax.set_title("Probability of winning a battle as the attacker with same number of troops\n")
+  plt.show()
+  
+  
+  # Valor de las armadas
+  diff = -10
+  prob_att = []
+  prob_def = []
+  
+  lim_inf = 2 if diff>0 else 2-diff
+  lim_sup = max_armies-diff if diff>0 else max_armies
+  x_axis = range(lim_inf, lim_sup)
+  for a in x_axis:
+    d = a + diff
+    prob_att.append(tree.probs[Node(a,d)])
+    prob_def.append(tree.probs[Node(d,a)])
+  
+  att = np.array(prob_att)
+  defe = 1 - np.array(prob_def)
+  
+  
+  fig, ax = plt.subplots(1,1, figsize=(20,9))
+  
+  ax.plot(x_axis, att, color="red", linestyle='-', label="Attacking")
+  ax.plot(x_axis, defe, color="blue", label="Defending")
+  ax.set_xlabel("Armies for player")
+  ax.set_xticks(list(filter(lambda x: x%2==0, x_axis)))
+  ax.set_ylabel("Probability")
+  sign = "+" if diff>0 else "-"
+  ax.set_title(f"Probability of winning a battle having x armies against {sign}{abs(diff)}")
+  ax.legend(loc="best")
+  plt.show()
+    
+    
+  
+     
+    
+    
+    

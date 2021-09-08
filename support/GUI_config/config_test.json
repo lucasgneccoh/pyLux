@@ -1,7 +1,7 @@
 {
   "players": [ 
     {
-      "agent": "NetPlayer",
+      "agent": "Human",
       "name": "net_23_4",
       "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
       "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_04_09_test_map/models/model_5_4_initialPick.tar",

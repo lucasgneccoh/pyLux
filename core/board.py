@@ -878,9 +878,8 @@ class Board(object):
   def prepareStart(self):
     '''! At the very beginning of a player's turn, this function should be called to update continent ownership and active player income.
     '''
-    if self.gamePhase == 'startTurn' or self.gamePhase == 'initialFortify':
-      if self.tookOverCountry:
-        self.updateContinents()        
+    if self.gamePhase == 'startTurn' or self.gamePhase == 'initialFortify':      
+      self.updateContinents()        
       self.updateIncome(self.activePlayer)
     self.tookOverCountry = False
   
@@ -895,7 +894,6 @@ class Board(object):
     self.activePlayer = next(self.playerCycle)
     if self.console_debug: print(f"Board:endTurn: Ending turn: next player is ({self.activePlayer.code}) {self.activePlayer.name}")
     
-    p = self.activePlayer
     #if self.console_debug: print(f"Player info: income = {p.income}")
     self.prepareStart()
     #if self.console_debug: print(f"Player info: income = {p.income}, game phase = {self.gamePhase}")

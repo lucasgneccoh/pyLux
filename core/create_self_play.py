@@ -243,6 +243,7 @@ if __name__ == '__main__':
                                     
         if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Defining net apprentice")
         # Define initial apprentice        
+        net.eval()
         apprentice = agent.NetApprentice(net)
     else:
         if verbose: misc.print_and_flush(f"create_self_play ({num_task}): Defining MCTS apprentice")
