@@ -177,7 +177,7 @@ if __name__ == '__main__':
     verbose = args.verbose
     num_task = args.num_task
     
-    misc.print_and_flush(f"create_self_play ({num_task}) ({move_type}): Start")
+    # misc.print_and_flush(f"create_self_play ({num_task}) ({move_type}): Start")
     start = time.process_time()
     
     saved_states_per_episode = inputs["saved_states_per_episode"]
