@@ -24,9 +24,9 @@
   },
   "iter_turn_value_on": 20,
   "value_turn_value_on": 0.5,
-  "path_data": "../data_08_09_test_map",
-  "path_model": "../data_08_09_test_map/models",
-  "batch_size": 20,
+  "path_data": "../data_09_09_test_map",
+  "path_model": "../data_09_09_test_map/models",
+  "batch_size": 32,
   "model_parameters": "../support/model_parameters/model_parameters_small.json",
   "board_params": {
       "path_board": "../support/maps/test_map.json",
@@ -34,7 +34,7 @@
       "useCards": true,
       "transferCards": true, 
       "immediateCash": true,
-      "continentIncrease": 0.05,
+      "continentIncrease": 0,
       "pickInitialCountries": true,
       "armiesPerTurnInitial": 4,
       "console_debug" : false,
@@ -42,6 +42,6 @@
   },
   "self_play_tag": "create_self_play",
   "train_apprentice_tag": "train_model",
-  "epochs": 8,
+  "epochs": 5,
   "eval_every": 99999
 }
