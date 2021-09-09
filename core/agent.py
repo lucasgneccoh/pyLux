@@ -1761,7 +1761,7 @@ if __name__ == "__main__":
         path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_02_09_test_map/models"
         EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_test.json"
         
-        load_model = True
+        load_model = False
         model_name = "model_27_0_initialPick.tar"
         
         # Create the net using the same parameters
@@ -1835,7 +1835,7 @@ if __name__ == "__main__":
                 
         
         # Test play
-        for i in range(50):
+        for i in range(5):
           board.play()
           if board.gameOver: break
   
@@ -1843,5 +1843,10 @@ if __name__ == "__main__":
         board.report()
         print(board.countriesPandas())
         
-        apprentice.getPolicy(board)
+        
+        print("\n\n")
+        
+        pol, value = apprentice.getPolicy(board)
+        print(pol.shape)
+        print(value.shape)
         

@@ -204,16 +204,13 @@ class GCN_risk(torch.nn.Module):
                  dropout = 0.4):
 
         super().__init__()
-
-        # TODO: add a node encoder?
-        # self.node_encoder = nn.Linear(board_input_dim, board_input_dim)
-
+       
         # Global
         
-        # self.num_global_layers = num_global_layers
-        # self.global_fc = torch.nn.ModuleList([nn.Linear(global_input_dim, hidden_global_dim)] + \
-        #                                      [nn.Linear(hidden_global_dim, hidden_global_dim) for i in range(num_global_layers-1)])
-        # self.global_bns = nn.ModuleList([torch.nn.BatchNorm1d(hidden_global_dim) for i in range(num_global_layers-1)])
+        #self.num_global_layers = num_global_layers
+        #self.global_fc = torch.nn.ModuleList([nn.Linear(global_input_dim, hidden_global_dim)] + \
+        #                                     [nn.Linear(hidden_global_dim, hidden_global_dim) for i in range(num_global_layers-1)])
+        #self.global_bns = nn.ModuleList([torch.nn.BatchNorm1d(hidden_global_dim) for i in range(num_global_layers-1)])
         
         self.num_nodes = num_nodes
         self.num_edges = num_edges
@@ -324,10 +321,10 @@ class GCN_risk(torch.nn.Module):
             pick = self.pick_layers[i](pick, adj_t)
         pick = pick.view(batch.num_graphs, -1)
         
-        for i in range(len(self.pick_final)):            
-            pick = self.pick_final[i](pick)
+        for i in range(len(self.pick_final)-1):            
+            pick = F.relu(self.pick_final[i](pick))
 
-        
+        pick = self.pick_final[-1](pick)
         pick = F.softmax(pick, dim=1)
         
         
@@ -336,9 +333,11 @@ class GCN_risk(torch.nn.Module):
         for i in range(1, self.num_place_layers):
             place = self.placeArmies_layers[i](place, adj_t)
         place = place.view(batch.num_graphs, -1)
-        for i in range(len(self.place_final)):
-            place = self.place_final[i](place)
+        
+        for i in range(len(self.place_final)-1):
+            place = F.relu(self.place_final[i](place))
 
+        place = self.place_final[-1](place)
         place = F.softmax(place, dim=1)
         
 
@@ -351,8 +350,10 @@ class GCN_risk(torch.nn.Module):
         attack = self.attack_edge.forward(attack[batch.edge_index[0]],
                                           attack[batch.edge_index[1]])
         attack = attack.view(batch.num_graphs, -1)
-        for i in range(len(self.attack_final)):
-            attack = self.attack_final[i](attack)
+        for i in range(len(self.attack_final)-1):
+            attack = F.relu(self.attack_final[i](attack))
+        
+        attack = self.attack_final[-1](attack)
         attack = F.softmax(attack, dim = 1)
         
 
@@ -365,8 +366,10 @@ class GCN_risk(torch.nn.Module):
         fortify = self.fortify_edge.forward(fortify[batch.edge_index[0]],
                                           fortify[batch.edge_index[1]])
         fortify = fortify.view(batch.num_graphs, -1)
-        for i in range(len(self.fortify_final)):
-            fortify = self.fortify_final[i](fortify)
+        for i in range(len(self.fortify_final)-1):
+            fortify = F.relu(self.fortify_final[i](fortify))
+            
+        fortify = self.fortify_final[-1](fortify)
         fortify = F.softmax(fortify, dim = 1)
 
         # value head
@@ -374,10 +377,13 @@ class GCN_risk(torch.nn.Module):
         for i in range(1, self.num_value_layers):
             value = self.value_layers[i](value, adj_t)
         
-        # Pooling
+        # value = self.global_pooling_layer(value, batch.batch)
+        # value = F.relu(self.value_fc_1(value))    
+
         
-        value = self.global_pooling_layer(value, batch.batch)
-        value = F.relu(self.value_fc_1(value))
+        value = F.relu(self.value_fc_1(value.mean(axis=0)))
+        
+        
         value = torch.sigmoid(self.value_fc_2(value))
 
         
