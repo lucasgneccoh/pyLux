@@ -21,7 +21,7 @@
             "agent": "NetPlayer",
             "name": "net",
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data_test/models/model_102_3_attack.tar",
+            "model_path": "../data_hex/models/model_102_3_attack.tar",
             "move_selection": "random_proportional",
             "temp": 0.1
           }
@@ -38,7 +38,7 @@
             "agent": "NetPlayer",
             "name": "net",
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data_test/models/model_102_3_attack.tar",
+            "model_path": "../data_hex/models/model_102_3_attack.tar",
             "move_selection": "random_proportional",
             "temp": 0.1
           }
@@ -52,7 +52,7 @@
             "agent": "NetPlayer",
             "name": "net",
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data_test/models/model_102_3_attack.tar",
+            "model_path": "../data_hex/models/model_102_3_attack.tar",
             "move_selection": "random_proportional",
             "temp": 0.1
           },
@@ -76,7 +76,7 @@
             "agent": "NetPlayer",
             "name": "net",
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data_test/models/model_102_3_attack.tar",
+            "model_path": "../data_hex/models/model_102_3_attack.tar",
             "move_selection": "random_proportional",
             "temp": 0.1
           }
@@ -90,7 +90,7 @@
             "agent": "NetPlayer",
             "name": "net",
             "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-            "model_path": "../data_test/models/model_102_3_attack.tar",
+            "model_path": "../data_hex/models/model_102_3_attack.tar",
             "move_selection": "random_proportional",
             "temp": 0.1
           },

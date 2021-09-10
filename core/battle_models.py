@@ -155,7 +155,7 @@ def battle(args):
                     winner = p.name
                     break
         print(f"\t\tDone: Winner is {winner}")
-        append_each_field(results, {"round": i})
+        append_each_field(results, {"round": board.roundCount})
         for k in board.players:
             append_each_field(results, player_results(board, k))
             
