@@ -6,6 +6,7 @@ Created on Wed Sep  1 14:17:15 2021
 """
 
 import pandas as pd
+import os
 
 def print_results(path):
     
@@ -41,10 +42,10 @@ def print_results(path):
 
 
 #%%  MAIN 
-paths = ["../support/battles/random_vs_net_strong.csv",
-         "../support/battles/net_strong_vs_random.csv",
-         "../support/battles/net_vs_net_strong_first.csv",
-         "../support/battles/net_vs_net_weak_first.csv"]
+root = "C:/Users/lucas/OneDrive/Documentos/stage_risk/battles"
+paths = ["final_net_vs_peace.csv",
+         "final_net_vs_random_first.csv",
+         "final_net_vs_random_second.csv"]
 
 for path in paths:
-    print_results(path)
+    print_results(os.path.join(root,path))

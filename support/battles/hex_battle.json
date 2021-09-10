@@ -12,7 +12,7 @@
         "initialArmies": 15
   },
   "battles":{    
-      "final_net_vs_peace":{
+      "final_net_vs_peace_2":{
         "players": [
           {
             "agent": "PeacefulAgent"
@@ -26,10 +26,10 @@
             "temp": 0.1
           }
         ],
-        "num_rounds": 100,
+        "num_rounds": 1000,
         "max_turns_per_game": 1000
       },
-      "final_net_vs_random_second":{
+      "final_net_vs_random_second_2":{
         "players": [
           {
             "agent": "RandomAgent"
@@ -43,10 +43,10 @@
             "temp": 0.1
           }
         ],
-        "num_rounds": 100,
+        "num_rounds": 1000,
         "max_turns_per_game": 1000
       },
-      "final_net_vs_random_first":{
+      "final_net_vs_random_first_2":{
         "players": [          
           {
             "agent": "NetPlayer",
@@ -60,10 +60,10 @@
             "agent": "RandomAgent"
           }
         ],
-        "num_rounds": 100,
+        "num_rounds": 1000,
         "max_turns_per_game": 1000
       },
-      "final_net_vs_uct_500_second":{
+      "final_net_vs_uct_500_second_2":{
         "players": [
           {
             "agent": "UCTPlayer",
@@ -81,10 +81,10 @@
             "temp": 0.1
           }
         ],
-        "num_rounds": 100,
+        "num_rounds": 500,
         "max_turns_per_game": 1000
       },
-      "final_net_vs_uct_500_first":{
+      "final_net_vs_uct_500_first_2":{
         "players": [
           {
             "agent": "NetPlayer",
@@ -102,7 +102,7 @@
             "cb": 1.1
           }          
         ],
-        "num_rounds": 100,
+        "num_rounds": 500,
         "max_turns_per_game": 1000
       }      
   }
