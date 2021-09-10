@@ -1,31 +1,12 @@
 from board import Board
-from world import World, Country, Continent
-from move import Move
+from world import World
 import agent
-from model import load_checkpoint, GCN_risk, load_dict
+from model import GCN_risk, load_dict
 import misc
 
-import os
-import itertools
-import numpy as np
-import copy
-import sys
-import json
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
 
-import torch_geometric 
-from torch_geometric.data import DataLoader as G_DataLoader
-from torch_geometric.data import Data
-from torch_geometric.nn import GCNConv
-from torch_geometric.data import Dataset as G_Dataset
-from torch_geometric.data import download_url
-import torch_geometric.transforms as T
-from torch_geometric import utils
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 

@@ -37,8 +37,8 @@ def get_model_order(path):
 
 
 #%% See policy for country pick over time
-path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_07_09_classic/models"
-EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_classic.json"
+path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_hex/models"
+EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_hex.json"
 
 load_model = True
 model_name = "model_27_0_initialPick.tar"
@@ -206,36 +206,40 @@ style = {"C0":(252/255, 59/255, 45/255),
 
 #%%% Plot
 
-roll = data.rolling(window=4).mean()
+roll = data.rolling(window=8).mean()
 
 
-fig, ax = plt.subplots(1,1,figsize=(12,5))
 
-mask_s = mask.squeeze()
-for i, col in enumerate(roll):
-  if mask_s[i]:
-    if data[col].max()>0.25:
-      ax.plot(roll[col], label = col)
-
-ax.legend(loc='best', ncol=4, fancybox=True, shadow=True)
-ax.set_xlabel("Training step")
-ax.set_ylabel("Probability")
-ax.set_title(f"Eval attack")
-# bbox_to_anchor=(0.5, 1.05)
-
-
+# ATTACK
 # fig, ax = plt.subplots(1,1,figsize=(12,5))
 
-# for col in roll:
-#   ax.plot(roll[col], color = style[col], label = col)
+# mask_s = mask.squeeze()
+# for i, col in enumerate(roll):
+#   if mask_s[i]:
+#     if data[col].max()>0.25:
+#       ax.plot(roll[col], label = col)
 
-# ax.legend(loc='lower center', ncol=3, fancybox=True, shadow=True)
+# ax.legend(loc='best', ncol=4, fancybox=True, shadow=True)
 # ax.set_xlabel("Training step")
 # ax.set_ylabel("Probability")
-# ax.set_title(f"Test map: Country draft in empty map")
+# ax.set_title(f"Eval attack")
 # # bbox_to_anchor=(0.5, 1.05)
 
-# plt.show()
+
+
+# PLACE
+fig, ax = plt.subplots(1,1,figsize=(12,5))
+
+for col in roll:
+  ax.plot(roll[col], color = style[col], label = col)
+
+ax.legend(loc='lower center', ncol=3, fancybox=True, shadow=True)
+ax.set_xlabel("Training step")
+ax.set_ylabel("Probability")
+ax.set_title(f"Test map: Country draft in empty map")
+# bbox_to_anchor=(0.5, 1.05)
+
+plt.show()
 
 
 
