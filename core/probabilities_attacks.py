@@ -354,7 +354,32 @@ if False:
   plt.show()
     
     
-  
+    
+    
+    
+#%% Brute force
+import time
+start = time.process_time()
+res = {(1,1):0, (0,2):0, (2,0):0}
+for a1 in range(6):
+  for a2 in range(6):
+    for a3 in range(6):
+      for d1 in range(6):
+        for d2 in range(6):
+          A = sorted([a1,a2,a3], reverse=True)
+          D = sorted([d1,d2], reverse=True)
+          aLoss, dLoss = 0,0
+          for x,y in zip(A,D):
+            if x<=y:
+              aLoss += 1
+            else:
+              dLoss += 1
+          res[(aLoss, dLoss)] += 1
+end= time.process_time()
+print(f"Time taken:: {end-start}")
+print(res)
+          
+          
      
     
     
