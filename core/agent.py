@@ -80,7 +80,7 @@ def heuristic_score_players(state):
     for i in range(num):
         countries = state.getNumberOfCountriesPlayer(i)
         income = state.getPlayerIncome(i)
-        res[i] = 0.5 * (income/all_income) + 0.5 * (countries/all_countries)
+        res[i] = 0.45 * (income/all_income) + 0.45 * (countries/all_countries)
     
     return res
 
@@ -786,9 +786,7 @@ class NetApprentice(object):
 
 
 
-class PUCT(object):
-
-    # TODO: Add the minimum number of visits and the prunning on the getBestAction (Katago) 
+class PUCT(object):    
 
     def __init__(self, apprentice, max_depth = 200, sims_per_eval = 1, num_MCTS_sims = 1000,
                  wa = 10, wb = 10, cb = np.sqrt(2), use_val = 0, console_debug = False):
@@ -852,13 +850,6 @@ class PUCT(object):
         action = -1
         bestScore = -float('inf')
         
-        
-        #if self.console_debug: print("treePolicy: Start")
-        #if self.console_debug: print("Valid:")
-        #if self.console_debug: print(self.Vs[s])
-        #if self.console_debug: print("Actions:")
-        #if self.console_debug: print(self.As[s])
-                
         for i, act in enumerate(self.As[s]):
             a = hash(act)
             # print(i, act)
@@ -870,10 +861,9 @@ class PUCT(object):
                     prior = self.Ps[s][i]
                     sc = mean + self.cb * prior * np.sqrt(self.Ns[s]) / (self.Nsa[(s,a)]+1)
                     
-                    #if self.console_debug: print(f"treePolicy: score for action {act}:  {sc}")
+                    
                 else:
-                    # Unseen action, take it
-                    #if self.console_debug: print(f"treePolicy: unseen action {act}")
+                    # Unseen action, take it                    
                     action = act
                     break
                 if sc > bestScore:
@@ -882,14 +872,10 @@ class PUCT(object):
         return action
         
     
-    def search(self, state, depth):
-        # print("\n\n-------- SEARCH --------")
-        # print(f"depth: {depth}")
-        # state.report()
+    def search(self, state, depth):        
 
         # Is terminal? return vector of score per player
-        if isTerminal(state) or depth>self.max_depth : 
-            # print("\n\n-------- TERMINAL --------")            
+        if isTerminal(state) or depth>self.max_depth :             
             return score_players(state), score_players(state)
 
         # Active player is dead, then end turn
@@ -907,8 +893,6 @@ class PUCT(object):
         # Not a leaf, keep going down. Use values for the current player
         action = self.treePolicy(state)
         
-        #if self.console_debug: print(f"Best action found by tree policy: {action}")
-        
         if isinstance(action, int) and action == -1:
             print("**** No move?? *****")
             state.report()
@@ -919,16 +903,12 @@ class PUCT(object):
         
         a = hash(action) # Best action in simplified way        
         
-        # Play action, continue search
-        # TODO: For now, armies are placed on one country only to simplify the game
-        
-        
+        # Play action, continue search        
+
         if not isinstance(action, Move):
           move = buildMove(state, action)
         else:
           move = action
-        
-        # if self.console_debug: print(move)
         
         state.playMove(move)
         
@@ -1143,8 +1123,7 @@ class NetPlayer(Agent):
       mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)      
       policy, net_value = self.apprentice.getPolicy(canon)
       # Fix order of value returned by net
-      # net_value = net_value.squeeze()
-      
+      # net_value = net_value.squeeze()      
       # cor_value = np.array([net_value[map_to_orig.get(i)] if not map_to_orig.get(i) is None else 0.0  for i in range(6)])
       
       pol = (policy * mask.detach().numpy()).squeeze()
@@ -1233,12 +1212,6 @@ the board that comes from Java is represented using:
   use Board.fromDicts and Board.toDicts to handle such a representation
 '''
   
-'''
-all_agents = {'random': RandomAgent, 'random_aggressive':RandomAggressiveAgent,
-              'human': Human,
-              'flatMC':FlatMC, 'peace':PeacefulAgent, 'neuralMCTS':neuralMCTS}
-'''
-
 
 if __name__ == "__main__":
     # Load a board, try to play

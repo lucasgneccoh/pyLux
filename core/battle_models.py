@@ -27,7 +27,8 @@ def append_each_field(master, new):
     
 def parseInputs():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--inputs", help="Json file containing the inputs for the battles to run", default = "../support/battles/test_battle.json")    
+    parser.add_argument("--inputs", help="Json file containing the inputs for the battles to run", default = "../support/battles/hex_battle_random.json") 
+    parser.add_argument("--verbose", help="Print on screen", default = 0) 
     args = parser.parse_args()
     return args 
     
@@ -129,7 +130,7 @@ def create_player_list(args):
             
     return list_players
   
-def battle(args):
+def battle(args, verbose=False):
     results = {}
     
     # Create players and board    
@@ -141,10 +142,10 @@ def battle(args):
         board = Board(world, list_players)
         board.setPreferences(board_params)
         
-        print(f"\t\tRound {i+1}")
+        if verbose: print(f"\t\tRound {i+1}")
         for j in range(M):
             aux = "{: <30}".format(f"Player {board.activePlayer.name} playing")
-            misc.print_message_over(f"\t\t\t{aux} Turn {j:0>4}")
+            if verbose: misc.print_message_over(f"\t\t\t{aux} Turn {j:0>4}")
             board.play()            
             if board.gameOver: break
         print()
@@ -154,7 +155,7 @@ def battle(args):
                 if p.is_alive:
                     winner = p.name
                     break
-        print(f"\t\tDone: Winner is {winner}")
+        if verbose: print(f"\t\tDone: Winner is {winner}")
         append_each_field(results, {"round": board.roundCount})
         for k in board.players:
             append_each_field(results, player_results(board, k))
@@ -185,6 +186,7 @@ if __name__ == '__main__':
 
     board_params = inputs["board_params"]
     battles = inputs["battles"]
+    save_path = inputs["save_path"]
           
     
     # Battle here. Create agent first, then set number of matches and play the games        
@@ -192,9 +194,9 @@ if __name__ == '__main__':
         print(f"Playing battle {b_name}")
         battle_args = dict(b_args)
         battle_args["board_params"] = dict(board_params)
-        res = battle(battle_args)                
+        res = battle(battle_args, args.verbose) 
         # Write csv with the results
-        csv, path = pd.DataFrame(data = res), f"../support/battles/{b_name}.csv"
+        csv, path = pd.DataFrame(data = res), f"{save_path}/{b_name}.csv"
         csv.to_csv(path)
         print(f"Wrote results to {path}")
         

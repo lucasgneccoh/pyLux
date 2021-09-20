@@ -11,15 +11,11 @@
         "console_debug" : false,
         "initialArmies": 15
   },
-  "battles":{         
-      "final_net_vs_uct_500_second":{
+  "battles":{          
+      "final_net_vs_random_second_5":{
         "players": [
           {
-            "agent": "UCTPlayer",
-            "max_depth": 500,
-            "sims_per_eval": 1,
-            "num_MCTS_sims": 500,
-            "cb": 1.1
+            "agent": "RandomAgent"
           },
           {
             "agent": "NetPlayer",
@@ -33,8 +29,8 @@
         "num_rounds": 100,
         "max_turns_per_game": 1000
       },
-      "final_net_vs_uct_500_first":{
-        "players": [
+      "final_net_vs_random_first_5":{
+        "players": [          
           {
             "agent": "NetPlayer",
             "name": "net",
@@ -44,15 +40,11 @@
             "temp": 0.1
           },
           {
-            "agent": "UCTPlayer",
-            "max_depth": 500,
-            "sims_per_eval": 1,
-            "num_MCTS_sims": 500,
-            "cb": 1.1
+            "agent": "RandomAgent"
           }
         ],
         "num_rounds": 100,
         "max_turns_per_game": 1000
-      }      
+      }     
   }
 }

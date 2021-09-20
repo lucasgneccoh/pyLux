@@ -1353,7 +1353,7 @@ if __name__ == "__main__":
 
   # Load map
   path = '../support/maps/classic_world_map.json'
-  # path = '../support/maps/test_map.json'
+  path = '../support/maps/test_map.json'
     
   world = World(path)
   
@@ -1365,8 +1365,9 @@ if __name__ == "__main__":
   # Set board
   prefs = {'initialPhase': True, 'useCards':True,
            'transferCards':True, 'immediateCash': True,
-           'continentIncrease': 0.05, 'pickInitialCountries':True,
-           'armiesPerTurnInitial':4,'console_debug':False}  
+           'continentIncrease': 0.0, 'pickInitialCountries':True,
+           'armiesPerTurnInitial':4,'console_debug':False,
+           'initialArmies':20}  
            
   board_orig = Board(world, players)
   board_orig.setPreferences(prefs)
@@ -1386,7 +1387,7 @@ if __name__ == "__main__":
   # board.report()
   # print(board.countriesPandas())
   
-  for i in range(2000):
+  for i in range(1):
     board.play()
     if board.gameOver: break
   
@@ -1406,6 +1407,26 @@ if __name__ == "__main__":
   
   # board_orig.report()
   # print(board_orig.countriesPandas())
+  
+  
+  print("\n\n\n")
+  numTries = 1000
+  maxSteps = 2000
+  endStep = []
+  finished = 0
+  for i in range(numTries):
+    board = copy.deepcopy(board_orig)
+    for j in range(maxSteps):
+      board.play()
+      if board.gameOver:
+        finished += 1
+        endStep.append(j)
+        break
+  
+  print(f"Finished games: {finished}")
+  print(f"Average end state: {np.mean(endStep)}")
+  import matplotlib.pyplot as plt
+  plt.hist(endStep)
 
   
 

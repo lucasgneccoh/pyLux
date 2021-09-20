@@ -1,0 +1,61 @@
+{
+  "save_path": "../support/battles",
+  "board_params": {
+        "path_board": "../support/maps/hex_map.json",
+        "initialPhase": true,
+        "useCards": true,
+        "transferCards": true, 
+        "immediateCash": true,
+        "continentIncrease": 0,
+        "pickInitialCountries": true,
+        "armiesPerTurnInitial": 4,
+        "console_debug" : false,
+        "initialArmies": 15
+  },
+  "battles":{         
+      "uct_200_vs_puct_200_second":{
+        "players": [
+          {
+            "agent": "UCTPlayer",
+            "max_depth": 500,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 200,
+            "cb": 1.1
+          },
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data_hex/models/model_102_3_attack.tar",
+            "max_depth": 500,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 200,
+            "cb": 1.1
+          }
+        ],
+        "num_rounds": 10,
+        "max_turns_per_game": 1000
+      },
+      "uct_200_vs_puct_200_first":{
+        "players": [
+          {
+            "agent": "PUCTPlayer", 
+            "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
+            "model_path": "../data_hex/models/model_102_3_attack.tar",
+            "max_depth": 500,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 200,
+            "cb": 1.1
+          },
+          {
+            "agent": "UCTPlayer",
+            "max_depth": 500,
+            "sims_per_eval": 1,
+            "num_MCTS_sims": 200,
+            "cb": 1.1
+          }
+        ],
+        "num_rounds": 10,
+        "max_turns_per_game": 1000
+      }
+  }
+}

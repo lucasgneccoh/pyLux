@@ -88,23 +88,23 @@ apprentice = agent.NetApprentice(net)
 # Prepare board
 board = copy.deepcopy(board_orig)
 
-board.playMove(agent.buildMove(board, ("pi", 1)))
-board.playMove(agent.buildMove(board, ("pi", 2)))
-board.playMove(agent.buildMove(board, ("pi", 3)))
-board.playMove(agent.buildMove(board, ("pi", 4)))
-board.playMove(agent.buildMove(board, ("pi", 5)))
-board.playMove(agent.buildMove(board, ("pi", 0)))
+# board.playMove(agent.buildMove(board, ("pi", 1)))
+# board.playMove(agent.buildMove(board, ("pi", 2)))
+# board.playMove(agent.buildMove(board, ("pi", 3)))
+# board.playMove(agent.buildMove(board, ("pi", 4)))
+# board.playMove(agent.buildMove(board, ("pi", 5)))
+# board.playMove(agent.buildMove(board, ("pi", 0)))
 
 
 
 
-board.playMove(agent.buildMove(board, ("pl", 1)))
-board.playMove(agent.buildMove(board, ("pl", 0)))
+# board.playMove(agent.buildMove(board, ("pl", 1)))
+# board.playMove(agent.buildMove(board, ("pl", 0)))
 
-board.playMove(agent.buildMove(board, ("pl", 1)))
-board.playMove(agent.buildMove(board, ("pl", 0)))
+# board.playMove(agent.buildMove(board, ("pl", 1)))
+# board.playMove(agent.buildMove(board, ("pl", 0)))
 
-board.playMove(agent.buildMove(board, ("pl", 1)))
+# board.playMove(agent.buildMove(board, ("pl", 1)))
 
 # Play moves if needed
 # board.playMove(agent.buildMove(board, ("pi", 0)))
@@ -164,6 +164,13 @@ board.playMove(agent.buildMove(board, ("pl", 1)))
 # board.world.countries[2].armies = 20
 
 
+
+#%%%
+board.play() 
+while not board.gameOver and board.gamePhase != "attack":
+  board.play()
+  
+  
 board.report()
 print(board.countriesPandas())
 print("\n")
@@ -187,3 +194,9 @@ for m, a, p, s in zip(mask.squeeze(), moves, pop, soft):
                 f"{a[0]}: {co[a[1]]['id']} -> {co[a[2]]['id']} - {p:.3f} - {s:.3f}")
         else:
             print(f"{a[0]}: {co[a[1]]['id']} - {p:.3f}- {s:.3f}")
+
+
+
+
+
+

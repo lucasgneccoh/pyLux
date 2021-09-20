@@ -1,4 +1,5 @@
 {
+  "save_path": "../support/battles",
   "board_params": {
         "path_board": "../support/maps/hex_map.json",
         "initialPhase": true,
