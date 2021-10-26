@@ -110,7 +110,7 @@ if __name__ == '__main__':
         root_path = f'{path_data}/{move_type}'
         
         if len(os.listdir(os.path.join(root_path, 'raw')))<batch_size: 
-            print("\t\TLess data than batch size, passing")
+            print("\t\tLess data than batch size, passing")
             continue
         
         risk_dataset = RiskDataset(root = root_path)

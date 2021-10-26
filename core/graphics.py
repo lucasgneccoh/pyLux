@@ -15,6 +15,7 @@ from model import GCN_risk, load_dict, boardToData
 import agent
 import copy
 import torch_geometric
+import re
 
 def get_model_order(path):    
   
@@ -270,6 +271,7 @@ plt.show()
 
 max_turns = 150
 num_matchs = 50
+match_number = 4
 
 
 # Get data now
@@ -277,18 +279,23 @@ models_sorted = get_model_order(path_model)
 wins = []
 netPlayer_countries = []
 netPlayer_armies = []
+op_countries = []
+op_armies = []
 model_cont = []
 for i, model_name in enumerate(models_sorted):
+    a = re.search(f"[a-z]+_[0-9]+_{match_number}",model_name)
+    if a is None: continue
     print(f"Chosen model is {model_name}")
     state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')    
     net.load_state_dict(state_dict['model'])
-    net.eval()
-    apprentice = agent.NetApprentice(net) 
-    netPlayer = agent.NetPlayer(apprentice, move_selection = "random_proportional", temp = 1)
-    # Play against random
-    pRandom = RandomAgent('Random')
+    net.eval()    
     for k in range(num_matchs):
-      if (k+1)%%10== 0: print(f'Match {k+1}')
+      if (k+1)%10== 0: print(f'Match {k+1}')
+      world = World(path_board)
+      apprentice = agent.NetApprentice(net) 
+      netPlayer = agent.NetPlayer(apprentice, move_selection = "random_proportional", temp = 1)
+      # Play against random
+      pRandom = RandomAgent('Random')
       battle_board = Board(world, [netPlayer, pRandom])
       battle_board.setPreferences(prefs)
       for j in range(max_turns):
@@ -304,9 +311,73 @@ for i, model_name in enumerate(models_sorted):
       wins.append(w)
       netPlayer_countries.append(battle_board.getPlayerCountries(netPlayer.code))
       netPlayer_armies.append(battle_board.getPlayerArmies(netPlayer.code))
+      op_armies.append(battle_board.getPlayerArmies(pRandom.code))
+      op_countries.append(battle_board.getPlayerCountries(pRandom.code))
       model_cont.append(i)
 
-data = pd.DataFrame(np.array(policies).squeeze(1), index = models_sorted)
+
+
+data = pd.DataFrame(data = {
+  "id":model_cont,
+  "result":wins,
+  "countries":netPlayer_countries,
+  "armies":netPlayer_armies,
+  "armies_op":op_armies,
+  "countries_op":op_countries
+  })
+
+data['win'] = data['result']==1
+data['loss'] = data['result']==-1
+data['draw'] = data['result']==0
+data['armies_win'] = data['armies'].where(data['win'], other = np.nan)
+data['armies_loss'] = data['armies'].where(data['loss'], other = np.nan)
+data['armies_draw'] = data['armies'].where(data['draw'], other = np.nan)
+
+data['armies_op_win'] = data['armies_op'].where(data['win'], other = np.nan)
+data['armies_op_loss'] = data['armies_op'].where(data['loss'], other = np.nan)
+data['armies_op_draw'] = data['armies_op'].where(data['draw'], other = np.nan)
+
+gb = data.groupby(by = "id", as_index=False).aggregate(func = 'mean')
+
+
+
+labelsize = 17
+fontsize_ticks = 17
+fontsize_legend = 15
+fontsize_title = 20
+
+plt.rc('xtick', labelsize=labelsize)
+plt.rc('ytick', labelsize=labelsize)
+
+fig, ax = plt.subplots(1,1,figsize=(12,5))
+
+
+for col in ['armies_win', 'armies_loss', 'armies_draw']:
+  ax.plot(gb[col], label = col)
+
+
+
+
+ax.legend(loc='best', ncol=3, fancybox=True, shadow=True, fontsize=fontsize_legend)
+ax.set_xlabel("Training step", fontsize=fontsize_ticks )
+ax.set_ylabel("Probability", fontsize=fontsize_ticks )
+ax.set_title(f"Hex map: Country draft in empty map", fontsize=fontsize_title)
+# bbox_to_anchor=(0.5, 1.05)
+
+
+plt.show()
+
+
+
+gb_plot = gb.loc[:, ['id', 'win', 'loss', 'draw']]
+gb_plot['epochs'] = gb_plot['id']*10 
+gb_plot.drop(columns = 'id', inplace=True)
+gb_plot.plot(
+    x = 'epochs',
+    kind = 'barh',
+    stacked = True,
+    title = 'Proportion of wins, losses and draws',
+    mark_right = True)
 
 
 
