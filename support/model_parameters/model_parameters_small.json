@@ -1,6 +1,6 @@
 {
 "board_input_dim":12, "global_input_dim": 19, 
-"hidden_global_dim":24, "num_global_layers":4,
+"hidden_global_dim":24, "num_global_layers":2,
 "hidden_conv_dim":24, "num_conv_layers":2, 
 "hidden_pick_dim":24, "num_pick_layers":2, "out_pick_dim":1,
 "hidden_place_dim":24, "num_place_layers":2, "out_place_dim":1,
