@@ -8,6 +8,7 @@ from subprocess import Popen
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import misc
+from numpy import ceil
 
 """
 This file is the main file used to perform the Expert iteration process.
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     if os.cpu_count() < num_cpu:
         print(f"num_cpu given as input is too high: Given was {num_cpu}, only {os.cpu_count()} available")        
         num_cpu = os.cpu_count()
-    num_iter = int(num_samples / (num_cpu * saved_states_per_episode))
+    num_iter = ceil(num_samples / (num_cpu * saved_states_per_episode))
     
     types_cycle = itertools.cycle(["initialPick", "initialFortify", "startTurn", "attack", "fortify"])
     
