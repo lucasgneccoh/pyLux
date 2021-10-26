@@ -34,7 +34,7 @@
       "useCards": true,
       "transferCards": true, 
       "immediateCash": true,
-      "continentIncrease": 0,
+      "continentIncrease": 0.05,
       "pickInitialCountries": true,
       "armiesPerTurnInitial": 4,
       "console_debug" : false,

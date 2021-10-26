@@ -36,7 +36,7 @@ def get_model_order(path):
 
 
 
-#%% See policy for country pick over time
+#%% LOAD MODEL
 path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_hex_final/models"
 EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_hex.json"
 
@@ -93,6 +93,9 @@ net.to(device)
 # net.eval()
 
 
+
+
+#%%% MODIFICATIONS
 # Prepare board
 board = copy.deepcopy(board_orig)
 # Play moves if needed
@@ -158,6 +161,7 @@ board = copy.deepcopy(board_orig)
 # board.world.countries[2].armies = 20
 
 
+#%%%% GET DATA POLICIES
 # Prepare table
 countries_names = {x.code : x.id for x in board.countries()}
 
@@ -193,6 +197,10 @@ else:
   raise Exception("Algo raro")
 
 
+
+
+#%%% Plot geenral parameters
+
 style = {"C0":(252/255, 59/255, 45/255), 
          "C1":(140/255, 12/255, 3/255),
          "C2":(255/255, 176/255, 31/255),
@@ -208,8 +216,6 @@ style = {"C0":(252/255, 59/255, 45/255),
          "GRE":(255/255, 191/255, 107/255),
          "ICE":(0/255, 251/255, 255/255),
          "SEU":(0/255, 42/255, 255/255),}
-
-#%%% Plot
 
 roll = data.rolling(window=6).mean()
 
@@ -250,7 +256,7 @@ for col in roll:
 ax.legend(loc='best', ncol=3, fancybox=True, shadow=True, fontsize=fontsize_legend)
 ax.set_xlabel("Training step", fontsize=fontsize_ticks )
 ax.set_ylabel("Probability", fontsize=fontsize_ticks )
-ax.set_title(f"Tex map: Country draft in empty map", fontsize=fontsize_title)
+ax.set_title(f"Hex map: Country draft in empty map", fontsize=fontsize_title)
 # bbox_to_anchor=(0.5, 1.05)
 
 
@@ -259,28 +265,49 @@ plt.show()
 
 
 
-# {0: South America. bonus = 2, owner = -1,
-#  1: North America. bonus = 5, owner = -1,
-#  2: Europe. bonus = 5, owner = -1,
-#  3: Africa. bonus = 3, owner = -1,
-#  4: Asia. bonus = 7, owner = -1,
-#  5: Oceania. bonus = 3, owner = -1}
+
+#%%% GET DATA WIN RATIO
+
+max_turns = 150
+num_matchs = 50
+
+
+# Get data now
+models_sorted = get_model_order(path_model)
+wins = []
+netPlayer_countries = []
+netPlayer_armies = []
+model_cont = []
+for i, model_name in enumerate(models_sorted):
+    print(f"Chosen model is {model_name}")
+    state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')    
+    net.load_state_dict(state_dict['model'])
+    net.eval()
+    apprentice = agent.NetApprentice(net) 
+    netPlayer = agent.NetPlayer(apprentice, move_selection = "random_proportional", temp = 1)
+    # Play against random
+    pRandom = RandomAgent('Random')
+    for k in range(num_matchs):
+      if (k+1)%%10== 0: print(f'Match {k+1}')
+      battle_board = Board(world, [netPlayer, pRandom])
+      battle_board.setPreferences(prefs)
+      for j in range(max_turns):
+        battle_board.play()
+        if battle_board.gameOver: break
+      
+      w = 0
+      if battle_board.players[netPlayer.code].is_alive:
+        if not battle_board.players[pRandom.code].is_alive:
+          w = 1
+      else:
+        w = -1
+      wins.append(w)
+      netPlayer_countries.append(battle_board.getPlayerCountries(netPlayer.code))
+      netPlayer_armies.append(battle_board.getPlayerArmies(netPlayer.code))
+      model_cont.append(i)
+
+data = pd.DataFrame(np.array(policies).squeeze(1), index = models_sorted)
 
 
 
-# for cont in range(6): 
-#   fig, ax = plt.subplots(1,1,figsize=(12,5))
-  
-#   for col in roll:
-#     # ax.plot(roll[col], color = style[col], label = col)
-#     if col in board.world.continents[cont]['countries_id']:
-#       ax.plot(roll[col], label = col)
-  
-#   ax.legend(loc='lower center', ncol=3, fancybox=True, shadow=True)
-#   ax.set_xlabel("Training step")
-#   ax.set_ylabel("Probability")
-#   ax.set_title(f"Classic: Country picking in {board.world.continents[cont]['name']}")
-#   # bbox_to_anchor=(0.5, 1.05)
-  
-#   plt.show()
 
