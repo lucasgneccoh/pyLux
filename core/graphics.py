@@ -37,8 +37,13 @@ def get_model_order(path):
 
 
 #%% See policy for country pick over time
-path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_hex/models"
+path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_hex_final/models"
 EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_hex.json"
+
+
+path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_02_09_test_map/models"
+EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_test_2.json"
+
 
 load_model = True
 model_name = "model_27_0_initialPick.tar"
@@ -85,7 +90,7 @@ net = GCN_risk(num_nodes, num_edges,
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 net.to(device)
-net.eval()
+# net.eval()
 
 
 # Prepare board
@@ -206,7 +211,7 @@ style = {"C0":(252/255, 59/255, 45/255),
 
 #%%% Plot
 
-roll = data.rolling(window=8).mean()
+roll = data.rolling(window=6).mean()
 
 
 
@@ -228,16 +233,26 @@ roll = data.rolling(window=8).mean()
 
 
 # PLACE
+
+labelsize = 17
+fontsize_ticks = 17
+fontsize_legend = 15
+fontsize_title = 20
+
+plt.rc('xtick', labelsize=labelsize)
+plt.rc('ytick', labelsize=labelsize)
+
 fig, ax = plt.subplots(1,1,figsize=(12,5))
 
 for col in roll:
-  ax.plot(roll[col], color = style[col], label = col)
+  ax.plot(roll[col].to_numpy(), color = style[col], label = col)
 
-ax.legend(loc='lower center', ncol=3, fancybox=True, shadow=True)
-ax.set_xlabel("Training step")
-ax.set_ylabel("Probability")
-ax.set_title(f"Test map: Country draft in empty map")
+ax.legend(loc='best', ncol=3, fancybox=True, shadow=True, fontsize=fontsize_legend)
+ax.set_xlabel("Training step", fontsize=fontsize_ticks )
+ax.set_ylabel("Probability", fontsize=fontsize_ticks )
+ax.set_title(f"Tex map: Country draft in empty map", fontsize=fontsize_title)
 # bbox_to_anchor=(0.5, 1.05)
+
 
 plt.show()
 

@@ -48,12 +48,13 @@ def print_results(path, player):
 
 
 #%%  MAIN 
+
+
 root = "C:/Users/lucas/OneDrive/Documentos/stage_risk/battles"
 root = "C:/Users/lucas/OneDrive/Documentos/GitHub/pyLux/support/battles"
 
-
-paths = ["final_net_vs_random_first_4.csv",
-         "final_net_vs_random_second_4.csv"]
+paths = ["final_net_vs_random_first_5.csv",
+         "final_net_vs_random_second_5.csv"]
 
 for path in paths:
     table = print_results(os.path.join(root,path), "net")

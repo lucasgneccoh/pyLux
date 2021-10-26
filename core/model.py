@@ -165,8 +165,8 @@ class RiskDataset(G_Dataset):
         
  ### Model
  
-def ResGCN(conv, norm, act = nn.ReLU(), dropout = 0.3):
-    return torch_geometric.nn.DeepGCNLayer(conv, norm, act, block='res+', dropout=dropout)
+def ResGCN(conv, norm, act = nn.ReLU(), dropout = 0.3, block = 'res'):
+    return torch_geometric.nn.DeepGCNLayer(conv, norm, act, block=block, dropout=dropout)
 
 class EdgeNet(torch.nn.Module):
 
@@ -201,7 +201,7 @@ class GCN_risk(torch.nn.Module):
                  hidden_attack_dim = 32, num_attack_layers = 4, out_attack_dim = 1,
                  hidden_fortify_dim = 32, num_fortify_layers = 4, out_fortify_dim = 1,
                  hidden_value_dim = 32,  num_value_layers = 4,
-                 dropout = 0.4):
+                 dropout = 0.4, block = 'res'):
 
         super().__init__()
        
@@ -220,16 +220,16 @@ class GCN_risk(torch.nn.Module):
         self.num_conv_layers = num_conv_layers
         self.conv_init = GCNConv(board_input_dim, hidden_conv_dim)
         self.deep_convs = nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_conv_dim),
-                                                nn.BatchNorm1d(hidden_conv_dim)) for i in range(num_conv_layers)])        
+                                                nn.BatchNorm1d(hidden_conv_dim), dropout=dropout, block = block) for i in range(num_conv_layers)])        
         
         self.softmax = nn.LogSoftmax(dim = 1)
 
         # Pick country head        
         self.num_pick_layers = num_pick_layers
         self.pick_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_pick_dim),
-                                                nn.BatchNorm1d(hidden_pick_dim))]+\
+                                                nn.BatchNorm1d(hidden_pick_dim), dropout=dropout, block = block)]+\
                                                 [ResGCN(GCNConv(hidden_pick_dim,hidden_pick_dim),
-                                                nn.BatchNorm1d(hidden_pick_dim)) for i in range(num_pick_layers-2)] +\
+                                                nn.BatchNorm1d(hidden_pick_dim), dropout=dropout, block = block) for i in range(num_pick_layers-2)] +\
                                                [GCNConv(hidden_pick_dim, out_pick_dim)]
                                                )
         self.pick_final = torch.nn.ModuleList([nn.Linear(num_nodes, 64), nn.Linear(64, num_nodes)])
@@ -238,9 +238,9 @@ class GCN_risk(torch.nn.Module):
         # Distribution over the nodes
         self.num_place_layers = num_place_layers
         self.placeArmies_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_place_dim),
-                                                nn.BatchNorm1d(hidden_place_dim))]+\
+                                                nn.BatchNorm1d(hidden_place_dim), dropout=dropout, block = block)]+\
                                                 [ResGCN(GCNConv(hidden_place_dim,hidden_place_dim),
-                                                nn.BatchNorm1d(hidden_place_dim)) for i in range(num_place_layers-2)] +\
+                                                nn.BatchNorm1d(hidden_place_dim), dropout=dropout, block = block) for i in range(num_place_layers-2)] +\
                                                [GCNConv(hidden_place_dim, out_place_dim)]
                                                )
         # self.global_to_place = nn.Linear(hidden_global_dim, out_place_dim)
@@ -253,9 +253,9 @@ class GCN_risk(torch.nn.Module):
         self.num_attack_layers = num_attack_layers
         self.hidden_attack_dim = hidden_attack_dim
         self.attack_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_attack_dim),
-                                                nn.BatchNorm1d(hidden_attack_dim))]+\
+                                                nn.BatchNorm1d(hidden_attack_dim), dropout=dropout, block = block)]+\
                                                 [ResGCN(GCNConv(hidden_attack_dim,hidden_attack_dim),
-                                                nn.BatchNorm1d(hidden_attack_dim)) for i in range(num_attack_layers-1)]     
+                                                nn.BatchNorm1d(hidden_attack_dim), dropout=dropout, block = block) for i in range(num_attack_layers-1)]     
                                                 )
         self.attack_edge = EdgeNet(hidden_attack_dim, 28, 3, out_attack_dim)
         # self.global_to_attack = nn.Linear(hidden_global_dim, out_attack_dim)
@@ -269,9 +269,9 @@ class GCN_risk(torch.nn.Module):
         self.num_fortify_layers = num_fortify_layers
         self.hidden_fortify_dim = hidden_fortify_dim
         self.fortify_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_fortify_dim),
-                                                nn.BatchNorm1d(hidden_fortify_dim))]+\
+                                                nn.BatchNorm1d(hidden_fortify_dim), dropout=dropout, block = block)]+\
                                                 [ResGCN(GCNConv(hidden_fortify_dim,hidden_fortify_dim),
-                                                nn.BatchNorm1d(hidden_fortify_dim)) for i in range(num_fortify_layers-1)]     
+                                                nn.BatchNorm1d(hidden_fortify_dim), dropout=dropout, block = block) for i in range(num_fortify_layers-1)]     
                                                 )
         self.fortify_edge = EdgeNet(hidden_fortify_dim, 28, 3, out_fortify_dim)
         # self.global_to_fortify = nn.Linear(hidden_global_dim, out_fortify_dim)
@@ -282,9 +282,9 @@ class GCN_risk(torch.nn.Module):
         # Value head
         self.num_value_layers = num_value_layers
         self.value_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_value_dim),
-                                                nn.BatchNorm1d(hidden_value_dim))]+\
+                                                nn.BatchNorm1d(hidden_value_dim), dropout=dropout, block = block)]+\
                                                 [ResGCN(GCNConv(hidden_value_dim,hidden_value_dim),
-                                                nn.BatchNorm1d(hidden_value_dim)) for i in range(num_value_layers-1)]
+                                                nn.BatchNorm1d(hidden_value_dim), dropout=dropout, block = block) for i in range(num_value_layers-1)]
                                                 )
         self.gate_nn = nn.Linear(hidden_value_dim, 1)
         self.other_nn = nn.Linear(hidden_value_dim, hidden_value_dim)

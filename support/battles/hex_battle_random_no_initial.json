@@ -28,7 +28,7 @@
           }
         ],
         "num_rounds": 100,
-        "max_turns_per_game": 1000
+        "max_turns_per_game": 100
       },
       "final_net_vs_random_first_5":{
         "players": [          
@@ -45,7 +45,7 @@
           }
         ],
         "num_rounds": 100,
-        "max_turns_per_game": 1000
+        "max_turns_per_game": 100
       }     
   }
 }

@@ -285,6 +285,8 @@ if __name__ == "__main__":
   # Set board
   board = Board(world, players)
   board.setPreferences(board_params)
+  
+  if board.initialPhase == False: board.play()
   print("Board set")
   
 #%% Draw the board

@@ -61,15 +61,15 @@ if __name__ == "__main__":
                      model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
                      model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
                      model_args['hidden_value_dim'], model_args['num_value_layers'],
-                     model_args['dropout'])
+                     model_args['dropout'], model_args['block'])
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     net.to(device)
     
     print("Net ready, creating other elements of the .tar file")
     
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.002, weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.97)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.05, weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=500, gamma=0.97)
     
     save_dict(save_path, {'model':net.state_dict(),
                         'optimizer':optimizer.state_dict(),

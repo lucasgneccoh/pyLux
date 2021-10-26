@@ -33,7 +33,7 @@
           }
         ],
         "num_rounds": 10,
-        "max_turns_per_game": 1000
+        "max_turns_per_game": 60
       },
       "uct_200_vs_puct_200_first":{
         "players": [
@@ -55,7 +55,7 @@
           }
         ],
         "num_rounds": 10,
-        "max_turns_per_game": 1000
+        "max_turns_per_game": 60
       }
   }
 }

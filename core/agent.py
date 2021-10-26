@@ -1115,7 +1115,18 @@ class NetPlayer(Agent):
       self.apprentice = apprentice     
       self.move_selection = move_selection  
       self.temp = temp
-  
+      
+  def choose_at_random(self, board):
+      options = board.legalMoves()
+      if not options:
+          print("\n\nNo legal moves found")
+          board.report()
+          print(board.countriesPandas())
+          print(f"Player: {board.activePlayer.name} ({board.activePlayer.code})")
+          print(f"Player is alive: {board.activePlayer.is_alive} (num countries {board.activePlayer.num_countries})")
+      return np.random.choice(options)
+
+    
   def run(self, state):
     
       canon, map_to_orig = state.toCanonical(state.activePlayer.code)                        
@@ -1164,10 +1175,12 @@ class NetPlayer(Agent):
   
   def pickCountry(self, board) -> int:
       move = self.run(board)
+      # move = self.choose_at_random(board)
       return move
     
   def placeInitialArmies(self, board, numberOfArmies:int):
       move = self.run(board)
+      # move = self.choose_at_random(board)
       return move
   
   

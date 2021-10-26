@@ -224,7 +224,7 @@ if __name__ == '__main__':
                          model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
                          model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
                          model_args['hidden_value_dim'], model_args['num_value_layers'],
-                         model_args['dropout'])
+                         model_args['dropout'], model_args['block'])
 
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')        
         net.to(device)

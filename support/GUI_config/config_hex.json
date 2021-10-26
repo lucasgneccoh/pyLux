@@ -15,15 +15,15 @@
   ],
   "board_params": {
       "path_board": "../support/maps/hex_map.json",
-      "pickInitialCountries": true,
-      "initialPhase": true,
-      "useCards": true,
-      "transferCards": true,
-      "immediateCash": true,
-      "continentIncrease": 0.05,
+      "pickInitialCountries": false,
+      "initialPhase": false,
+      "useCards": false,
+      "transferCards": false,
+      "immediateCash": false,
+      "continentIncrease": 0,
       "console_debug": true,
       "armiesPerTurnInitial": 4,
-      "initialArmies": 20
+      "initialArmies": 15
       },
   "key_till_dead": [
     1073742049,

@@ -7,5 +7,5 @@
 "hidden_attack_dim":32, "num_attack_layers":4,  "out_attack_dim":1,
 "hidden_fortify_dim":32, "num_fortify_layers":4,  "out_fortify_dim":1,
 "hidden_value_dim":32,  "num_value_layers":4,
-"dropout":0.4
+"dropout":0.4, "block":"res"
 } 
