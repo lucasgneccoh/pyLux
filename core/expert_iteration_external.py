@@ -8,7 +8,7 @@ from subprocess import Popen
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import misc
-from numpy import ceil
+from math import ceil
 
 """
 This file is the main file used to perform the Expert iteration process.
