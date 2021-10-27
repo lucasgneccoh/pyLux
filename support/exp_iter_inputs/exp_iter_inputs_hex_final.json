@@ -13,8 +13,8 @@
       "model_name": "model_0_0_hex.tar"
   },
   "expert_params": {
-      "max_depth": 200,
-      "num_MCTS_sims": 7000,
+      "max_depth": 250,
+      "num_MCTS_sims": 15000,
       "sims_per_eval": 2,
       "wa": 0,
       "wb": 0,
