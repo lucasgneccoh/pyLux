@@ -3,10 +3,10 @@
     {
       "agent": "NetPlayer",
       "name": "net_102_3",
-      "model_parameters_json": "../support/model_parameters/model_default_parameters.json",
-      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_hex/models/model_102_3_attack.tar",
+      "model_parameters_json": "../support/model_parameters/model_parameters_small.json",
+      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_26_10_hex/models/model_14_4_startTurn.tar",
       "move_selection": "random_proportional",
-      "temp": 0.1
+      "temp": 0.3
     },
     {
       "agent": "Human", 

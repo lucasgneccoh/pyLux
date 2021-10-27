@@ -1,6 +1,9 @@
-from board import Board # Only used for the Board.fromDicts
+from board import Board, RandomAgent # Only used for the Board.fromDicts
+from world import World
 import os
 import json
+import copy
+import misc
 
 import torch
 import torch.nn as nn
@@ -96,10 +99,9 @@ def buildGlobalFeature(players, misc):
         maxIncome = max(maxIncome, int(p['income']))
         maxCountries = max(maxCountries, int(p['countries']))
 
-    num_players = len(players)
     func = int if isinstance(list(players.keys())[0], int) else str
-    for i in range(num_players): # Max 6 players
-        res.extend(playerGlobalFeatures(players[func(i)], maxIncome, maxCountries))
+    for i in range(6): # Max 6 players
+        res.extend(playerGlobalFeatures(players.get(func(i)), maxIncome, maxCountries))
     res.extend([int(misc['nextCashArmies'])/100])
     res.extend(oneHotGamePhase(misc['gamePhase']))
     return torch.FloatTensor(res)
@@ -207,8 +209,8 @@ class GCN_risk(torch.nn.Module):
        
         # Global
         
-        #self.num_global_layers = num_global_layers
-        #self.global_fc = torch.nn.ModuleList([nn.Linear(global_input_dim, hidden_global_dim)] + \
+        # self.num_global_layers = num_global_layers
+        # self.global_fc = torch.nn.ModuleList([nn.Linear(global_input_dim, hidden_global_dim)] + \
         #                                     [nn.Linear(hidden_global_dim, hidden_global_dim) for i in range(num_global_layers-1)])
         #self.global_bns = nn.ModuleList([torch.nn.BatchNorm1d(hidden_global_dim) for i in range(num_global_layers-1)])
         
@@ -218,7 +220,11 @@ class GCN_risk(torch.nn.Module):
 
         # Board
         self.num_conv_layers = num_conv_layers
-        self.conv_init = GCNConv(board_input_dim, hidden_conv_dim)
+        
+        # self.conv_init = GCNConv(board_input_dim, hidden_conv_dim)
+        # add global information on each node
+        self.conv_init = GCNConv(board_input_dim+global_input_dim, hidden_conv_dim)
+        
         self.deep_convs = nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_conv_dim),
                                                 nn.LayerNorm(hidden_conv_dim, elementwise_affine=True), dropout=dropout, block = block) for i in range(num_conv_layers)])        
         
@@ -307,17 +313,14 @@ class GCN_risk(torch.nn.Module):
     def forward(self, batch, global_x):
         x, adj_t = batch.x, batch.edge_index
 
-        
-        # Global
-        # for i in range(self.num_global_layers-1):
-        #     global_x = self.global_fc[i](global_x)
-        #     global_x = self.global_bns[i](global_x)
-        #     global_x = F.dropout(F.relu(global_x), training=True, p = self.dropout) + global_x
-
-        # global_x = self.global_fc[-1](global_x)
-        
 
         # Initial convolution
+        # Concatenate global vector to each node      
+        h0, h1 = x.shape
+    
+        to_concat = torch.ones((h0,1)) * global_x    
+    
+        x = torch.cat([x, to_concat], dim = -1)
         
         x = self.conv_init(x,adj_t)
 
@@ -505,5 +508,71 @@ def train_model(model, optimizer, scheduler, criterion, device, epochs,
 if __name__ == "__main__":
     # Test the model loading, the forward and the loss
     print("script model.py")
+    
+    
+    EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_hex_final.json"
+    
+    
+    # Create the net using the same parameters
+    inputs = misc.read_json(EI_inputs_path)
+    model_args =  misc.read_json(inputs["model_parameters"])
+    board_params = inputs["board_params"]
+    path_board = board_params["path_board"]
+    # Create board
+    world = World(path_board)
+
+
+    # Set players
+    pR1, pR2 = RandomAgent('Red'), RandomAgent('Blue')
+    players = [pR1, pR2]
+    # Set board
+    prefs = board_params
+            
+    board_orig = Board(world, players)
+    board_orig.setPreferences(prefs)
+    
+    
+    
+    num_nodes = board_orig.world.map_graph.number_of_nodes()
+    num_edges = board_orig.world.map_graph.number_of_edges()
+    
+    board = copy.deepcopy(board_orig)
+    
+    print("Creating model")
+    net = GCN_risk(num_nodes, num_edges, 
+                     model_args['board_input_dim'], model_args['global_input_dim'],
+                     model_args['hidden_global_dim'], model_args['num_global_layers'],
+                     model_args['hidden_conv_dim'], model_args['num_conv_layers'],
+                     model_args['hidden_pick_dim'], model_args['num_pick_layers'], model_args['out_pick_dim'],
+                     model_args['hidden_place_dim'], model_args['num_place_layers'], model_args['out_place_dim'],
+                     model_args['hidden_attack_dim'], model_args['num_attack_layers'], model_args['out_attack_dim'],
+                     model_args['hidden_fortify_dim'], model_args['num_fortify_layers'], model_args['out_fortify_dim'],
+                     model_args['hidden_value_dim'], model_args['num_value_layers'],
+                     model_args['dropout'])
+    
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    net.to(device)
+    
+    
+    canon, _ = board.toCanonical(0)
+    batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
+    from agent import maskAndMoves
+    mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
+        
+    # Get information relevant for global features
+    _, _, _, players, misc = canon.toDicts()
+    # Build global features
+    global_x = buildGlobalFeature(players, misc).unsqueeze(0)
+    
+    
+    print("batch.x: ", batch.x.shape)
+    print("global_x: ",global_x.shape)
+    
+    to_concat = torch.ones((batch.x.shape[0],1)) * global_x
+    
+    print(to_concat.shape)
+    
+    batch.x = torch.cat([batch.x, to_concat], dim = -1)
+    print(batch.x.shape)
     
     

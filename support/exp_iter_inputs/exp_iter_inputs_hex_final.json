@@ -24,8 +24,8 @@
   },
   "iter_turn_value_on": 75,
   "value_turn_value_on": 0.5,
-  "path_data": "../data_26_10_hex",
-  "path_model": "../data_26_10_hex/models",
+  "path_data": "../data_27_10_hex",
+  "path_model": "../data_27_10_hex/models",
   "batch_size": 32,
   "model_parameters": "../support/model_parameters/model_parameters_small.json",
   "board_params": {

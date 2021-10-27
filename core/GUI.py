@@ -17,11 +17,9 @@ def parseInputs():
   parser.add_argument("--preferences", 
                       help="Path to the preferences file. It is a JSON file containing all the game and visual preferences", default = "../support/GUI_config/classic_map_default_config.json")
   
-  parser.add_argument("--console_debug", help="Set to true to print on the console messages to help debugging", default ="false")
+  parser.add_argument("--console_debug", help="Set to true to print on the console messages to help debugging", default =0, type=int)
   args = parser.parse_args()
   
-  # Some formatting
-  args.console_debug = (args.console_debug.lower()=='true')
   return args
 
 #%%% Utils
@@ -282,9 +280,12 @@ if __name__ == "__main__":
 
   players = create_player_list(prefs)
   
+  
   # Set board
   board = Board(world, players)
   board.setPreferences(board_params)
+  for i, p in board.players.items():
+    p.console_debug = console_debug
   
   if board.initialPhase == False: board.play()
   print("Board set")
