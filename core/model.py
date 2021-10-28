@@ -318,16 +318,21 @@ class GCN_risk(torch.nn.Module):
         # Concatenate global vector to each node      
         h0, h1 = x.shape
         
-        num_graphs = batch.y.shape[0]
+        
+        
+        num_graphs = batch.num_graphs
         num_nodes = h0/num_graphs
         
         aux = torch.zeros((h0, num_graphs))
         for k in range(h0):
           aux[k, int(k/num_nodes)] = 1
                 
+                
         
-        to_concat = torch.matmul(aux, global_batch)
-        
+        if len(global_x.shape)==1:
+          global_x = global_x.unsqueeze(0)
+          
+        to_concat = torch.matmul(aux, global_x)
         x = torch.cat([x, to_concat], dim = -1)
     
         
@@ -589,13 +594,15 @@ if __name__ == "__main__":
     loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
     
     for batch, global_batch in loader:
+      
+      print(batch)
     
       print("batch.x: ", batch.x.shape)
       print("global_x: ",global_batch.shape)
       
       x = batch.x      
       h0, h1 = x.shape
-      num_graphs = batch.y.shape[0]
+      num_graphs = batch.num_graphs
       num_nodes = h0/num_graphs
       
       aux = torch.zeros((h0, num_graphs))
@@ -613,3 +620,42 @@ if __name__ == "__main__":
       
       break
     
+    print("\n\nFor only one")
+    
+    canon, map_to_orig = board_orig.toCanonical(0) 
+    batch_alone = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
+    _, _, _, players, misc = canon.toDicts()
+    global_alone  = buildGlobalFeature(players, misc) 
+    
+    print(batch_alone)
+    print("batch.x: ", batch_alone.x.shape)
+    print("global_x: ",global_alone.shape)
+    if len(global_alone.shape)==1:
+      global_alone = global_alone.unsqueeze(0)
+    print("global_x: ",global_alone.shape)
+    x_alone = batch_alone.x      
+    h0, h1 = x_alone.shape
+    num_graphs = batch_alone.num_graphs
+    num_nodes = h0/num_graphs
+    
+    aux = torch.zeros((h0, num_graphs))
+    for k in range(h0):
+      aux[k, int(k/num_nodes)] = 1
+    
+    print("aux :", aux.shape)
+    
+    to_concat = torch.matmul(aux, global_alone)
+    
+    print(to_concat.shape)
+    
+    x_alone = torch.cat([x_alone, to_concat], dim = -1)
+    print(x_alone.shape)
+    
+    print("\n\n Test forward")
+    a,b,c,d,e = net.forward(batch, global_batch)
+    
+    print(a)
+    
+    a,b,c,d,e = net.forward(batch_alone, global_alone)
+    
+    print(a)
