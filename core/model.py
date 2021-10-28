@@ -317,10 +317,19 @@ class GCN_risk(torch.nn.Module):
         # Initial convolution
         # Concatenate global vector to each node      
         h0, h1 = x.shape
-    
-        to_concat = torch.ones((h0,1)) * global_x    
-    
+        
+        num_graphs = batch.y.shape[0]
+        num_nodes = h0/num_graphs
+        
+        aux = torch.zeros((h0, num_graphs))
+        for k in range(h0):
+          aux[k, int(k/num_nodes)] = 1
+                
+        
+        to_concat = torch.matmul(aux, global_batch)
+        
         x = torch.cat([x, to_concat], dim = -1)
+    
         
         x = self.conv_init(x,adj_t)
 
@@ -554,25 +563,53 @@ if __name__ == "__main__":
     net.to(device)
     
     
-    canon, _ = board.toCanonical(0)
-    batch = torch_geometric.data.Batch.from_data_list([boardToData(canon)])
-    from agent import maskAndMoves
-    mask, moves = maskAndMoves(canon, canon.gamePhase, batch.edge_index)
-        
-    # Get information relevant for global features
-    _, _, _, players, misc = canon.toDicts()
-    # Build global features
-    global_x = buildGlobalFeature(players, misc).unsqueeze(0)
+    # Create some sample data to test the model
+    
+    root_path = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data"
+    move_types = ["initialPick", "initialFortify", "startTurn", "attack", "fortify"]
+                         
+    from create_self_play import simple_save_state
+    import numpy as np
+    
+    batch_size = 4
+    for folder in move_types:
+        os.makedirs(os.path.join(root_path, folder, 'raw'), exist_ok = True)
+        for i in range(batch_size):
+          board = copy.deepcopy(board_orig)
+          while board.gamePhase != folder and not board.gameOver:
+            board.play()
+          simple_save_state(root_path, board, np.array([0]), np.array([0]), verbose=False, num_task=0)
     
     
-    print("batch.x: ", batch.x.shape)
-    print("global_x: ",global_x.shape)
     
-    to_concat = torch.ones((batch.x.shape[0],1)) * global_x
+    from torch_geometric.data import DataLoader as G_DataLoader
     
-    print(to_concat.shape)
+    move_type = np.random.choice(move_types)
+    risk_dataset = RiskDataset(root = os.path.join(root_path, move_type))    
+    loader = G_DataLoader(risk_dataset, batch_size=batch_size, shuffle = True)
     
-    batch.x = torch.cat([batch.x, to_concat], dim = -1)
-    print(batch.x.shape)
+    for batch, global_batch in loader:
     
+      print("batch.x: ", batch.x.shape)
+      print("global_x: ",global_batch.shape)
+      
+      x = batch.x      
+      h0, h1 = x.shape
+      num_graphs = batch.y.shape[0]
+      num_nodes = h0/num_graphs
+      
+      aux = torch.zeros((h0, num_graphs))
+      for k in range(h0):
+        aux[k, int(k/num_nodes)] = 1
+      
+      print("aux :", aux.shape)
+      
+      to_concat = torch.matmul(aux, global_batch)
+      
+      print(to_concat.shape)
+      
+      x = torch.cat([x, to_concat], dim = -1)
+      print(x.shape)
+      
+      break
     
