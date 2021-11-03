@@ -167,7 +167,7 @@ class RiskDataset(G_Dataset):
         
  ### Model
  
-def ResGCN(conv, norm, act = nn.ReLU(), dropout = 0.1, block = 'res'):
+def ResGCN(conv, norm, act = nn.ReLU(), dropout = 0.1, block = 'res+'):
     return torch_geometric.nn.DeepGCNLayer(conv, norm, act, block=block, dropout=dropout)
 
 class EdgeNet(torch.nn.Module):
@@ -193,8 +193,205 @@ class EdgeNet(torch.nn.Module):
 
         return x
 
-
 class GCN_risk(torch.nn.Module):
+    def __init__(self, num_nodes, num_edges, board_input_dim, global_input_dim,
+                 hidden_global_dim = 32, num_global_layers = 4,
+                 hidden_conv_dim = 16, num_conv_layers=4, 
+                 hidden_pick_dim = 32, num_pick_layers = 4, out_pick_dim = 1,
+                 hidden_place_dim = 32, num_place_layers = 4, out_place_dim = 1,
+                 hidden_attack_dim = 32, num_attack_layers = 4, out_attack_dim = 1,
+                 hidden_fortify_dim = 32, num_fortify_layers = 4, out_fortify_dim = 1,
+                 hidden_value_dim = 32,  num_value_layers = 4,
+                 dropout = 0.4):
+
+        super().__init__()
+       
+        # Global
+        
+        #self.num_global_layers = num_global_layers
+        #self.global_fc = torch.nn.ModuleList([nn.Linear(global_input_dim, hidden_global_dim)] + \
+        #                                     [nn.Linear(hidden_global_dim, hidden_global_dim) for i in range(num_global_layers-1)])
+        #self.global_bns = nn.ModuleList([torch.nn.BatchNorm1d(hidden_global_dim) for i in range(num_global_layers-1)])
+        
+        self.num_nodes = num_nodes
+        self.num_edges = num_edges
+
+
+        # Board
+        self.num_conv_layers = num_conv_layers
+        self.conv_init = GCNConv(board_input_dim, hidden_conv_dim)
+        self.deep_convs = nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_conv_dim),
+                                                nn.BatchNorm1d(hidden_conv_dim)) for i in range(num_conv_layers)])        
+        
+        self.softmax = nn.LogSoftmax(dim = 1)
+
+        # Pick country head        
+        self.num_pick_layers = num_pick_layers
+        self.pick_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_pick_dim),
+                                                nn.BatchNorm1d(hidden_pick_dim))]+\
+                                                [ResGCN(GCNConv(hidden_pick_dim,hidden_pick_dim),
+                                                nn.BatchNorm1d(hidden_pick_dim)) for i in range(num_pick_layers-2)] +\
+                                               [GCNConv(hidden_pick_dim, out_pick_dim)]
+                                               )
+        self.pick_final = torch.nn.ModuleList([nn.Linear(num_nodes, 64), nn.Linear(64, num_nodes)])
+
+        # Place armies head
+        # Distribution over the nodes
+        self.num_place_layers = num_place_layers
+        self.placeArmies_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_place_dim),
+                                                nn.BatchNorm1d(hidden_place_dim))]+\
+                                                [ResGCN(GCNConv(hidden_place_dim,hidden_place_dim),
+                                                nn.BatchNorm1d(hidden_place_dim)) for i in range(num_place_layers-2)] +\
+                                               [GCNConv(hidden_place_dim, out_place_dim)]
+                                               )
+        # self.global_to_place = nn.Linear(hidden_global_dim, out_place_dim)
+        # self.place_final_1 = nn.Linear(2*out_place_dim, out_place_dim)
+        # self.place_final_2 = nn.Linear(out_place_dim, 1)
+
+        self.place_final = torch.nn.ModuleList([nn.Linear(num_nodes, 64), nn.Linear(64, num_nodes)])
+        
+        # Attack head
+        self.num_attack_layers = num_attack_layers
+        self.hidden_attack_dim = hidden_attack_dim
+        self.attack_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_attack_dim),
+                                                nn.BatchNorm1d(hidden_attack_dim))]+\
+                                                [ResGCN(GCNConv(hidden_attack_dim,hidden_attack_dim),
+                                                nn.BatchNorm1d(hidden_attack_dim)) for i in range(num_attack_layers-1)]     
+                                                )
+        self.attack_edge = EdgeNet(hidden_attack_dim, 28, 3, out_attack_dim)
+        # self.global_to_attack = nn.Linear(hidden_global_dim, out_attack_dim)
+        # self.attack_final_1 = nn.Linear(2*out_attack_dim, out_attack_dim)
+        # self.attack_final_2 = nn.Linear(out_attack_dim, 1)
+        self.attack_final = torch.nn.ModuleList([nn.Linear(num_edges, 64), nn.Linear(64, num_edges+1)])
+        
+        # Add something to make it edge-wise
+        
+        # Fortify head
+        self.num_fortify_layers = num_fortify_layers
+        self.hidden_fortify_dim = hidden_fortify_dim
+        self.fortify_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_fortify_dim),
+                                                nn.BatchNorm1d(hidden_fortify_dim))]+\
+                                                [ResGCN(GCNConv(hidden_fortify_dim,hidden_fortify_dim),
+                                                nn.BatchNorm1d(hidden_fortify_dim)) for i in range(num_fortify_layers-1)]     
+                                                )
+        self.fortify_edge = EdgeNet(hidden_fortify_dim, 28, 3, out_fortify_dim)
+        # self.global_to_fortify = nn.Linear(hidden_global_dim, out_fortify_dim)
+        # self.fortify_final_1 = nn.Linear(2*out_fortify_dim, out_fortify_dim)
+        # self.fortify_final_2 = nn.Linear(out_fortify_dim, 1)
+        self.fortify_final = torch.nn.ModuleList([nn.Linear(num_edges, 64), nn.Linear(64, num_edges+1)])
+
+        # Value head
+        self.num_value_layers = num_value_layers
+        self.value_layers = torch.nn.ModuleList([ResGCN(GCNConv(hidden_conv_dim,hidden_value_dim),
+                                                nn.BatchNorm1d(hidden_value_dim))]+\
+                                                [ResGCN(GCNConv(hidden_value_dim,hidden_value_dim),
+                                                nn.BatchNorm1d(hidden_value_dim)) for i in range(num_value_layers-1)]
+                                                )
+        self.gate_nn = nn.Linear(hidden_value_dim, 1)
+        self.other_nn = nn.Linear(hidden_value_dim, hidden_value_dim)
+        self.global_pooling_layer = torch_geometric.nn.GlobalAttention(self.gate_nn, self.other_nn)
+        self.value_fc_1 = nn.Linear(hidden_value_dim, hidden_value_dim)        
+        self.value_fc_2 = nn.Linear(hidden_value_dim, 6)
+
+        self.dropout = dropout
+
+    def forward(self, batch, global_x):
+        x, adj_t = batch.x, batch.edge_index
+
+        
+        # Global
+        # for i in range(self.num_global_layers-1):
+        #     global_x = self.global_fc[i](global_x)
+        #     global_x = self.global_bns[i](global_x)
+        #     global_x = F.dropout(F.relu(global_x), training=True, p = self.dropout) + global_x
+
+        # global_x = self.global_fc[-1](global_x)
+        
+
+        # Initial convolution
+        
+        x = self.conv_init(x,adj_t)
+
+        # Board
+        for i in range(self.num_conv_layers):
+            x = self.deep_convs[i](x, adj_t)  
+
+        # pick head
+        pick = self.pick_layers[0](x, adj_t)
+        for i in range(1, self.num_pick_layers):
+            pick = self.pick_layers[i](pick, adj_t)
+        pick = pick.view(batch.num_graphs, -1)
+        
+        for i in range(len(self.pick_final)-1):            
+            pick = F.relu(self.pick_final[i](pick))
+
+        pick = self.pick_final[-1](pick)
+        pick = F.softmax(pick, dim=1)
+        
+        
+        # placeArmies head
+        place = self.placeArmies_layers[0](x, adj_t)
+        for i in range(1, self.num_place_layers):
+            place = self.placeArmies_layers[i](place, adj_t)
+        place = place.view(batch.num_graphs, -1)
+        
+        for i in range(len(self.place_final)-1):
+            place = F.relu(self.place_final[i](place))
+
+        place = self.place_final[-1](place)
+        place = F.softmax(place, dim=1)
+        
+
+        # attack head
+        attack = self.attack_layers[0](x, adj_t)        
+        for i in range(1, self.num_attack_layers):
+            attack = self.attack_layers[i](attack, adj_t)
+        # Take node vectors and join them to create edge vectors
+
+        attack = self.attack_edge.forward(attack[batch.edge_index[0]],
+                                          attack[batch.edge_index[1]])
+        attack = attack.view(batch.num_graphs, -1)
+        for i in range(len(self.attack_final)-1):
+            attack = F.relu(self.attack_final[i](attack))
+        
+        attack = self.attack_final[-1](attack)
+        attack = F.softmax(attack, dim = 1)
+        
+
+        # fortify head
+        fortify = self.fortify_layers[0](x, adj_t)        
+        for i in range(1, self.num_fortify_layers):
+            fortify = self.fortify_layers[i](fortify, adj_t)
+        # Take node vectors and join them to create edge vectors
+
+        fortify = self.fortify_edge.forward(fortify[batch.edge_index[0]],
+                                          fortify[batch.edge_index[1]])
+        fortify = fortify.view(batch.num_graphs, -1)
+        for i in range(len(self.fortify_final)-1):
+            fortify = F.relu(self.fortify_final[i](fortify))
+            
+        fortify = self.fortify_final[-1](fortify)
+        fortify = F.softmax(fortify, dim = 1)
+
+        # value head
+        value = self.value_layers[0](x, adj_t)        
+        for i in range(1, self.num_value_layers):
+            value = self.value_layers[i](value, adj_t)
+        
+        # value = self.global_pooling_layer(value, batch.batch)
+        # value = F.relu(self.value_fc_1(value))    
+
+        
+        value = F.relu(self.value_fc_1(value.mean(axis=0)))
+        
+        
+        value = torch.sigmoid(self.value_fc_2(value))
+
+        
+        #########################################        
+        return pick, place, attack, fortify, value
+
+class GCN_risk_2(torch.nn.Module):
     def __init__(self, num_nodes, num_edges, board_input_dim, global_input_dim,
                  hidden_global_dim = 32, num_global_layers = 4,
                  hidden_conv_dim = 16, num_conv_layers=4, 
@@ -315,7 +512,7 @@ class GCN_risk(torch.nn.Module):
 
 
         # Initial convolution
-        # Concatenate global vector to each node      
+        # Concatenate global vector to each node
         h0, h1 = x.shape
         
         
@@ -333,7 +530,7 @@ class GCN_risk(torch.nn.Module):
           global_x = global_x.unsqueeze(0)
           
         to_concat = torch.matmul(aux, global_x)
-        x = torch.cat([x, to_concat], dim = -1)
+        # x = torch.cat([x, to_concat], dim = -1)
     
         
         x = self.conv_init(x,adj_t)

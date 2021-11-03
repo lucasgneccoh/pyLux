@@ -1065,6 +1065,21 @@ class PUCTPlayer(Agent):
           raise Exception("Invalid kind of move selection criterion")
       
       # Return the selected move, destroy tree
+      
+      if self.console_debug:
+        print()
+        print(f"PUCT policy with {self.move_selection}")
+        print("Move -- Mask -- Orig pol -- softmax")
+        moves_aux = []
+        countries = state.countries()
+        for m in actions:
+            if len(m) > 2:
+                moves_aux.append((m[0], countries[m[1]].id, countries[m[2]].id))
+            else:
+                moves_aux.append((m[0], countries[m[1]].id))
+        for m, p in zip(moves_aux, probs.round(3)):
+            print(m, p)
+      
       self.puct = None # Dont destroy tree?
       return buildMove(board, actions[ind])
   

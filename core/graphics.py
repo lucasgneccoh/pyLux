@@ -38,16 +38,22 @@ def get_model_order(path):
 
 
 #%% LOAD MODEL
-path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_26_10_hex/models"
-EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_hex_final.json"
+
+path_model = "../data_hex/models"
+out_path = "../data_hex"
+EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_hex.json"
 
 
-# path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_02_09_test_map/models"
+# path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_01_09_test_map/models"
+# # path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_test_git/models"
 # EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_test_2.json"
+
+# path_model = "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_07_09_classic/models"
+# EI_inputs_path = "../support/exp_iter_inputs/exp_iter_inputs_classic.json"
 
 
 load_model = True
-model_name = "model_27_0_initialPick.tar"
+model_name = "model_0_0_initialFortify.tar"
 
 # Create the net using the same parameters
 inputs = misc.read_json(EI_inputs_path)
@@ -102,11 +108,14 @@ board = copy.deepcopy(board_orig)
 # Play moves if needed
 
 
-# board.playMove(agent.buildMove(board, ("pi", 0)))
-# board.playMove(agent.buildMove(board, ("pi", 8)))
-# board.playMove(agent.buildMove(board, ("pi", 1)))
-# board.playMove(agent.buildMove(board, ("pi", 7)))
+# board.playMove(agent.buildMove(board, ("pi", 4)))
+# board.playMove(agent.buildMove(board, ("pi", 5)))
 # board.playMove(agent.buildMove(board, ("pi", 2)))
+# board.playMove(agent.buildMove(board, ("pi", 3)))
+# board.playMove(agent.buildMove(board, ("pi", 0)))
+# board.playMove(agent.buildMove(board, ("pi", 1)))
+# board.report()
+# board.countriesPandas()
 # board.playMove(agent.buildMove(board, ("pi", 6)))
 # board.playMove(agent.buildMove(board, ("pi", 3)))
 # board.playMove(agent.buildMove(board, ("pi", 5)))
@@ -219,7 +228,9 @@ style = {"C0":(252/255, 59/255, 45/255),
          "ICE":(0/255, 251/255, 255/255),
          "SEU":(0/255, 42/255, 255/255),}
 
-roll = data.rolling(window=6).mean()
+filt = data.index.str.contains("startTurn")
+filt = data.index.str.contains("model")
+roll = data.loc[filt,:].rolling(window=18).mean()
 
 
 
@@ -246,20 +257,20 @@ if False:
 
 # PLACE
 
-if True:
-  title_place = "Hex map: Country draft in empty map"
-  labelsize = 17
-  fontsize_ticks = 17
-  fontsize_legend = 15
-  fontsize_title = 20
+if False:
+  title_place = "Hex map: Initial army placing after optimal country draft"
+  labelsize = 21
+  fontsize_ticks = 21
+  fontsize_legend = 21
+  fontsize_title = 21
   
   plt.rc('xtick', labelsize=labelsize)
   plt.rc('ytick', labelsize=labelsize)
   
-  fig, ax = plt.subplots(1,1,figsize=(12,5))
+  fig, ax = plt.subplots(1,1,figsize=(12,6))
   
   for col in roll:
-    ax.plot(roll[col].to_numpy(), color = style[col], label = col)
+    ax.plot(roll[col].to_numpy(), color = style[col] if col in style else "black", label = col)
   
   ax.legend(loc='best', ncol=3, fancybox=True, shadow=True, fontsize=fontsize_legend)
   ax.set_xlabel("Training step", fontsize=fontsize_ticks )
@@ -279,7 +290,7 @@ if True:
 if True:
 
   max_turns = 150
-  num_matchs = 50
+  num_matchs = 100
   match_number = 4
   title_win_ratio = f"Hex map: win, loss and draws"
   
@@ -299,6 +310,7 @@ if True:
   model_cont = []
   for i, model_name in enumerate(models_sorted):
       a = re.search(f"[a-z]+_[0-9]+_{match_number}",model_name)
+      a = 1
       if a is None: continue
       print(f"Chosen model is {model_name}")
       state_dict = load_dict(os.path.join(path_model, model_name), device = 'cpu', encoding = 'latin1')    
@@ -308,7 +320,7 @@ if True:
         if (k+1)%10== 0: print(f'Match {k+1}')
         world = World(path_board)
         apprentice = agent.NetApprentice(net) 
-        netPlayer = agent.NetPlayer(apprentice, move_selection = "random_proportional", temp = 1)
+        netPlayer = agent.NetPlayer(apprentice, move_selection = "random_proportional", temp = 0.5)
         # Play against random
         pRandom = RandomAgent('Random')
         battle_board = Board(world, [netPlayer, pRandom])
@@ -352,42 +364,43 @@ if True:
   data['armies_op_loss'] = data['armies_op'].where(data['loss'], other = np.nan)
   data['armies_op_draw'] = data['armies_op'].where(data['draw'], other = np.nan)
   
-  gb = data.groupby(by = "id", as_index=False).aggregate(func = 'mean')
+  data.to_csv(os.path.join(out_path, "data_vs_random.csv"))
   
+  if False:
+    gb = data.groupby(by = "id", as_index=False).aggregate(func = 'mean')
+    
+    
+    
+    plt.rc('xtick', labelsize=labelsize)
+    plt.rc('ytick', labelsize=labelsize)
+    
+    fig, ax = plt.subplots(1,1,figsize=(12,5))
+    
+    
+    for col in ['armies_win', 'armies_draw', 'armies_op_draw', 'armies_op_loss']:
+      ax.plot(gb[col], label = col)
+    
   
-  
-  
-  
-  plt.rc('xtick', labelsize=labelsize)
-  plt.rc('ytick', labelsize=labelsize)
-  
-  fig, ax = plt.subplots(1,1,figsize=(12,5))
-  
-  
-  for col in ['armies_win', 'armies_draw', 'armies_op_win', 'armies_op_draw']:
-    ax.plot(gb[col], label = col)
-  
-
-  ax.legend(loc='best', ncol=3, fancybox=True, shadow=True, fontsize=fontsize_legend)
-  ax.set_xlabel("Training step", fontsize=fontsize_ticks )
-  ax.set_ylabel("armies", fontsize=fontsize_ticks )
-  ax.set_title(title_win_ratio, fontsize=fontsize_title)
-  # bbox_to_anchor=(0.5, 1.05)
-  
-  
-  plt.show()
-  
-  
-  
-  gb_plot = gb.loc[:, ['id', 'win', 'loss', 'draw']]
-  gb_plot['epochs'] = gb_plot['id']*10 
-  gb_plot.drop(columns = 'id', inplace=True)
-  gb_plot.plot(
-      x = 'epochs',
-      kind = 'barh',
-      stacked = True,
-      title = 'Proportion of wins, losses and draws',
-      mark_right = True)
+    ax.legend(loc='best', ncol=3, fancybox=True, shadow=True, fontsize=fontsize_legend)
+    ax.set_xlabel("Training step", fontsize=fontsize_ticks )
+    ax.set_ylabel("armies", fontsize=fontsize_ticks )
+    ax.set_title(title_win_ratio, fontsize=fontsize_title)
+    # bbox_to_anchor=(0.5, 1.05)
+    
+    
+    plt.show()
+    
+    
+    
+    gb_plot = gb.loc[:, ['id', 'win', 'loss', 'draw']]
+    gb_plot['epochs'] = gb_plot['id']*1
+    gb_plot.drop(columns = 'id', inplace=True)
+    gb_plot.plot(
+        x = 'epochs',
+        kind = 'barh',
+        stacked = True,
+        title = 'Proportion of wins, losses and draws',
+        mark_right = True)
 
 
 
