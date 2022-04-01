@@ -15,7 +15,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 def parseInputs():
   parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
   parser.add_argument("--preferences", 
-                      help="Path to the preferences file. It is a JSON file containing all the game and visual preferences", default = "../support/GUI_config/classic_map_default_config.json")
+                      help="Path to the preferences file. It is a JSON file containing all the game and visual preferences", default = "../support/GUI_config/config_classic.json")
   
   parser.add_argument("--console_debug", help="Set to true to print on the console messages to help debugging", default =0, type=int)
   args = parser.parse_args()
@@ -287,7 +287,7 @@ if __name__ == "__main__":
   for i, p in board.players.items():
     p.console_debug = console_debug
   
-  if board.initialPhase == False: board.play()
+  if not board.initialPhase or not board.pickInitialCountries : board.play()
   print("Board set")
   
 #%% Draw the board
@@ -468,59 +468,6 @@ if __name__ == "__main__":
   last_AI_player = None
   final_message = []
   winner = None
-  
-  
-  # Board modifications
-  # board.playMove(agent.buildMove(board, ("pi", 0)))
-  # board.playMove(agent.buildMove(board, ("pi", 8)))
-  # board.playMove(agent.buildMove(board, ("pi", 1)))
-  # board.playMove(agent.buildMove(board, ("pi", 7)))
-  # board.playMove(agent.buildMove(board, ("pi", 2)))
-  # board.playMove(agent.buildMove(board, ("pi", 6)))
-  # board.playMove(agent.buildMove(board, ("pi", 3)))
-  # board.playMove(agent.buildMove(board, ("pi", 5)))
-  # board.playMove(agent.buildMove(board, ("pi", 4)))
-  
-  # board.playMove(agent.buildMove(board, ("pl", 5)))
-  # board.playMove(agent.buildMove(board, ("pl", 4)))
-  # board.playMove(agent.buildMove(board, ("pl", 5)))
-  # board.playMove(agent.buildMove(board, ("pl", 4)))
-  # board.playMove(agent.buildMove(board, ("pl", 5)))
-  # board.playMove(agent.buildMove(board, ("pl", 4)))
-  # board.playMove(agent.buildMove(board, ("pl", 5)))
-  # board.playMove(agent.buildMove(board, ("pl", 4)))
-  
-  
-  
-  
-  # # Modifications for the attack example (Dont put them in SEU)
-  # board.world.countries[4].armies = 12
-  # board.world.countries[5].armies = 12
-
-
-
-# Modifications for the attack example (pinned in Peru)
-  
-  # board.playMove(agent.buildMove(board, ("pl", 5)))
-  # board.playMove(agent.buildMove(board, ("a", -1,-1)))
-  # board.playMove(agent.buildMove(board, ("f", -1,-1)))
-  
-  # board.world.countries[4].armies = 1
-  # board.world.countries[5].armies = 1
-  
-  
-  # board.world.countries[0].owner = 1
-  # board.world.countries[1].owner = 1
-  # board.world.countries[3].owner = 1
-  # board.world.countries[4].owner = 1
-  
-  # board.world.countries[0].armies = 1 # Venezuela
-  # board.world.countries[1].armies = 20 # Brazil
-  
-  
-  # board.playMove(agent.buildMove(board, ("pl", 2)))
-  
-  # board.world.countries[2].armies = 20
   
   
 #%% Main loop
@@ -752,7 +699,7 @@ if __name__ == "__main__":
                 numberOfArmies = 1
                 if bool_move_all: numberOfArmies = 0
                 if bool_move_5: numberOfArmies = 5
-                move = agent.buildMove(board, ('pl', c.code))
+                move = agent.buildMove(board, ('pl', c.code, numberOfArmies))
                 board.playMove(move)
                 action_msg = f'Fortified {c.name}'
               else:
@@ -766,7 +713,7 @@ if __name__ == "__main__":
                 numberOfArmies = 1
                 if bool_move_all: numberOfArmies = 0
                 if bool_move_5: numberOfArmies = 5
-                move = agent.buildMove(board, ('pl', c.code))
+                move = agent.buildMove(board, ('pl', c.code, numberOfArmies))
                 board.playMove(move)
               else:
                 if console_debug: print("GUI:Territory belongs to enemy player")
@@ -791,8 +738,15 @@ if __name__ == "__main__":
                   battle_results = {7: 'Conquest!', 13:'Defeat...', 0:'Not much', -1:'ERROR', 99:'Game Over !'}                  
                   res = battle_results[val]                  
                   action_msg = f'Attack: {source.id} -> {target.id}. Result: {res}'
-                  # Reset
                   
+                  # TODO: Choose how many armies to move
+                  # The problem is that this is done inside the attack function, so control stays in board
+                  # How to let human choose this from inside the board attack function that calls the agent method moveArmiesIn??
+                  # Maybe block the game, go to a fortify-like board and move manually armies with clicks
+                  # Then use a key like <space> to finish the army movement and continue attacking
+                  # If it is till dead, then the current behaviour is good and allows fast paced games
+                  
+                  # Reset   
                   if val == 7:
                     #print(source.id)
                     source = copy.deepcopy(target)
@@ -831,9 +785,6 @@ if __name__ == "__main__":
                     draw_lines(coords, board)
                     draw_lines_fortify(coords, board, source)
                     
-            
-            
-              
           else:
             # Nothing happened: Wait
             pass
@@ -849,7 +800,6 @@ if __name__ == "__main__":
         last_AI_player = board.activePlayer
         board.play() 
         AI_played = True
-        
         
   
       # -----------------------------------------------

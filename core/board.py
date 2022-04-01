@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 import copy
 import pandas as pd
+import random
 
 from deck import Deck, ListThenArithmeticCardSequence
 from world import World, Country
@@ -187,11 +188,14 @@ class RandomAgent(Agent):
   def cardPhase(self, board, cards):
     '''! Only cash when forced, then cash best possible set
     '''
-    if len(cards)<5 or not Deck.containsSet(cards): 
+    if not Deck.containsSet(cards): 
       return None
-    c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
-    if not c is None:      
-      return c
+    elif 0.5 < np.random.uniform():
+      c = Deck.yieldBestCashableSet(cards, self.code, board.world.countries)
+      if not c is None:      
+        return c
+    else: 
+      return None
   
   def placeArmies(self, board, numberOfArmies:int):
     '''! Place armies at random one by one, but on the countries with enemy
@@ -206,6 +210,14 @@ class RandomAgent(Agent):
     parameter
     '''  
     return self.choose_at_random(board)
+    
+  def moveArmiesIn(self, board, countryCodeAttacker:int, countryCodeDefender:int) -> int:
+    '''! Move a random number or armies. If the choice is wrong, the board will fix it
+    Wrong means > than armies-1 or < aDice
+    '''
+    # TODO: Communicate the number of dice used
+    # This also means letting the player choose the number of dice
+    return np.random.choice(board.world.countries[countryCodeAttacker].armies)
   
   def fortifyPhase(self, board):
     '''! For now, no fortification is made
@@ -429,9 +441,11 @@ class Board(object):
         self.report()
         self.showPlayers()
         return [Move(None, None, None, self.gamePhase)]
-      #return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), range(armies,-1,-1))]
+      
+      return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), range(armies,-1,-1))]
+      
       # Simplify: Place everything in one country
-      return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), [0])]
+      # return [Move(c,c,a, self.gamePhase) for c,a in itertools.product(self.getCountriesPlayer(p.code), [0])]
     
     # ATTACK
     elif self.gamePhase == 'attack':
@@ -439,7 +453,7 @@ class Board(object):
       for source in self.getCountriesPlayerThatCanAttack(p.code):
         for target in self.world.getCountriesToAttack(source.code):
           # Attack once
-          # moves.append(Move(source, target, 0, 'attack'))
+          moves.append(Move(source, target, 0, 'attack'))
           # Attack till dead
           moves.append(Move(source, target, 1, 'attack'))
       # Always possible to just pass
@@ -457,12 +471,12 @@ class Board(object):
             moves.append(Move(source, target, 0,'fortify'))            
             
             # Simplify
-            #moves.append(Move(source, target, 1,'fortify'))
+            moves.append(Move(source, target, 1,'fortify'))
           
           if source.moveableArmies > 5 and source.armies > 1:
             # Simplify
-            # moves.append(Move(source, target, 5,'fortify'))
-            pass
+            moves.append(Move(source, target, 5,'fortify'))
+            
             
       # Always possible to just pass
       moves.append(Move(None, None, None, 'fortify'))
@@ -594,6 +608,25 @@ class Board(object):
       if self.console_debug: print("Board:play: Game over")
       return
     
+    # If there is no initial phase
+    if not self.pickInitialCountries or not self.initialPhase:
+      if self.gamePhase == 'initialPick':
+        if self.console_debug: print("Board:play: Random initial Pick")
+        # Select countries at random
+        countries = self.countries()
+        random.shuffle(countries)
+        moves = [Move(c,c,0, 'initialPick') for c in countries]
+        for m in moves: self.playMove(m)
+        return
+        
+      if self.gamePhase == 'initialFortify' and not self.initialPhase:
+        if self.console_debug: print("Board:play: Random initial fortify")
+        while self.gamePhase == 'initialFortify':
+          c = np.random.choice(self.getCountriesPlayer(self.activePlayer.code))
+          self.playMove(Move(c,c,1, 'initialFortify'))
+          return
+          
+    
     
     p = self.activePlayer
     if self.console_debug: print(f"\n***Board:play: Starting play for ({p.code}), {p.name}")
@@ -603,8 +636,6 @@ class Board(object):
       self.endTurn()
 
     else:   
-
-      # For now, there is always an initial phase
       
       # Initial phase
       if self.gamePhase == 'initialPick':
@@ -1217,7 +1248,7 @@ class Board(object):
     if s.moveableArmies == 0 or s.armies == 1: return []
     return [t for t in list(self.world.successors(source)) if s.owner == t.owner]
     
-  def getCountriesPlayer(self, player:int): # GOOD
+  def getCountriesPlayer(self, player:int):
     '''! Return a list of countries currently owned by player
     '''
     return [c for c in self.countries() if c.owner==player]

@@ -1,13 +1,8 @@
 {
   "players": [
     {
-      "agent": "PUCTPlayer", 
-      "model_parameters_json": "../support/model_parameters/model_parameters_small.json",
-      "model_path": "C:/Users/lucas/OneDrive/Documentos/stage_risk/data_27_10_hex_2/models/model_7_4_startTurn.tar",
-      "max_depth": 150,
-      "sims_per_eval": 2,
-      "num_MCTS_sims": 500,
-      "cb": 1.1
+      "agent": "RandomAgent", 
+      "name": "random"
     },
     {
       "agent": "Human", 

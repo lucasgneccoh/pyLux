@@ -45,3 +45,7 @@ Here are the commands you can use to play the game with the default configuratio
     - Hold `Ctrl` while placing armies or fortifying to place/move all available armies
     - Hold `Alt` while placing armies or fortifying to place/move 5 armies
 
+
+# TODO
+
+  - List the dependencies and make something to install everything that is needed

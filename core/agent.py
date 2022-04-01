@@ -131,7 +131,8 @@ def maskAndMoves(state, phase, edge_index):
         moves = [("pi", int(i)) for i in range(len(state.countries()))]
     else: # Place armies
         mask = [validPlace(state, p, int(i)) for i in range(len(state.countries()))]
-        moves = [("pl", int(i)) for i in range(len(state.countries()))]
+        # Place all armies for now
+        moves = [("pl", int(i), 0) for i in range(len(state.countries()))]
     return torch.FloatTensor(mask).unsqueeze(0), moves
 
 def buildMove(state, move):
@@ -163,7 +164,7 @@ def buildMove(state, move):
         return Move(s, s, 0, phase)
     else: # Place armies
         # TODO: Add armies. For now we put everything in one country
-        return Move(s, s, 0, phase)
+        return Move(s, s, move[2], phase)
 
 
 class FlatMC(object):
