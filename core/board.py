@@ -779,7 +779,7 @@ class Board(object):
     
     return aLoss, dLoss
     
-  def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDead:bool) -> int:
+def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDead:bool, dice = None) -> int:
     '''! Performs an attack.
     If *attackTillDead* is true then perform attacks until one side or the other has been defeated, otherwise perform a single attack.
     This method may only be called from within an agent's attackPhase() method.
@@ -805,6 +805,8 @@ class Board(object):
     while not stop:
       aDice, dDice = min(3, cA.armies-1), min(2,cD.armies)      
       aLoss, dLoss = self.roll(aDice, dDice) 
+      # Save in board the rolled dice so that players can choose
+      self.aDice, self.dDice = aDice, dDice
       if self.console_debug: print(f'attack:Dice roll - attacker loss {aLoss},  defender loss {dLoss}')
       cA.armies -= aLoss
       cD.armies -= dLoss
