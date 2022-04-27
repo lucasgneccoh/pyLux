@@ -1,3 +1,8 @@
+# Avoid having data used to train models and old backups
+data*
+*_old
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
