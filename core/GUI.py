@@ -6,7 +6,7 @@ import agent
 from board import Board
 from world import World
 from deck import Deck
-from battle_models import create_player_list
+
 # For the GUI
 import pygame
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -278,7 +278,7 @@ if __name__ == "__main__":
   
   # Set players
 
-  players = create_player_list(prefs)
+  players = agent.create_player_list(prefs)
   
   
   # Set board
@@ -533,7 +533,7 @@ if __name__ == "__main__":
               continue
               
             elif e.unicode == key_fortify_phase:
-              # Can only do this afterplacing armies
+              # Can only do this after placing armies
               if board.activePlayer.income > 0:
                 if console_debug: print('GUI:Can only fortify after placing armies')
                 action_msg = "Place armies before fortify!"
@@ -774,8 +774,8 @@ if __name__ == "__main__":
                     if console_debug: print(f'GUI:Human fortified {source.id} -> {target.id}')
                     
                     numberOfArmies = 1
-                    if bool_move_all: numberOfArmies = source.movable_armies
-                    if bool_move_5: numberOfArmies = min(5, source.movable_armies)
+                    if bool_move_all: numberOfArmies = source.moveableArmies
+                    if bool_move_5: numberOfArmies = min(5, source.moveableArmies)
                                         
                     move = agent.buildMove(board, ('f', source.code, target.code))
                     val = board.playMove(move) 

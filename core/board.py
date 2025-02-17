@@ -1,8 +1,6 @@
-import sys
 import itertools
 import numpy as np
 import copy
-import pandas as pd
 import random
 
 from deck import Deck, ListThenArithmeticCardSequence
@@ -304,6 +302,9 @@ class Board(object):
       p.income = 0
       p.initialArmies = int(initialArmies)
       p.num_countries = 0
+
+  def countries(self):
+    return list(self.world.countries.values())
 
   @staticmethod
   def fromDicts(continents:dict, countries:dict, inLinks:dict,\
@@ -779,86 +780,86 @@ class Board(object):
     
     return aLoss, dLoss
     
-def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDead:bool, dice = None) -> int:
-    '''! Performs an attack.
-    If *attackTillDead* is true then perform attacks until one side or the other has been defeated, otherwise perform a single attack.
-    This method may only be called from within an agent's attackPhase() method.
-    The Board's attack() method returns symbolic ints, as follows:     
-      - a negative return means that you supplied incorrect parameters.
-      - 0 means that your single attack call has finished, with no one being totally defeated. Armies may have been lost from either country.
-      - 7 means that the attacker has taken over the defender's country.
-      NOTE: before returning 7, board will call moveArmiesIn() to poll you on how many armies to move into the taken over country.
-      - 13 means that the defender has fought off the attacker (the attacking country has only 1 army left).
-    '''
-    cA = self.world.countries[countryCodeAttacker]
-    cD = self.world.countries[countryCodeDefender]
-    attacker = self.players[cA.owner]
-    defender = self.players[cD.owner]
-    if attacker.code != self.activePlayer.code: return -1
-    if defender.code == self.activePlayer.code: return -1
-    if not cD in self.world.getAdjoiningList(cA.code, kind=1): return -1
-    if cA.armies <= 1 or cD.armies == 0: return -1
-    
-    stop = False
-    if self.console_debug:
-      print(f'attack:From {cA.id} to {cD.id}, tillDead:{attackTillDead}')
-    while not stop:
-      aDice, dDice = min(3, cA.armies-1), min(2,cD.armies)      
-      aLoss, dLoss = self.roll(aDice, dDice) 
-      # Save in board the rolled dice so that players can choose
-      self.aDice, self.dDice = aDice, dDice
-      if self.console_debug: print(f'attack:Dice roll - attacker loss {aLoss},  defender loss {dLoss}')
-      cA.armies -= aLoss
-      cD.armies -= dLoss
-      if cD.armies < 1: 
-        stop=True
-        # Attacker won
-        armies = attacker.moveArmiesIn(self, countryCodeAttacker, countryCodeDefender)
-        if armies >= cA.armies: armies = cA.armies-1
-        if armies < aDice: armies = aDice
-        cA.armies -= armies
-        attacker.num_countries += 1
-        defender.num_countries -= 1
-        cD.owner = attacker.code
-        cD.armies += armies
-
-        if defender.num_countries == 0:
-          defender.is_alive = False   
-          # Add cards to use in next turn
-          attacker.cards.extend(defender.cards)
-          
-          if self.getNumberOfPlayersLeft() == 1: 
-            self.gameOver = True
-            return 99
-          
-          # To simplify, cards won by eliminating an opponent can only be used on the next turn, in the startTurn phase
-                 
-        self.tookOverCountry = True    
-        if self.console_debug:
-          print('attack:Attack end: res 7')
-        return 7
+  def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDead:bool, dice = None) -> int:
+      '''! Performs an attack.
+      If *attackTillDead* is true then perform attacks until one side or the other has been defeated, otherwise perform a single attack.
+      This method may only be called from within an agent's attackPhase() method.
+      The Board's attack() method returns symbolic ints, as follows:     
+        - a negative return means that you supplied incorrect parameters.
+        - 0 means that your single attack call has finished, with no one being totally defeated. Armies may have been lost from either country.
+        - 7 means that the attacker has taken over the defender's country.
+        NOTE: before returning 7, board will call moveArmiesIn() to poll you on how many armies to move into the taken over country.
+        - 13 means that the defender has fought off the attacker (the attacking country has only 1 army left).
+      '''
+      cA = self.world.countries[countryCodeAttacker]
+      cD = self.world.countries[countryCodeDefender]
+      attacker = self.players[cA.owner]
+      defender = self.players[cD.owner]
+      if attacker.code != self.activePlayer.code: return -1
+      if defender.code == self.activePlayer.code: return -1
+      if not cD in self.world.getAdjoiningList(cA.code, kind=1): return -1
+      if cA.armies <= 1 or cD.armies == 0: return -1
       
-      if cA.armies < 2:
-        # Defender won
-        if self.console_debug:
-          print('attack:Attack end: res 13')
-        return 13        
-      if not attackTillDead: stop=True
-    if self.console_debug:
-          print('attack:Attack end: res 0')
-    return 0
+      stop = False
+      if self.console_debug:
+        print(f'attack:From {cA.id} to {cD.id}, tillDead:{attackTillDead}')
+      while not stop:
+        aDice, dDice = min(3, cA.armies-1), min(2,cD.armies)      
+        aLoss, dLoss = self.roll(aDice, dDice) 
+        # Save in board the rolled dice so that players can choose
+        self.aDice, self.dDice = aDice, dDice
+        if self.console_debug: print(f'attack:Dice roll - attacker loss {aLoss},  defender loss {dLoss}')
+        cA.armies -= aLoss
+        cD.armies -= dLoss
+        if cD.armies < 1: 
+          stop=True
+          # Attacker won
+          armies = attacker.moveArmiesIn(self, countryCodeAttacker, countryCodeDefender)
+          if armies >= cA.armies: armies = cA.armies-1
+          if armies < aDice: armies = aDice
+          cA.armies -= armies
+          attacker.num_countries += 1
+          defender.num_countries -= 1
+          cD.owner = attacker.code
+          cD.armies += armies
+
+          if defender.num_countries == 0:
+            defender.is_alive = False   
+            # Add cards to use in next turn
+            attacker.cards.extend(defender.cards)
+            
+            if self.getNumberOfPlayersLeft() == 1: 
+              self.gameOver = True
+              return 99
+            
+            # To simplify, cards won by eliminating an opponent can only be used on the next turn, in the startTurn phase
+                  
+          self.tookOverCountry = True    
+          if self.console_debug:
+            print('attack:Attack end: res 7')
+          return 7
         
+        if cA.armies < 2:
+          # Defender won
+          if self.console_debug:
+            print('attack:Attack end: res 13')
+          return 13        
+        if not attackTillDead: stop=True
+      if self.console_debug:
+            print('attack:Attack end: res 0')
+      return 0
+          
   def fortifyArmies(self, numberOfArmies:int, origin, destination) ->int:
     '''! Order a fortification move. This method may only be called from within an agent's 'fortifyPhase()' method. It returns 1 on a successful fortify (maybe nothing happened), -1 on failure.
   '''
     cO = origin if isinstance(origin, Country) else self.world.countries[origin]
     cD = destination if isinstance(destination, Country) else self.world.countries[destination]
- 
+
     if cO.owner != self.activePlayer.code: return -1
     if cD.owner != self.activePlayer.code: return -1
     if not cD in self.world.getAdjoiningList(cO.code, kind=1): return -1
     if cO.moveableArmies == 0 or cO.moveableArmies < numberOfArmies: return -1
- 
+
     # Even if moveableArmies == armies, we have to always leave one army at least    
     if numberOfArmies == 0: numberOfArmies = cO.moveableArmies
     aux = numberOfArmies-1 if numberOfArmies == cO.armies else numberOfArmies
@@ -870,9 +871,9 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     cD.armies += aux
     return 1
     
-   
-#%% Functions to update information, end turns and start new rounds
-  
+    
+  #%% Functions to update information, end turns and start new rounds
+
   def updateIncome(self, p):
     '''! Calculates the income of the player p. This function should only be called during the "startTurn" or "initialFortify" game phases. In any other case, the income will be set to 0.
     '''    
@@ -890,7 +891,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     elif self.gamePhase == "initialFortify":
       p.income = min(p.initialArmies, self.armiesPerTurnInitial)
       p.initialArmies -= p.income
-  
+
   def setupNewRound(self):
     '''! Performs the necessary actions at the end of a round (all players played)
     '''
@@ -915,11 +916,11 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       self.updateContinents()        
       self.updateIncome(self.activePlayer)
     self.tookOverCountry = False
-  
+
   def endTurn(self):
     '''! Function to end a player's turn by giving it a card if at least one country was conquered, change the active player, and prepare his turn by calling self.prepareStart()
     '''
-  
+
     if self.tookOverCountry and self.useCards:
       self.activePlayer.cards.append(self.deck.draw())
     
@@ -930,7 +931,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     #if self.console_debug: print(f"Player info: income = {p.income}")
     self.prepareStart()
     #if self.console_debug: print(f"Player info: income = {p.income}, game phase = {self.gamePhase}")
-  
+
   def updatemoveable(self):
     '''! Sets the moveable armies of every country equal to the number of armies. Should be called after every "attack" phase and before "fortify" phase
     '''
@@ -955,10 +956,10 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     '''
     for i, _ in self.world.continents.items():
       self.updateContinentOwner(i)
-     
-  
-  
-#%% Simulation
+      
+
+
+  #%% Simulation
 
   def readyForSimulation(self):
     activePlayerCode = self.activePlayer.code
@@ -970,8 +971,8 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     while self.activePlayer.code != activePlayerCode:
       self.activePlayer = next(self.playerCycle)
     
-  
-  
+
+
   def simulate(self, maxRounds = 60, safety=10e5, sim_console_debug = False):
     '''! Use to facilitate the playouts for search algorithms. 
     Should be called from a copy of the actual board, because it the board will be modified.    
@@ -992,9 +993,9 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     while not self.gameOver and self.roundCount-initRounds < maxRounds and cont < safety:      
       self.play()
       cont += 1 # for safety 
-  
-  
-#%% Basic information methods
+
+
+  #%% Basic information methods
   # These methods are provided for the agents to get information about the game.
 
   def countries(self):
@@ -1004,14 +1005,14 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
   def countriesLeft(self):
     '''! Will return a list of all the countries without an owner'''
     return [c for c in self.countries() if c.owner ==-1]
-  
-  
+
+
   def getCountryById(self, ID):
     '''! Return a country by id or None if no match was found'''
     for c in self.countries():
       if c.id == ID: return c
     return None
-  
+
   def getNumberOfCountries(self)->int:
     '''1 Returns the number of countries in the game.'''
     return len(self.world.countries)
@@ -1020,7 +1021,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     '''! Returns the number of countries owned by a player.'''
     r = self.players.get(player)
     return r.num_countries if not r is None else None
-  
+
   def getNumberOfContinents(self) -> int:
     '''! Returns the number of continents in the game.  '''  
     return len(self.world.continents)
@@ -1034,7 +1035,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     '''! Returns the name of the specified continent (or None if the map did not give one).  '''
     c = self.world.continents.get(cont)    
     return c.name if not c is None else None
-     
+      
   def getNumberOfPlayers(self) -> int:
     '''! Returns the number of players that started in the game.  ''' 
     return self.startingPlayers   
@@ -1061,11 +1062,11 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     p = self.players.get(player)
     if not p is None:
       return p.name
-  
+
   def getAgentName(self, player:int) -> str:
     '''! Returns whatever the name method of the of the given agent returns.  '''
     return self.getPlayerName(player)
-  
+
   def getPlayerCards(self, player:int) -> int:
     '''! Returns the number of cards that the specified player has.  ''' 
     p = self.players.get(player)
@@ -1084,7 +1085,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     for _ in range(10):
       res.append(aux.nextCashArmies())
     return '-'.join(res)
-  
+
   def getPlayerArmies(self, player:int)-> int:
     '''! Return the total number of armies that a player has on the board
     '''
@@ -1092,12 +1093,12 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     for c in self.countries():
       if c.owner==player: s += c.armies
     return s
-  
+
   def getPlayerCountries(self, player:int)-> int:
     '''! Return the number of countries a player owns
     '''    
     return self.players[player].num_countries
-  
+
   def getPlayerContinents(self, player:int)-> int:
     '''! Return the number of countries a player owns
     '''    
@@ -1107,7 +1108,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       if c.owner == player:
         s += 1
     return s
-  
+
   def getPlayerArmiesInContinent(self, player:int, cont:int)-> int:
     '''! Return the number of armies player has in the given continent
     '''    
@@ -1116,8 +1117,8 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       c = self.world.countries[i]
       if c.owner==player: s += c.armies
     return s
-  
-  
+
+
   def getEnemyArmiesInContinent(self, player:int, cont:int)-> int:
     '''! Return the number of enemy armies in the given continent. Eney means that is not player
     '''    
@@ -1126,7 +1127,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       c = self.world.countries[i]
       if c.owner!=player: s += c.armies
     return s
-  
+
   def getContinentBorders(self, cont:int, kind=0)-> int:    
     '''! Return the list of countries in the given continent that are linked to another country outside of the continent. The link type is determined by the kind argument (See Country.getAdjoiningList)
     '''
@@ -1138,8 +1139,8 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
           border.append(c)
           break            
     return list(set(border))
-  
-  
+
+
   def getPlayerArmiesAdjoiningContinent(self, player:int, cont:int, kind = 0)-> int:
     '''! Return the total number of armies that player has around the continent. Use the kind parameter to look for armies that can attack the border of the continent, that can defend from an attack from the border, or both. 
     '''
@@ -1156,7 +1157,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     for c in toCount:
       s += c.armies
     return s
-  
+
   def playerIsStillInTheGame(self, player:int):
     '''! Return if player is alive or not
     '''
@@ -1173,7 +1174,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     '''! Return the number of countries in continent
     '''
     return len(self.world.continents[cont].countries)
-  
+
   def getCountryInContinent(self, cont:int):
     '''! Return a random country code from a given continent
     '''
@@ -1182,13 +1183,13 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     
   def getContinentBordersBeyond(self, cont:int)-> int:
     pass
-   
+    
   def playerOwnsContinent(self, player:int, cont:int):
     '''! Return if player owns the whole continent
     '''
     self.updateContinentOwner(cont)
     return self.world.continents[cont].owner == player      
-  
+
   def playerOwnsAnyContinent(self, player):
     '''! Return if player owns any continent
     '''
@@ -1220,8 +1221,8 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       c = self.world.countries[i]
       if c.owner == player: return True
     return False
-  
-#%% Methods I have found useful on the run
+
+  #%% Methods I have found useful on the run
 
 
   def getAttackListTarget(self, target:int):
@@ -1256,13 +1257,13 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     return [c for c in self.countries() if c.owner==player]
     
     
-       
+        
       
 
 
 
   #%% MISC functions
-  
+
   def __deepcopy__(self, memo):
     act_code = self.activePlayer.code
     new_world = copy.deepcopy(self.world, memo)
@@ -1288,8 +1289,8 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
     new_board.gamePhase = self.gamePhase
     return new_board
     
-  
-  
+
+
   def encodePlayer(self, p):
     return f'{p.code}_{len(p.cards)}'
     
@@ -1304,8 +1305,8 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
   def __repr__(self):
     '''! Gives a String representation of the board. '''
     return self.encode()
-   
-  
+    
+
   def report(self):
     print('\n------- Board report --------')
     print('Board id :', self.board_id)
@@ -1321,10 +1322,10 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       
   def getAllPlayersArmies(self):
     return [self.getPlayerArmies(p.code) for i,p in self.players.items()]
-  
+
   def getAllPlayersNumCountries(self):
     return [p.num_countries for i,p in self.players.items()]
-  
+
   def getCountriesPlayerThatCanAttack(self, player:int): # GOOD
     cc = self.getCountriesPlayer(player)
     res = []
@@ -1332,7 +1333,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       if len(self.world.getCountriesToAttack(c.code))>0 and c.armies>1:
         res.append(c)
     return res
-  
+
   def getCountriesPlayerWithEnemyNeighbors(self, player:int, kind=1):
     cc = self.getCountriesPlayer(player)
     res = []
@@ -1340,7 +1341,7 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       if len(self.world.getCountriesToAttack(c.code))>0:
         res.append(c)
     return res
-  
+
   def replacePlayer(self, player:int, newAgent):
     oldActivePlayerCode = self.activePlayer.code
 
@@ -1365,14 +1366,8 @@ def attack(self, countryCodeAttacker: int, countryCodeDefender:int, attackTillDe
       setattr(newPlayer, n, copy.deepcopy(getattr(oldPlayer,n)))
     newPlayer.console_debug = False
     return newPlayer
-  
-  def countriesPandas(self):
-    df = pd.DataFrame(data = {'id':[c.id for c in self.countries()],
-                          'name':[c.name for c in self.countries()],
-                          'continent':[c.continent for c in self.countries()],
-                          'owner':[c.owner for c in self.countries()],
-                          'armies':[c.armies for c in self.countries()]})
-    return df
+
+
 
   def showPlayers(self):
     for i, p in self.players.items():

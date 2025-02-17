@@ -2,12 +2,12 @@
   "players": [
     {
       "agent": "RandomAgent",
-      "name": "random"
+      "name": "Tibo"
 
     },
     {
       "agent": "Human",
-      "name": "Yo"
+      "name": "Lucas"
     }
   ],
   "board_params": {
@@ -36,7 +36,7 @@
   "key_fortify_phase": "f",
   "key_end_turn": "q",
   "key_cards": "c",
-  "time_sleep_ai": 0.5,
+  "time_sleep_ai": 0.01,
   "screen_W": 1280,
   "screen_H": 720,
   "sq_radius": 23,
